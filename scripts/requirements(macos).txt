@@ -7,9 +7,10 @@ et-xmlfile==1.0.1
 idna==2.9
 jdcal==1.4.1
 MouseInfo==0.1.2
+olefile==0.46
 openpyxl==3.0.0
 pathlib2==2.3.5
-Pillow==6.2.1
+Pillow==7.1.1
 pycparser==2.20
 PyGetWindow==0.0.8
 PyMsgBox==1.0.7
