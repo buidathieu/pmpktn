@@ -1,0 +1,1 @@
+WScript.CreateObject("Wscript.Shell").Run "pmpktn.bat",0,True
