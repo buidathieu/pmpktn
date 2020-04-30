@@ -1,7 +1,7 @@
 from initialize import *
-from mainview.__init__ import *
-from mainview.custom_ctrl import *
-import mainview.other_func as otf
+from core.__init__ import *
+from core.custom_ctrl import *
+import other_func.other_func as otf
 import wx
 import wx.adv
 

@@ -1,7 +1,7 @@
 from initialize import *
-from mainview.custom_ctrl import *
-from mainview.__init__ import *
-import mainview.other_func as otf
+from core.custom_ctrl import *
+from core.__init__ import *
+import other_func.other_func as otf
 import db_sql.db_func as dbf
 from sample_prescription.sample_prescription import SamplePrescriptionDialog
 from fractions import Fraction as fr
@@ -35,7 +35,6 @@ class Visit_Info_Panel(wx.Panel):
         self.followup = self._createFollowup()
         self.save_drug_btn = self._createSaveDrugbtn()
         self.erase_drug_btn = self._createEraseDrugbtn()
-        self.new_p_btn = self._createNewbtn()
         self.new_visit_btn = self._createNewVisitbtn()
         self.reuse_btn = self._createReusebtn()
         self.sample_prescription_btn = self._createSamplePrescriptionbtn()
@@ -142,11 +141,6 @@ class Visit_Info_Panel(wx.Panel):
         btn.Bind(wx.EVT_BUTTON, self.onSamplePrescriptionbtn)
         return btn
 
-    def _createNewbtn(self):
-        btn = wx.Button(self, label='Bệnh nhân mới (F1)')
-        btn.SetBitmap(wx.Bitmap(new_p_bm))
-        btn.Bind(wx.EVT_BUTTON, self.onNewPatientbtn)
-        return btn
 
     def _createNewVisitbtn(self):
         btn = wx.Button(self, label='Lượt khám mới (F2)')
@@ -220,7 +214,7 @@ class Visit_Info_Panel(wx.Panel):
         price_row.Add(wx.StaticText(self, label='Tổng tiền:'), 0, wx.CENTRE)
         price_row.Add(self.total_cost, 0, wx.CENTRE)
 
-        btn_row.Add(self.new_p_btn)
+        
         btn_row.Add(self.new_visit_btn)
         btn_row.Add(self.save_visit_btn)
 
@@ -338,8 +332,6 @@ class Visit_Info_Panel(wx.Panel):
         self.d_list.Clear()
         self.drugpicker.Clear()
 
-    def onNewPatientbtn(self, e):
-        self.NewPatient()
 
     def onNewVisit(self, e):
         self.NewVisit()
@@ -347,20 +339,6 @@ class Visit_Info_Panel(wx.Panel):
     def onSaveVisit(self, e):
         self.SaveVisit()
 
-    def NewPatient(self):
-        with NewPatientDialog(self) as dlg:
-            if dlg.ShowModal() == wx.ID_OK:
-                new_patient = dbf.create_new_patient(
-                    name=dlg.name.Value.upper(),
-                    gender=dlg.gender.Selection,
-                    birthdate=otf.wxdate2pydate(
-                        dlg.birthdate.Value),
-                    address=dlg.address.Value,
-                    past_history=dlg.past_history.Value,
-                    sess=self.Parent.sess
-                )
-                tab0 = self.Parent.book.GetPage(0)
-                tab0.Add_new_patient(new_patient)
 
     def NewVisit(self):
         self.Parent.visit = None

@@ -1,7 +1,6 @@
 from wx import NewId
 
 
-
 #  my ids
 id_new_patient = NewId()
 id_new_visit = NewId()

@@ -1,8 +1,8 @@
 import db_sql.db_func as dbf
 from db_sql.make_db import Visit
 from initialize import *
-from mainview.__init__ import *
-import mainview.other_func as otf
+from core.__init__ import *
+import other_func.other_func as otf
 import wx
 
 
@@ -12,9 +12,9 @@ class PatientBook(wx.Notebook):
         super().__init__(parent)
 
         self.AddPage(page=PatientList(self),
-                     text='DS toàn bộ bệnh nhân', select=True)
+                     text='Danh sách chờ khám', select=True)
         self.AddPage(page=PatientList(self, today=True),
-                     text='DS đã khám hôm nay')
+                     text='Danh sách đã khám hôm nay')
 
     def Refresh(self):
         for t in [self.GetPage(0), self.GetPage(1)]:
@@ -81,12 +81,6 @@ class PatientList(wx.ListCtrl):
         self.initialize_p_list()
         self.Refresh()
 
-    def Add_new_patient(self, p):
-        self.init_p_list.append(p)
-        self.Update()
-        idx = self.ItemCount - 1
-        self.Select(idx)
-        self.EnsureVisible(idx)
 
 
 class SearchCtrl(wx.Panel):

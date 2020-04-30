@@ -148,11 +148,14 @@ def random_sample_linedrug(k=10):
 
 
 def make_staff():
-    li = ["NGUYỄN DUY KHẢI", "VƯƠNG KIẾN THANH", "TRẦN VŨ",
-          "HUỲNH HỮU DANH", "QUÁCH NGỌC VINH", "BÙI THỊ LỆ HUYỀN"]
     res = []
-    for i in li:
-        res.append(Staff(name=i))
+    doctor_li = ["NGUYỄN DUY KHẢI", "VƯƠNG KIẾN THANH", "TRẦN VŨ",
+                 "HUỲNH HỮU DANH", "QUÁCH NGỌC VINH", "BÙI THỊ LỆ HUYỀN"]
+    for i in doctor_li:
+        res.append(Staff(name=i, job='Doctor'))
+    nurse_li = ["Nurse A", "Nurse B"]
+    for i in nurse_li:
+        res.append(Staff(name=i, job='Nurse'))
     return res
 
 
@@ -169,10 +172,10 @@ def commit_population(k=10):
         sess.add_all(flatten_li)
 
 
-def commit_drugwarehouse():
-    li = [sample_warehouse(),
-          random_sample_prescription(),
-          random_sample_linedrug()]
-    flatten_li = [obj for sublist in li for obj in sublist]
-    with session_scope() as sess:
-        sess.add_all(flatten_li)
+# def commit_drugwarehouse():
+#     li = [sample_warehouse(),
+#           random_sample_prescription(),
+#           random_sample_linedrug()]
+#     flatten_li = [obj for sublist in li for obj in sublist]
+#     with session_scope() as sess:
+#         sess.add_all(flatten_li)

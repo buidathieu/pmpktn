@@ -1,13 +1,15 @@
 # db name
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-import os
+# import os
 from contextlib import contextmanager
 
-sqlfilename = "thankinhnhi.db"
-sql_path = os.path.join(os.path.dirname(os.path.dirname(
-    os.path.dirname(os.path.abspath(__file__)))), "sqlite", sqlfilename)
-engine = create_engine('sqlite:///{}'.format(sql_path), echo=False)
+name = 'postgres'
+password = ''
+host = 'localhost'
+port = '5433'
+db_name = 'pmpktn'
+engine = create_engine(f'postgresql://{name}:{password}@{host}:{port}/{db_name}', echo=False)
 
 
 Session = sessionmaker(bind=engine)

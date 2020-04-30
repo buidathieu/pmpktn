@@ -1,13 +1,13 @@
 import db_sql.db_func as dbf
-
+from db_sql.__init__ import Session
 import wx
 
 
-class CheckStaffDialog(wx.Dialog):
+class LogInDialog(wx.Dialog):
 
-    def __init__(self, parent, sess):
-        super().__init__(parent, title="Đăng nhập hôm nay")
-        self.sess = sess
+    def __init__(self, parent):
+        super().__init__(parent, title="Đăng nhập")
+        self.sess = Session()
         self.staff_list = dbf.query_staff_list(self.sess).all()
         self.staff_ctrl = wx.Choice(
             self, choices=[i.name for i in self.staff_list])
@@ -24,3 +24,8 @@ class CheckStaffDialog(wx.Dialog):
         idx = self.staff_ctrl.Selection
         staff = self.staff_list[idx]
         dbf.save_staff_workday(staff, sess=self.sess)
+
+    def get_staff_job(self):
+        idx = self.staff_ctrl.Selection
+        staff = self.staff_list[idx]
+        return staff.job

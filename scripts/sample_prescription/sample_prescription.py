@@ -2,7 +2,7 @@ from initialize import *
 import db_sql.db_func as dbf
 from db_sql.__init__ import Session
 from sample_prescription.__init__ import *
-import mainview.other_func as otf
+import other_func.other_func as otf
 import wx
 
 
