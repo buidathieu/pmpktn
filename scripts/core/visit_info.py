@@ -22,6 +22,7 @@ class Visit_Info_Panel(wx.Panel):
         self.note = self._createNote()
         self.diag = wx.TextCtrl(self)
         self.weight = self._createWeight()
+        self.getweightbtn= self._createGetWeightBtn()
         self.days = self._createDays()
         self.drugpicker = DrugPicker(self)
         self.times = self._createTimes()
@@ -59,6 +60,11 @@ class Visit_Info_Panel(wx.Panel):
         w.Bind(wx.EVT_CHAR,
                lambda e: otf.only_nums(e, decimal=True))
         w.SetHint('Kg')
+        return w
+
+    def _createGetWeightBtn(self):
+        w = wx.BitmapButton(self, bitmap=wx.Bitmap(weight_bm))
+        w.Bind(wx.EVT_BUTTON, self.getWeight)
         return w
 
     def _createDays(self):
@@ -122,12 +128,12 @@ class Visit_Info_Panel(wx.Panel):
         return w
 
     def _createSaveDrugbtn(self):
-        btn = wx.BitmapButton(self, bitmap=wx.Bitmap(save_drug_bm))
+        btn = wx.BitmapButton(self, bitmap=wx.Bitmap(plus_bm))
         btn.Bind(wx.EVT_BUTTON, self.onSaveDrug)
         return btn
 
     def _createEraseDrugbtn(self):
-        btn = wx.BitmapButton(self, bitmap=wx.Bitmap(name=erase_drug_bm))
+        btn = wx.BitmapButton(self, bitmap=wx.Bitmap(minus_bm))
         btn.Bind(wx.EVT_BUTTON, self.onEraseDrug)
         return btn
 
@@ -140,7 +146,6 @@ class Visit_Info_Panel(wx.Panel):
         btn = wx.Button(self, label="Toa mẫu")
         btn.Bind(wx.EVT_BUTTON, self.onSamplePrescriptionbtn)
         return btn
-
 
     def _createNewVisitbtn(self):
         btn = wx.Button(self, label='Lượt khám mới (F2)')
@@ -180,6 +185,7 @@ class Visit_Info_Panel(wx.Panel):
         weight_days_row.Add(wx.StaticText(self, label='Cân nặng:'),
                             0, wx.ALIGN_CENTER)
         weight_days_row.Add(self.weight, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
+        weight_days_row.Add(self.getweightbtn, 0, wx.RIGHT, 5)
         weight_days_row.Add(wx.StaticText(self, label='Số ngày:'),
                             0, wx.ALIGN_CENTER)
         weight_days_row.Add(self.days, 0, wx.ALIGN_CENTER)
@@ -214,7 +220,6 @@ class Visit_Info_Panel(wx.Panel):
         price_row.Add(wx.StaticText(self, label='Tổng tiền:'), 0, wx.CENTRE)
         price_row.Add(self.total_cost, 0, wx.CENTRE)
 
-        
         btn_row.Add(self.new_visit_btn)
         btn_row.Add(self.save_visit_btn)
 
@@ -232,6 +237,10 @@ class Visit_Info_Panel(wx.Panel):
         sizer.AddSpacer(20)
         sizer.Add(btn_row, 0, wx.EXPAND | wx.BOTTOM, 10)
         self.SetSizer(sizer)
+
+    def getWeight(self, e):
+        weight = self.Parent.patient.visits[-1].weight
+        self.weight.Value = str(weight)
 
     def _calc_quantity(self, e):
         day = self.days.Value
@@ -332,13 +341,11 @@ class Visit_Info_Panel(wx.Panel):
         self.d_list.Clear()
         self.drugpicker.Clear()
 
-
     def onNewVisit(self, e):
         self.NewVisit()
 
     def onSaveVisit(self, e):
         self.SaveVisit()
-
 
     def NewVisit(self):
         self.Parent.visit = None
@@ -375,13 +382,10 @@ class Visit_Info_Panel(wx.Panel):
             ans = wx.MessageBox("Cập nhật lượt khám?", "Lưu", style=wx.YES_NO)
             if ans == wx.YES:
                 dbf.save_old_visit(**kwargs, vid=v.id, sess=self.Parent.sess)
-                v_list.Update()
                 wx.MessageBox("Đã cập nhật")
-                mv.book.GetPage(1).Renew()
         else:
             ans = wx.MessageBox("Lưu lượt khám mới?", "Lưu", style=wx.YES_NO)
             if ans == wx.YES:
                 dbf.save_new_visit(**kwargs, sess=self.Parent.sess)
-                v_list.Update()
                 wx.MessageBox("Đã lưu")
-                mv.book.GetPage(1).Renew()
+        mv.Refresh()

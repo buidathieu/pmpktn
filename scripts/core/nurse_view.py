@@ -137,15 +137,13 @@ class NurseView(wx.Frame):
     def NewPatient(self):
         with NewPatientDialog(self) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
-                new_patient = dlg.add_a_new_patient(
-                    sess=self.sess
-                )
-        with wx.MessageDialog(self,
-                              "Thêm vào danh sách chờ?",
-                              "Thêm vào danh sách chờ?",
-                              style=wx.OK | wx.CANCEL) as dlg:
-            if dlg.ShowModal() == wx.ID_OK:
-                self.AddQueue(new_patient)
+                new_patient = dlg.add_a_new_patient(sess=self.sess)
+                with wx.MessageDialog(self,
+                                      "Thêm vào danh sách chờ khám?",
+                                      "Thêm vào danh sách chờ khám?",
+                                      style=wx.OK | wx.CANCEL) as dlg:
+                    if dlg.ShowModal() == wx.ID_OK:
+                        self.AddQueue(new_patient)
 
     def AddQueue(self, patient=None):
         if not patient:
@@ -185,4 +183,5 @@ class NurseView(wx.Frame):
         dlg = wx.MessageDialog(self, "", "Close app?", style=wx.OK | wx.CANCEL)
         if dlg.ShowModal() == wx.ID_OK:
             e.Skip()
+            self.sess.commit()
             self.sess.close()

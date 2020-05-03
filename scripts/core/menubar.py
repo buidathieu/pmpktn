@@ -2,6 +2,7 @@ from initialize import *
 from core.__init__ import *
 import other_func.other_func as otf
 import db_sql.db_func as dbf
+from core.add_a_new_patient_dialog import NewPatientDialog
 import wx
 
 
@@ -15,6 +16,7 @@ class MyMenuBar(wx.MenuBar):
     def _createMenu(self):
         patientmenu = wx.Menu()
         menuAbout = patientmenu.Append(wx.ID_ABOUT, "Thông tin")
+        menuNewPatient = patientmenu.Append(id_new_patient, "Bệnh nhân mới\tF1")
         menuNewVisit = patientmenu.Append(id_new_visit, "Lượt khám mới\tF2")
         menuSaveVisit = patientmenu.Append(id_save_visit, "Lưu lượt khám\tF3")
         menuExit = patientmenu.Append(wx.ID_EXIT, "&Exit\tALT+F4")
@@ -30,6 +32,7 @@ class MyMenuBar(wx.MenuBar):
         self.Append(reportmenu, "Báo cáo")
 
         self.Bind(wx.EVT_MENU, self.onAbout, menuAbout)
+        self.Bind(wx.EVT_MENU, self.onNewPatient, menuNewPatient)
         self.Bind(wx.EVT_MENU, self.onNewVisit, menuNewVisit)
         self.Bind(wx.EVT_MENU, self.onSaveVisit, menuSaveVisit)
         self.Bind(wx.EVT_MENU, self.onExit, menuExit)
@@ -43,11 +46,23 @@ class MyMenuBar(wx.MenuBar):
                               "Phần mềm phòng khám tại nhà", wx.OK) as dlg:
             dlg.ShowModal()
 
+    def onNewPatient(self, e):
+        with NewPatientDialog(self.mv) as dlg:
+            if dlg.ShowModal() == wx.ID_OK:
+                patient = dlg.add_a_new_patient(sess=self.mv.sess)
+                with wx.MessageDialog(self,
+                                      "Thêm vào danh sách chờ?",
+                                      "Thêm vào danh sách chờ?",
+                                      style=wx.OK | wx.CANCEL) as dlg:
+                    if dlg.ShowModal() == wx.ID_OK:
+                        dbf.add_new_visitqueue(patient.id, sess=self.mv.sess)
+                        self.mv.Refresh()
+
     def onNewVisit(self, e):
-        self.Parent.visit_info.NewVisit()
+        self.mv.visit_info.NewVisit()
 
     def onSaveVisit(self, e):
-        self.Parent.visit_info.SaveVisit()
+        self.mv.visit_info.SaveVisit()
 
     def onExit(self, e):
         self.mv.Close()

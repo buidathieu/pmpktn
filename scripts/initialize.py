@@ -31,6 +31,7 @@ plus_bm = os.path.join(BM_PATH, 'plus.png')
 pencil_bm = os.path.join(BM_PATH, 'pencil.png')
 minus_bm = os.path.join(BM_PATH, 'minus.png')
 
+weight_bm = os.path.join(BM_PATH, 'weight.png')
 
 # excel path
 default_exlpath = os.path.join(DIR_PATH, "excel")

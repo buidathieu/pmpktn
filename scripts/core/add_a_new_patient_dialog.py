@@ -30,7 +30,7 @@ class NewPatientDialog(wx.Dialog):
             self.age.ChangeValue(otf.bd_to_age(w.Value).ljust(16))
             e.Skip()
 
-        w = wx.adv.DatePickerCtrl(self, dt=wx.DateTime(31, 11, 2010))
+        w = wx.adv.DatePickerCtrl(self, style=wx.adv.DP_DROPDOWN)
         w.Bind(wx.adv.EVT_DATE_CHANGED, onBirthdateChange)
         return w
 
