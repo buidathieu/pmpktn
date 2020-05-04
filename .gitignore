@@ -131,3 +131,4 @@ dmypy.json
 # project
 *.sublime-project
 *.sublime-workspace
+*.ipynb
