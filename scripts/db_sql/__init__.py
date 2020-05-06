@@ -1,15 +1,25 @@
-# db name
+from initialize import DIR_PATH
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-# import os
+import os
 from contextlib import contextmanager
+import json
 
-name = 'postgres'
-password = ''
-host = 'localhost'
-port = '5433'
-db_name = 'pmpktn'
-engine = create_engine(f'postgresql://{name}:{password}@{host}:{port}/{db_name}', echo=False)
+
+
+with open(os.path.join(DIR_PATH, "config.json"), "r", encoding="utf-8-sig") as f:
+    setting = json.load(f)
+
+username = setting['username']
+password = setting['password']
+host = setting['host']
+port = setting['port']
+db_name = setting['db_name']
+gssencmode = setting['gssencmode']
+
+engine = create_engine(
+    f'postgresql://{username}:{password}@{host}:{port}/{db_name}?gssencmode={gssencmode}',
+    echo=False)
 
 
 Session = sessionmaker(bind=engine)

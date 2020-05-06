@@ -2,6 +2,7 @@ from core.add_a_new_patient_dialog import NewPatientDialog
 from core.__init__ import *
 import db_sql.db_func as dbf
 from db_sql.__init__ import Session
+import other_func.other_func as otf
 import wx
 
 
@@ -10,6 +11,8 @@ class NurseView(wx.Frame):
     def __init__(self, parent):
         super().__init__(parent, title='Nhận bệnh')
         self.sess = Session()
+        
+        self.SetBackgroundColour(wx.Colour(206, 219, 186))
 
         self.search_name = self._createSearchName()
         self.search_gender = self._createSearchGender()
@@ -65,13 +68,14 @@ class NurseView(wx.Frame):
         return w
 
     def _createSearchGender(self):
-        w = wx.Choice(self, choices=[gender_dict[0], gender_dict[1]])
-        w.Selection = 0
+        w = wx.Choice(self, choices=[gender_dict[0], gender_dict[1], ''])
+        w.Selection = 2
         return w
 
     def _createSearchBirthyear(self):
         w = wx.TextCtrl(self)
         w.Hint = "Năm sinh"
+        w.Bind(wx.EVT_CHAR, lambda e: otf.only_nums(e))
         return w
 
     def _createSearchButton(self):
@@ -116,12 +120,14 @@ class NurseView(wx.Frame):
 
         newPatientMenu = menu.Append(wx.ID_NEW, "Thêm bệnh nhân mới\tF1")
         addQueueMenu = menu.Append(wx.ID_ADD, "Thêm vào DS chờ khám\tF2")
+        refreshMenu = menu.Append(wx.ID_REFRESH, "Refresh\tF5")
         exitMenu = menu.Append(wx.ID_EXIT, "&Exit\tALT+F4")
 
         w.Append(menu, 'Nhận bệnh')
 
         w.Bind(wx.EVT_MENU, lambda e: self.NewPatient(), newPatientMenu)
         w.Bind(wx.EVT_MENU, lambda e: self.AddQueue(), addQueueMenu)
+        w.Bind(wx.EVT_MENU, lambda e: self.Refresh(), refreshMenu)
         w.Bind(wx.EVT_MENU, lambda e: self.Close(), exitMenu)
         self.SetMenuBar(w)
 
@@ -129,7 +135,8 @@ class NurseView(wx.Frame):
         accel = wx.AcceleratorTable(
             [wx.AcceleratorEntry(wx.ACCEL_NORMAL, wx.WXK_F1, wx.ID_NEW),
              wx.AcceleratorEntry(wx.ACCEL_NORMAL, wx.WXK_F2, wx.ID_ADD),
-             wx.AcceleratorEntry(wx.ACCEL_ALT, wx.WXK_F4, wx.ID_EXIT)])
+             wx.AcceleratorEntry(wx.ACCEL_ALT, wx.WXK_F4, wx.ID_EXIT),
+             wx.AcceleratorEntry(wx.ACCEL_NORMAL, wx.WXK_F5, wx.ID_REFRESH)])
         self.SetAcceleratorTable(accel)
 
     # Functions
@@ -172,7 +179,7 @@ class NurseView(wx.Frame):
         self.p_listctrl.DeleteAllItems()
         self.p_list = dbf.search_patient(
             name=self.search_name.Value.upper(),
-            gender=bool(self.search_gender.Selection),
+            gender=self.search_gender.Selection,
             birthyear=self.search_birthyear.Value,
             sess=self.sess).all()
         for p in self.p_list:
@@ -180,8 +187,16 @@ class NurseView(wx.Frame):
                 [p.id, p.name, gender_dict[int(p.gender)], p.birthdate])
 
     def onClose(self, e):
-        dlg = wx.MessageDialog(self, "", "Close app?", style=wx.OK | wx.CANCEL)
+        dlg = wx.MessageDialog(self, "Kết thúc", "Close app?", style=wx.OK | wx.CANCEL)
         if dlg.ShowModal() == wx.ID_OK:
             e.Skip()
             self.sess.commit()
             self.sess.close()
+
+    def Refresh(self):
+        self.search_name.ChangeValue("")
+        self.search_gender.Selection = 2
+        self.search_birthyear.ChangeValue("")
+        self.RefreshQueue()
+        self.p_listctrl.DeleteAllItems()
+        self.p_list = []

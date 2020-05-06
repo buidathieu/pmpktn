@@ -92,7 +92,7 @@ class Mainview(wx.Frame):
         self.patient = None
 
     def onClose(self, e):
-        dlg = wx.MessageDialog(self, "", "Close app?", style=wx.OK | wx.CANCEL)
+        dlg = wx.MessageDialog(self, "Kết thúc", "Close app?", style=wx.OK | wx.CANCEL)
         if dlg.ShowModal() == wx.ID_OK:
             try:
                 self.sess.commit()

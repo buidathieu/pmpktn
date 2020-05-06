@@ -17,10 +17,11 @@ def save_staff_workday(staff, date=dt.date.today(), sess=None):
 # nurseview
 def search_patient(name, gender, birthyear, sess=None):
     query = sess.query(Patient).\
-        filter(Patient.name.contains(name)).\
-        filter(Patient.gender == gender)
-    if birthyear != "":
-        query.filter(extract('year', Patient.birthdate) == birthyear)
+        filter(Patient.name.contains(name))
+    if gender in [0,1]:
+        query = query.filter(Patient.gender == bool(gender))
+    if birthyear.isnumeric():
+        query = query.filter(extract('year', Patient.birthdate) == int(birthyear))
     return query
 
 
