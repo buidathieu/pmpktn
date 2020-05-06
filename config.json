@@ -1,8 +1,9 @@
 {
-	"username" : "postgres",
-	"password" : "admin",
-	"host" : "localhost",
-	"port" : 5432,
-	"db_name" : "pmpktn",
-	"gssencmode" : "disable"
+    "username" : "postgres",
+    "password" : "admin",
+    "host" : "localhost",
+    "port" : 5432,
+    "db_name" : "pmpktn",
+    "gssencmode" : "disable",
+    "DEBUG" : true
 }

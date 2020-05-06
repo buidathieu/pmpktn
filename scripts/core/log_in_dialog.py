@@ -1,6 +1,7 @@
 import db_sql.db_func as dbf
 from db_sql.__init__ import Session
 import wx
+import logging
 
 
 class LogInDialog(wx.Dialog):
@@ -22,11 +23,14 @@ class LogInDialog(wx.Dialog):
         self.SetSizerAndFit(sizer)
 
         self.Bind(wx.EVT_CLOSE, self.onClose)
+        logging.debug('LoginDialog initialized, session opened')
 
     def save_staff_workday(self):
         idx = self.staff_ctrl.Selection
-        staff = self.staff_list[idx]
-        dbf.save_staff_workday(staff, sess=self.sess)
+        if idx >= 0:
+            staff = self.staff_list[idx]
+            logging.debug(f'LoginDialog: save_staff_workday: selection={idx}, name={staff.name}, job={staff.job}')
+            dbf.save_staff_workday(staff, sess=self.sess)
 
     def get_staff_job(self):
         idx = self.staff_ctrl.Selection
@@ -34,5 +38,10 @@ class LogInDialog(wx.Dialog):
             return self.staff_list[idx].job
 
     def onClose(self, e):
-        self.sess.close()
         self.EndModal(wx.ID_CLOSE)
+        
+    def Destroy(self):
+        logging.debug('LoginDialog destroyed, session closed')
+        self.sess.commit()
+        self.sess.close()
+        super().Destroy()

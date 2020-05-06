@@ -4,6 +4,7 @@ import db_sql.db_func as dbf
 from db_sql.__init__ import Session
 import other_func.other_func as otf
 import wx
+import logging
 
 
 class NurseView(wx.Frame):
@@ -11,9 +12,10 @@ class NurseView(wx.Frame):
     def __init__(self, parent):
         super().__init__(parent, title='Nhận bệnh')
         self.sess = Session()
+        logging.debug('NurseView initialized, session opened')
         
         self.SetBackgroundColour(wx.Colour(206, 219, 186))
-
+        
         self.search_name = self._createSearchName()
         self.search_gender = self._createSearchGender()
         self.search_birthyear = self._createSearchBirthyear()
@@ -35,6 +37,7 @@ class NurseView(wx.Frame):
         self._setAccelTable()
 
         self.Bind(wx.EVT_CLOSE, self.onClose)
+        
 
     def _setsizer(self):
 
@@ -128,7 +131,7 @@ class NurseView(wx.Frame):
         w.Bind(wx.EVT_MENU, lambda e: self.NewPatient(), newPatientMenu)
         w.Bind(wx.EVT_MENU, lambda e: self.AddQueue(), addQueueMenu)
         w.Bind(wx.EVT_MENU, lambda e: self.Refresh(), refreshMenu)
-        w.Bind(wx.EVT_MENU, lambda e: self.Close(), exitMenu)
+        w.Bind(wx.EVT_MENU, self.onClose, exitMenu)
         self.SetMenuBar(w)
 
     def _setAccelTable(self):
@@ -144,7 +147,7 @@ class NurseView(wx.Frame):
     def NewPatient(self):
         with NewPatientDialog(self) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
-                new_patient = dlg.add_a_new_patient(sess=self.sess)
+                new_patient = dlg.add_a_new_patient()
                 with wx.MessageDialog(self,
                                       "Thêm vào danh sách chờ khám?",
                                       "Thêm vào danh sách chờ khám?",
@@ -156,42 +159,49 @@ class NurseView(wx.Frame):
         if not patient:
             patient_idx = self.p_listctrl.GetFirstSelected()
             patient = self.p_list[patient_idx]
+        logging.debug(f'Adding {patient.name} to waiting queue')
         if patient.id in [vq.patient_id for vq in self.queue_list]:
+            logging.debug(f'Patient already in waiting queue. AddQueue failed')
             wx.MessageBox('Đã có trong danh sách chờ khám',
                           "Không thực hiện được")
         else:
+            logging.debug(f'{patient.name} added to waiting queue')
             dbf.add_new_visitqueue(patient.id, sess=self.sess)
             self.RefreshQueue()
 
     def RefreshQueue(self):
+        logging.debug('NurseView waiting queue rebuilt')
         self.queue_listctrl.DeleteAllItems()
         self.queue_list = dbf.get_visitqueue(sess=self.sess).all()
         for vq in self.queue_list:
             p = vq.patient
             self.queue_listctrl.Append(
                 [p.id, p.name, gender_dict[int(p.gender)], p.birthdate])
+        
 
     def RefreshQueueTimer(self):
         self.RefreshQueue()
         return wx.CallLater(1000 * 60 * 5, self.RefreshQueueTimer)
 
     def Search(self):
+        kwargs = {
+            'name': self.search_name.Value.upper(),
+            'gender': self.search_gender.Selection,
+            'birthyear': self.search_birthyear.Value,
+            'sess': self.sess
+        }
+        logging.debug(f'NurseView search {kwargs}')
         self.p_listctrl.DeleteAllItems()
-        self.p_list = dbf.search_patient(
-            name=self.search_name.Value.upper(),
-            gender=self.search_gender.Selection,
-            birthyear=self.search_birthyear.Value,
-            sess=self.sess).all()
+        self.p_list = dbf.search_patient(**kwargs).all()
         for p in self.p_list:
             self.p_listctrl.Append(
                 [p.id, p.name, gender_dict[int(p.gender)], p.birthdate])
 
     def onClose(self, e):
-        dlg = wx.MessageDialog(self, "Kết thúc", "Close app?", style=wx.OK | wx.CANCEL)
-        if dlg.ShowModal() == wx.ID_OK:
-            e.Skip()
-            self.sess.commit()
-            self.sess.close()
+        with wx.MessageDialog(self, "Kết thúc", "Close app?", style=wx.OK | wx.CANCEL) as dlg:
+            if dlg.ShowModal() == wx.ID_OK:
+                self.Destroy()
+            
 
     def Refresh(self):
         self.search_name.ChangeValue("")
@@ -200,3 +210,11 @@ class NurseView(wx.Frame):
         self.RefreshQueue()
         self.p_listctrl.DeleteAllItems()
         self.p_list = []
+        
+    def Destroy(self):
+        self.sess.commit()
+        self.sess.close()
+        logging.debug('NurseView destroyed. session closed')
+        super().Destroy()
+        
+    

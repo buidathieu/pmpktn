@@ -7,6 +7,7 @@ from core.basic_info import Basic_Info_Panel
 from core.menubar import MyMenuBar
 from db_sql.__init__ import Session
 import wx
+import logging
 
 
 class Mainview(wx.Frame):
@@ -16,8 +17,9 @@ class Mainview(wx.Frame):
         self._patient = None
         self._visit = None
         self.sess = Session()
+        logging.debug("Mainview initialized, session opened")
 
-        super().__init__(parent, title='APP PHÒNG MẠCH TƯ, created by thanhstardust@outlook.com', pos=(0, 20),
+        super().__init__(parent, title='APP PHÒNG MẠCH TƯ, created by thanhstardust@outlook.com',
                          *args, **kw)
         self.SetBackgroundColour(wx.Colour(206, 219, 186))
 
@@ -68,9 +70,11 @@ class Mainview(wx.Frame):
     def patient(self, p):
         self._patient = p
         if p:
+            logging.debug(f'Set mainview patient = {p.name}')
             self.basic_info.Update()
             self.visit_list.Update()
         else:
+            logging.debug(f'Set mainview patient to None')
             self.basic_info.Clear()
             self.visit_list.Clear()
             self.visit_info.Clear()
@@ -83,8 +87,10 @@ class Mainview(wx.Frame):
     def visit(self, v):
         self._visit = v
         if v:
+            logging.debug(f'Set mainview visit = {v.exam_date}')
             self.visit_info.Update()
         else:
+            logging.debug(f'Set mainview visit to None')
             self.visit_info.Clear()
 
     def Refresh(self):
@@ -94,9 +100,10 @@ class Mainview(wx.Frame):
     def onClose(self, e):
         dlg = wx.MessageDialog(self, "Kết thúc", "Close app?", style=wx.OK | wx.CANCEL)
         if dlg.ShowModal() == wx.ID_OK:
-            try:
-                self.sess.commit()
-                self.sess.close()
-            except Exception:
-                self.rollback()
-            e.Skip()
+            self.Destroy()
+            
+    def Destroy(self):
+        logging.debug('Mainview destroyed, session closed')
+        self.sess.commit()
+        self.sess.close()
+        super().Destroy()

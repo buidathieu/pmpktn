@@ -4,6 +4,7 @@ from initialize import *
 from core.__init__ import *
 import other_func.other_func as otf
 import wx
+import logging
 
 
 class PatientBook(wx.Notebook):
@@ -61,12 +62,13 @@ class QueuingPatientList(wx.ListCtrl):
         mv.visit = None
 
     def Refresh(self):
+        logging.debug('waiting queue rebuilt')
         self._make_p_list()
         self._append()
 
     def RefreshQueueTimer(self):
         self.Refresh()
-        return wx.CallLater(1000 * 60 * 5, self.RefreshQueueTimer)
+        return wx.CallLater(1000 *60 * 5, self.RefreshQueueTimer)
 
 
 class SeenPatientList(wx.ListCtrl):
@@ -102,6 +104,7 @@ class SeenPatientList(wx.ListCtrl):
         mv.visit = None
 
     def Refresh(self):
+        logging.debug('seen patient list rebuilt')
         self._make_p_list()
         self._append()
 
@@ -128,6 +131,7 @@ class VisitList(wx.ListCtrl):
         self._append()
 
     def _append(self):
+        logging.debug('visit list rebuilt')
         self.Clear()
         for v in self.visit_list:
             self.Append([v.id,

@@ -2,7 +2,7 @@ from core.__init__ import *
 import db_sql.db_func as dbf
 import other_func.other_func as otf
 import wx
-
+import logging
 
 class NewPatientDialog(wx.Dialog):
 
@@ -18,6 +18,7 @@ class NewPatientDialog(wx.Dialog):
 
         self.Bind(wx.EVT_KEY_DOWN, self.onESC)
         self._setSizer()
+        logging.debug('NewPatientDialog initialize, using parent session')
 
     def _createGender(self):
         w = wx.Choice(self, choices=[gender_dict[0], gender_dict[1]])
@@ -74,13 +75,13 @@ class NewPatientDialog(wx.Dialog):
             e.Skip()
 
     def add_a_new_patient(self, sess):
-        new_patient = dbf.create_new_patient(
-            name=self.name.Value.upper(),
-            gender=self.gender.Selection,
-            birthdate=otf.wxdate2pydate(
-                self.birthdate.Value),
-            address=self.address.Value,
-            past_history=self.past_history.Value,
-            sess=sess
-        )
+        kwargs = {'name': self.name.Value.upper(),
+                  'gender': self.gender.Selection,
+                  'birthdate': otf.wxdate2pydate(self.birthdate.Value),
+                  'address': self.address.Value, 
+                  'past_history': self.past_history.Value,
+                  'sess': self.Parent.sess
+                  }
+        logging.debug(f'NewPatientDialog: add_a_new_patient {kwargs}')
+        new_patient = dbf.create_new_patient(**kwargs)
         return new_patient

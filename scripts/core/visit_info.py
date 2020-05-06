@@ -7,6 +7,7 @@ from sample_prescription.sample_prescription import SamplePrescriptionDialog
 from fractions import Fraction as fr
 import math
 import wx
+import logging
 
 
 class Visit_Info_Panel(wx.Panel):
@@ -238,11 +239,14 @@ class Visit_Info_Panel(wx.Panel):
         sizer.Add(btn_row, 0, wx.EXPAND | wx.BOTTOM, 10)
         self.SetSizer(sizer)
 
+    # functions
     def getWeight(self, e):
+        logging.debug('get latest weight')
         weight = self.Parent.patient.visits[-1].weight
         self.weight.Value = str(weight)
 
     def _calc_quantity(self, e):
+        logging.debug('recalculate quantity')
         day = self.days.Value
         dosage = self.dosage_per.Value
         time = self.times.Value
@@ -284,11 +288,15 @@ class Visit_Info_Panel(wx.Panel):
         self.d_list.Remove()
 
     def onReuse(self, e):
+        # keep old values
+        logging.debug('on Reuse weight, days, linedruglist, total_cost')
         linedruglist = self.Parent.visit.linedrugs.copy()
         w = self.weight.Value
         d = self.days.Value
         p = self.total_cost.Value
+        # unselect
         self.Parent.visit = None
+        # populate field with old values
         self.d_list.Update(linedruglist=linedruglist)
         self.weight.ChangeValue(w)
         self.days.ChangeValue(d)

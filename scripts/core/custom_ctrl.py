@@ -5,6 +5,7 @@ from db_sql.db_func import query_linedrug_list_by_name
 import os
 import wx
 import wx.adv
+import logging
 
 
 class DrugPopup(wx.ComboPopup):
@@ -185,7 +186,7 @@ class DrugList(wx.ListCtrl):
 
     def __init__(self, parent):
         super().__init__(parent, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        self._total_price = setting['cong_kham_benh']
+        self.total_price = 0
         self.dwh_list = []
         self.AppendColumn('STT', width=d_stt_w)
         self.AppendColumn('Thuốc', width=d_name_w)
@@ -196,15 +197,6 @@ class DrugList(wx.ListCtrl):
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onDrugSelect)
         self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onDrugDeselect)
 
-    @property
-    def total_price(self):
-        return self._total_price
-
-    @total_price.setter
-    def total_price(self, val):
-        self._total_price = val
-        self.Parent.total_cost.ChangeValue(
-            otf.bill_int_to_str(val))
 
     def Update(self, linedruglist=None):
         if not linedruglist:
@@ -224,7 +216,7 @@ class DrugList(wx.ListCtrl):
     def Clear(self):
         self.DeleteAllItems()
         self.dwh_list = []
-        self.total_price = setting['cong_kham_benh']
+        self.total_price = 0
 
     def onDrugSelect(self, e):
         i = e.Index
@@ -287,15 +279,12 @@ class DrugList(wx.ListCtrl):
 
     def calc_total_price(self):
         assert self.ItemCount == len(self.dwh_list)
-        if self.ItemCount == 0:
-            self.total_price = setting['cong_kham_benh']
-        else:
-            res = setting['cong_kham_benh']
+        self.total_price = 0
+        if self.ItemCount > 0:
             for i in range(self.ItemCount):
                 qty = int(self.GetItemText(i, 4).partition(' ')[0])
                 p = self.dwh_list[i].sale_price
-                res += (qty * p)
-            self.total_price = res
+                self.total_price += (qty * p)
 
     def build_linedrugs(self):
         linedrugs = []

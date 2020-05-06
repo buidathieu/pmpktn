@@ -1,5 +1,6 @@
 import os
 import json
+import logging
 # High DPI aware
 import ctypes
 try:
@@ -39,3 +40,8 @@ default_exlpath = os.path.join(DIR_PATH, "excel")
 
 with open(os.path.join(DIR_PATH, "setting.json"), "r", encoding="utf-8-sig") as f:
     setting = json.load(f)
+    
+with open(os.path.join(DIR_PATH, 'config.json'), 'r') as f:
+    DEBUG = json.load(f)['DEBUG']
+    if DEBUG:
+        logging.basicConfig(level=logging.DEBUG)

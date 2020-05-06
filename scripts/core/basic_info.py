@@ -94,6 +94,7 @@ class Basic_Info_Panel(wx.Panel):
         self.SetSizer(sizer)
 
     def Update(self):
+        logging.debug('patient basic info updated')
         p = self.Parent.patient
         self.group_label.Label = f'Thông tin bệnh nhân (Mã BN: {p.id})'
         self.name.ChangeValue(p.name)
