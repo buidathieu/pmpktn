@@ -21,23 +21,14 @@ def bd_to_age(bd):
 def age_to_bd(age):
     age = age.upper()
     now = wx.DateTime.Today()
-    year, month, day = now.GetYear(), now.GetMonth() + 1, now.GetDay()
+    span = wx.DateSpan()
     if "TH" in age:
-        num = int(age.partition("TH")[0].strip(" "))
-        month -= num
-        while month <= 0:
-            month += 12
-            year -= 1
+        span.SetMonths(int(age.partition("TH")[0].strip(" ")))
     elif "T" in age:
-        num = int(age.partition("T")[0].strip(" "))
-        year -= num
+        span.SetYears(int(age.partition("T")[0].strip(" ")))
     elif "NG" in age:
-        num = int(age.partition("NG")[0].strip(" "))
-        day -= num
-        while day <= 0:
-            month -= 1
-            day += wx.GetNumberOfDays(month)
-    return wx.DateTime(year=year, month=month - 1, day=day)
+        span.SetDays(int(age.partition("NG")[0].strip(" ")))
+    return now.Subtract(span)
 
 
 def pydate2wxdate(date):
@@ -89,4 +80,3 @@ def only_nums(e, decimal=False, slash=False):
         nums += [47, wx.WXK_DIVIDE]
     if x in nums:
         e.Skip()
-

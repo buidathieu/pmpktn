@@ -1,14 +1,11 @@
-# -*- coding: utf-8 -*-
 
 from initialize import *
-from mainview.__init__ import *
-from mainview.left_panel import *
-from mainview.visit_info import Visit_Info_Panel
-from mainview.basic_info import Basic_Info_Panel
-from mainview.menubar import MyMenuBar
-from mainview.check_staff_dialog import CheckStaffDialog
+from core.__init__ import *
+from core.left_panel import *
+from core.visit_info import Visit_Info_Panel
+from core.basic_info import Basic_Info_Panel
+from core.menubar import MyMenuBar
 from db_sql.__init__ import Session
-import db_sql.db_func as dbf
 import wx
 
 
@@ -20,34 +17,26 @@ class Mainview(wx.Frame):
         self._visit = None
         self.sess = Session()
 
-        if not dbf.check_exist_staff_date(sess=self.sess):
-            with CheckStaffDialog(None, self.sess) as dlg:
-                if dlg.ShowModal() == wx.ID_OK:
-                    dlg.save_staff_workday()
-
         super().__init__(parent, title='APP PHÒNG MẠCH TƯ, created by thanhstardust@outlook.com', pos=(0, 20),
                          *args, **kw)
         self.SetBackgroundColour(wx.Colour(206, 219, 186))
 
         self._createInterface()
-        self._createMenuBar()
-        self._createAccelTable()
+        self._setMenuBar()
+        self._setAccelTable()
         self.Bind(wx.EVT_CLOSE, self.onClose)
-        self.Show()
 
     def _createInterface(self):
         self.book = PatientBook(self)
-        self.searchctrl = SearchCtrl(self)
         self.visit_list = VisitList(self)
         self.basic_info = Basic_Info_Panel(self)
         self.visit_info = Visit_Info_Panel(self)
 
         leftpanel = wx.BoxSizer(wx.VERTICAL)
         leftpanel.Add(self.book, 10, wx.LEFT | wx.TOP, 10)
-        leftpanel.Add(self.searchctrl, 0, wx.EXPAND | wx.LEFT | wx.BOTTOM, 15)
         leftpanel.Add(wx.StaticText(
-            self, label='Lượt khám cũ:'), 0, wx.LEFT, 15)
-        leftpanel.Add(self.visit_list, 4, wx.EXPAND | wx.LEFT | wx.BOTTOM, 10)
+            self, label='Lượt khám cũ:'), 0, wx.LEFT, 20)
+        leftpanel.Add(self.visit_list, 4, wx.EXPAND | wx.LEFT | wx.BOTTOM, 20)
 
         rightpanel = wx.BoxSizer(wx.VERTICAL)
         rightpanel.Add(self.basic_info, 0, wx.EXPAND)
@@ -58,11 +47,11 @@ class Mainview(wx.Frame):
         wholepanel.Add(rightpanel, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
         self.SetSizerAndFit(wholepanel)
 
-    def _createMenuBar(self):
+    def _setMenuBar(self):
         self.menubar = MyMenuBar(self)
         self.SetMenuBar(self.menubar)
 
-    def _createAccelTable(self):
+    def _setAccelTable(self):
         accel = wx.AcceleratorTable(
             [wx.AcceleratorEntry(wx.ACCEL_NORMAL, wx.WXK_F1, id_new_patient),
              wx.AcceleratorEntry(wx.ACCEL_NORMAL, wx.WXK_F2, id_new_visit),
@@ -81,8 +70,6 @@ class Mainview(wx.Frame):
         if p:
             self.basic_info.Update()
             self.visit_list.Update()
-            if p.visits.count() > 0:
-                self.visit_list.Select(0)
         else:
             self.basic_info.Clear()
             self.visit_list.Clear()
@@ -101,18 +88,15 @@ class Mainview(wx.Frame):
             self.visit_info.Clear()
 
     def Refresh(self):
-        self.book.ChangeSelection(0)
-        idx = self.book.GetPage(0).GetFirstSelected()
-        self.book.GetPage(0).Select(idx, 0)
-        self.searchctrl.Clear()
+        self.book.Refresh()
+        self.patient = None
 
     def onClose(self, e):
         dlg = wx.MessageDialog(self, "", "Close app?", style=wx.OK | wx.CANCEL)
         if dlg.ShowModal() == wx.ID_OK:
+            try:
+                self.sess.commit()
+                self.sess.close()
+            except Exception:
+                self.rollback()
             e.Skip()
-
-
-def mainloop():
-    app = wx.App()
-    Mainview(None)
-    app.MainLoop()

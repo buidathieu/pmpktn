@@ -1,7 +1,7 @@
 from initialize import *
-from mainview.__init__ import *
-from mainview.custom_ctrl import *
-import mainview.other_func as otf
+from core.__init__ import *
+from core.custom_ctrl import *
+import other_func.other_func as otf
 import wx
 import wx.adv
 
@@ -37,7 +37,7 @@ class Basic_Info_Panel(wx.Panel):
             self.age.ChangeValue(otf.bd_to_age(w.Value).ljust(16))
             e.Skip()
 
-        w = wx.adv.DatePickerCtrl(self, dt=wx.DateTime(31, 11, 2010))
+        w = wx.adv.DatePickerCtrl(self, style=wx.adv.DP_DROPDOWN)
         w.Bind(wx.adv.EVT_DATE_CHANGED, onBirthdateChange)
         return w
 

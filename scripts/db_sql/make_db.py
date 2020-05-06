@@ -2,7 +2,7 @@
 from .__init__ import *
 import datetime as dt
 from sqlalchemy import Column, Integer, Float, String, DateTime,\
-    Boolean, Date,\
+    Boolean, Date, Enum,\
     Text, CheckConstraint, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
@@ -16,7 +16,7 @@ class Patient(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), index=True)
-    gender = Column(Boolean, nullable=False)
+    gender = Column(Boolean, nullable=False)  # 0=nam, 1=nu
     birthdate = Column(Date, nullable=False)
     address = Column(Text, default="")
     past_history = Column(Text, default="")
@@ -61,21 +61,20 @@ class DrugWarehouse(Base):
 class LineDrug(Base):
     __tablename__ = 'linedrugs'
     __table_args__ = (CheckConstraint("quantity >= 0"),
-                      CheckConstraint("times >= 0"),
-                      CheckConstraint("dosage_per >= 0"))
+                      CheckConstraint("times >= 0"),)
 
     id = Column(Integer, primary_key=True)
     drug_id = Column(ForeignKey("drugwarehouse.id"))
     dosage_per = Column(String(5), default=0)
     times = Column(Integer, default=0)
     quantity = Column(Integer, default=0)
-    usage = Column(String(20), default='uống')
+    usage = Column(String(30), default='uống')
     visit_id = Column(ForeignKey("visits.id"))
     drug = relationship('DrugWarehouse', lazy='selectin')
 
 
 class SamplePrescription(Base):
-    __tablename__ = "sampleprescription"
+    __tablename__ = "sampleprescriptions"
     __table_args__ = (CheckConstraint("name != ''"),)
 
     id = Column(Integer, primary_key=True)
@@ -86,22 +85,22 @@ class SamplePrescription(Base):
 
 class SampleLineDrug(Base):
     __tablename__ = "samplelinedrugs"
-    __table_args__ = (CheckConstraint("times >= 0"),
-                      CheckConstraint("dosage_per >= 0"))
+    __table_args__ = (CheckConstraint("times >= 0"),)
 
     id = Column(Integer, primary_key=True)
     drug_id = Column(ForeignKey("drugwarehouse.id"))
     times = Column(Integer, default=0)
     dosage_per = Column(String(5), default=0)
-    sampleprescription_id = Column(ForeignKey("sampleprescription.id"))
+    sampleprescription_id = Column(ForeignKey("sampleprescriptions.id"))
     drug = relationship('DrugWarehouse', lazy='selectin')
 
 
 class Staff(Base):
-    __tablename__ = "staff"
+    __tablename__ = "staffs"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), default='test', nullable=False)
+    job = Column(Enum('Doctor', 'Nurse', name='jobs'), nullable=False)
     workdays = relationship('WorkDay', lazy='dynamic', back_populates='staff')
 
 
@@ -109,10 +108,25 @@ class WorkDay(Base):
     __tablename__ = "workdays"
 
     id = Column(Integer, primary_key=True)
-    date = Column(Date, nullable=False, unique=True)
-    staff_id = Column(ForeignKey("staff.id"))
+    time_login = Column(DateTime, nullable=False,
+                        unique=True, default=dt.datetime.now)
+    staff_id = Column(ForeignKey("staffs.id"))
     staff = relationship('Staff', back_populates='workdays')
+
+
+class VisitQueue(Base):
+    __tablename__ = 'visitqueue'
+    id = Column(Integer, primary_key=True)
+    time_added = Column(DateTime, nullable=False,
+                        default=dt.datetime.now)
+    is_seen = Column(Boolean, default=False, nullable=False)
+    patient_id = Column(ForeignKey("patients.id"))
+    patient = relationship('Patient', lazy='selectin')
 
 
 def make_db():
     Base.metadata.create_all(engine)
+
+
+def drop_db():
+    Base.metadata.drop_all(engine)
