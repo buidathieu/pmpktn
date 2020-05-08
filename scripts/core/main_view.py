@@ -19,8 +19,10 @@ class Mainview(wx.Frame):
         self.sess = Session()
         logging.debug("Mainview initialized, session opened")
 
-        super().__init__(parent, title='APP PHÒNG MẠCH TƯ, created by thanhstardust@outlook.com',
-                         *args, **kw)
+        super().__init__(
+            parent,
+            title='APP PHÒNG MẠCH TƯ, created by thanhstardust@outlook.com',
+            pos=(0, 20), *args, **kw)
         self.SetBackgroundColour(wx.Colour(206, 219, 186))
 
         self._createInterface()
@@ -98,10 +100,11 @@ class Mainview(wx.Frame):
         self.patient = None
 
     def onClose(self, e):
-        dlg = wx.MessageDialog(self, "Kết thúc", "Close app?", style=wx.OK | wx.CANCEL)
+        dlg = wx.MessageDialog(
+            self, "Kết thúc", "Close app?", style=wx.OK | wx.CANCEL)
         if dlg.ShowModal() == wx.ID_OK:
             self.Destroy()
-            
+
     def Destroy(self):
         logging.debug('Mainview destroyed, session closed')
         self.sess.commit()

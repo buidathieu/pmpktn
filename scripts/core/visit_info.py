@@ -23,7 +23,7 @@ class Visit_Info_Panel(wx.Panel):
         self.note = self._createNote()
         self.diag = wx.TextCtrl(self)
         self.weight = self._createWeight()
-        self.getweightbtn= self._createGetWeightBtn()
+        self.getweightbtn = self._createGetWeightBtn()
         self.days = self._createDays()
         self.drugpicker = DrugPicker(self)
         self.times = self._createTimes()
@@ -95,7 +95,7 @@ class Visit_Info_Panel(wx.Panel):
         def on_txt_qty(e):
             x = e.KeyCode
             if x in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
-                self.d_list.Add_or_Update()
+                self.onSaveDrug(None)
             elif x == wx.WXK_TAB:
                 return
             else:
@@ -176,7 +176,8 @@ class Visit_Info_Panel(wx.Panel):
         label_1_row.Add(self.group_label)
         label_1_row.Add(wx.StaticLine(self), 1, wx.ALIGN_CENTER)
         datetime_row.Add(wx.StaticText(
-            self, label='Bệnh sử, triệu chứng, ghi chú,... (theo từng lượt khám):'))
+            self,
+            label='Bệnh sử, triệu chứng, ghi chú,... (theo từng lượt khám):'))
         datetime_row.Add(self.dt_label, 1, wx.RIGHT, 10)
         diag_row.Add(wx.StaticText(self, label='Chẩn đoán:'),
                      0, wx.ALIGN_CENTER | wx.TOP, 3)
@@ -282,10 +283,31 @@ class Visit_Info_Panel(wx.Panel):
             pass
 
     def onSaveDrug(self, e):
-        self.d_list.Add_or_Update()
+        kwargs = {
+            "d": self.drugpicker.drugWH,
+            "times": self.times.Value,
+            "dosage_per": self.dosage_per.Value,
+            "quantity": self.quantity.Value,
+            "usage": self.usage.Value
+        }
+        assert kwargs["d"] is not None
+        assert int(kwargs["times"])
+        assert kwargs['dosage_per'] != ""
+        assert int(kwargs['quantity'])
+
+        logging.debug(f"Add or update drug, recalc total_drug_price:\n\t\
+                      {kwargs['d'].name}\n{kwargs}")
+        self.d_list.Add_or_Update(**kwargs)
+        self.total_cost.ChangeValue(otf.bill_int_to_str(
+            setting['cong_kham_benh'] + self.d_list.total_drug_price))
 
     def onEraseDrug(self, e):
+        logging.debug("Del drug, recalc total_drug_price")
         self.d_list.Remove()
+        self.total_cost.ChangeValue(otf.bill_int_to_str(
+            setting['cong_kham_benh'] + self.d_list.total_drug_price))
+        self.drugpicker.Clear()
+        self.drugpicker.SetFocus()
 
     def onReuse(self, e):
         # keep old values
@@ -302,20 +324,6 @@ class Visit_Info_Panel(wx.Panel):
         self.days.ChangeValue(d)
         self.total_cost.ChangeValue(p)
 
-    def onSamplePrescriptionbtn(self, e):
-        with SamplePrescriptionDialog(self) as dlg:
-            if dlg.ShowModal() == wx.ID_APPLY:
-                ps, _ = dlg.get_selected_sample_prescription()
-                self.d_list.Clear()
-                for i in ps.samplelinedrugs:
-                    self.drugpicker.drugWH = i.drug
-                    self.times.ChangeValue(str(i.times))
-                    self.dosage_per.ChangeValue(i.dosage_per)
-                    self.usage_unit.Label = i.drug.usage_unit
-                    self.sale_unit.Label = i.drug.sale_unit
-                    self._calc_quantity(None)
-                    self.d_list.Add_or_Update()
-
     def Update(self):
 
         def _dt_to_label(p_dt):
@@ -327,6 +335,8 @@ class Visit_Info_Panel(wx.Panel):
                        p_dt.year)
 
         v = self.Parent.visit
+        logging.debug(f"update visit_info with selected visit:\n\t\
+                      {v.exam_date} {v.bill}")
         self.group_label.Label =\
             f'Thông tin lượt khám (Mã lượt khám: {v.id})'
         self.dt_label.Label = _dt_to_label(v.exam_date)
@@ -336,6 +346,7 @@ class Visit_Info_Panel(wx.Panel):
         self.days.ChangeValue(str(v.days))
         self.drugpicker.Clear()
         self.d_list.Update()
+        self.total_cost.ChangeValue(otf.bill_int_to_str(v.bill))
         self.followup.ChangeValue(v.followup)
 
     def Clear(self):
@@ -345,6 +356,7 @@ class Visit_Info_Panel(wx.Panel):
         self.diag.ChangeValue("")
         self.weight.ChangeValue('0')
         self.days.ChangeValue('2')
+        self.total_cost.ChangeValue("0")
         self.followup.Selection = 0
         self.d_list.Clear()
         self.drugpicker.Clear()
@@ -389,11 +401,29 @@ class Visit_Info_Panel(wx.Panel):
         if v:
             ans = wx.MessageBox("Cập nhật lượt khám?", "Lưu", style=wx.YES_NO)
             if ans == wx.YES:
+                logging.debug(f"update selected visit: {v.exam_date}")
                 dbf.save_old_visit(**kwargs, vid=v.id, sess=self.Parent.sess)
                 wx.MessageBox("Đã cập nhật")
         else:
             ans = wx.MessageBox("Lưu lượt khám mới?", "Lưu", style=wx.YES_NO)
             if ans == wx.YES:
+                logging.debug("save new visit")
                 dbf.save_new_visit(**kwargs, sess=self.Parent.sess)
                 wx.MessageBox("Đã lưu")
         mv.Refresh()
+
+    def onSamplePrescriptionbtn(self, e):
+        with SamplePrescriptionDialog(self) as dlg:
+            if dlg.ShowModal() == wx.ID_APPLY:
+                ps, _ = dlg.get_selected_sample_prescription()
+                self.d_list.Clear()
+                for i in ps.samplelinedrugs:
+                    self.drugpicker.drugWH = i.drug
+                    self.times.ChangeValue(str(i.times))
+                    self.dosage_per.ChangeValue(i.dosage_per)
+                    self.usage_unit.Label = i.drug.usage_unit
+                    self.sale_unit.Label = i.drug.sale_unit
+                    self._calc_quantity(None)
+                    self.d_list.Add_or_Update()
+                self.total_cost.ChangeValue(otf.bill_int_to_str(
+                    setting['cong_kham_benh'] + self.d_list.total_drug_price))

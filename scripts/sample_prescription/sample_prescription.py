@@ -1,16 +1,16 @@
 from initialize import *
 import db_sql.db_func as dbf
-from db_sql.__init__ import Session
 from sample_prescription.__init__ import *
 import other_func.other_func as otf
 import wx
+import logging
 
 
 class SamplePrescriptionDialog(wx.Dialog):
 
     def __init__(self, parent):
         super().__init__(parent, title="Toa mẫu")
-        self.sess = Session()
+        self.sess = self.Parent.Parent.sess
         self.sample_prescription_list = dbf.query_sample_prescription_list(
             self.sess).all()
         self.tree = self._createTree()
@@ -23,6 +23,8 @@ class SamplePrescriptionDialog(wx.Dialog):
         self._setSizer()
         self.RefreshTree()
         self._bind()
+        logging.debug(
+            "SamplePrescriptionDialog initialized, using mainview session")
 
     def _createTree(self):
         w = wx.TreeCtrl(self, size=tree_size,
@@ -96,7 +98,6 @@ class SamplePrescriptionDialog(wx.Dialog):
 
     def onCancelBtn(self, e):
         self.EndModal(wx.ID_CANCEL)
-        self.Close()
 
     def onApplyBtn(self, e):
         ps, idx = self.get_selected_sample_prescription()
@@ -104,29 +105,33 @@ class SamplePrescriptionDialog(wx.Dialog):
         self.EndModal(wx.ID_APPLY)
 
     def onAddSamplePrescription(self, e):
-        dlg = AddEditSamplePrescriptionDialog(self, 'add')
-        dlg.ShowModal()
-        dlg.Close()
+        with AddEditSamplePrescriptionDialog(self,
+                                             mode='add') as dlg:
+            dlg.ShowModal()
 
     def onUpdSamplePrescription(self, e):
         ps, idx = self.get_selected_sample_prescription()
         assert idx != -1
-        dlg = AddEditSamplePrescriptionDialog(self, 'edit', ps)
-        dlg.ShowModal()
-        dlg.Close()
+        with AddEditSamplePrescriptionDialog(self,
+                                             mode='edit',
+                                             ps=ps) as dlg:
+            dlg.ShowModal()
 
     def onDelSamplePrescription(self, e):
         ps, idx = self.get_selected_sample_prescription()
-        dlg = wx.MessageDialog(
-            self, f'Xoá toa mẫu "{ps.name}"?', "Xoá toa mẫu",
-            style=wx.OK | wx.CANCEL)
-        with dlg:
+        with wx.MessageDialog(self,
+                              f'Xoá toa mẫu "{ps.name}"?',
+                              "Xoá toa mẫu",
+                              style=wx.OK | wx.CANCEL) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 self.sample_prescription_list.pop(idx)
                 dbf.del_sample_prescription(ps, self.sess)
                 self.RefreshTree()
 
     def get_selected_sample_prescription(self):
+        '''
+        return SamplePrescription and its index in list
+        '''
         sel = self.tree.Selection
         if sel.IsOk():
             idx = 0
@@ -155,7 +160,8 @@ class AddEditSamplePrescriptionDialog(wx.Dialog):
             title = 'Thêm toa mẫu'
         elif mode == 'edit':
             title = 'Sửa toa mẫu'
-        super().__init__(parent=parent, title=title, size=add_edit_prescription_dialog_size)
+        super().__init__(parent=parent, title=title,
+                         size=add_edit_prescription_dialog_size)
 
         self.drugs = dbf.query_drugWH_list(self.Parent.sess).all()
         self.drugWH_id_list = []
@@ -295,20 +301,26 @@ class AddEditSamplePrescriptionDialog(wx.Dialog):
             assert self.name.Value != ""
             sess = self.Parent.sess
             if self.mode == 'add':
-                with wx.MessageDialog(self, "Lưu toa mẫu mới?", "Lưu toa mẫu") as dlg:
+                with wx.MessageDialog(self,
+                                      "Lưu toa mẫu mới?",
+                                      "Lưu toa mẫu") as dlg:
                     if dlg.ShowModal() == wx.ID_OK:
                         ps = self.add_sample_prescription(sess)
                         self.Parent.sample_prescription_list.append(ps)
                         self.Parent.RefreshTree()
                         self.EndModal(wx.ID_OK)
             elif self.mode == 'edit':
-                with wx.MessageDialog(self, "Lưu thay đổi toa mẫu ?", "Lưu toa mẫu") as dlg:
+                with wx.MessageDialog(self,
+                                      "Lưu thay đổi toa mẫu ?",
+                                      "Lưu toa mẫu") as dlg:
                     if dlg.ShowModal() == wx.ID_OK:
                         self.upd_sample_prescription(sess)
                         self.Parent.RefreshTree()
                         self.EndModal(wx.ID_OK)
         except AssertionError:
-            with wx.MessageDialog(self, "Lỗi chưa nhập tên toa mẫu", "Lưu toa mẫu", style=wx.OK) as dlg:
+            with wx.MessageDialog(self,
+                                  "Lỗi chưa nhập tên toa mẫu",
+                                  "Lưu toa mẫu", style=wx.OK) as dlg:
                 dlg.ShowModal()
 
     def add_sample_prescription(self, sess):

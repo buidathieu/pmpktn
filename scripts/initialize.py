@@ -12,6 +12,12 @@ except Exception:
 SCRIPTS_PATH = os.path.dirname(os.path.abspath(__file__))
 DIR_PATH = os.path.dirname(SCRIPTS_PATH)
 
+# logo_path
+logo = os.path.join(DIR_PATH, "logo.png")
+
+# fonts_path
+fonts = os.path.join(DIR_PATH, "fonts")
+
 # BM_PATH_paths
 BM_PATH = os.path.join(DIR_PATH, 'bitmaps')
 

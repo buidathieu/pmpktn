@@ -24,6 +24,10 @@ class PatientBook(wx.Notebook):
 
     def onChangePage(self, e):
         self.GetPage(e.GetSelection()).Refresh()
+        self.Parent.patient = None
+        self.Parent.visit = None
+        self.Parent.visit_list.Clear()
+        logging.debug(f"Change to page {e.GetSelection()}")
         e.Skip()
 
 
