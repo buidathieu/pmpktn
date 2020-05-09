@@ -10,7 +10,7 @@ class MyPrinter():
     filename = "prescription.pdf"
     file = os.path.join(MAKE_PDF_DIR, filename)
     
-    def start_print_job(filepath):
+    def start_print_job(self):
         if os.name == 'nt':
             import win32print
             printer_name = win32print.GetDefaultPrinter()
@@ -18,24 +18,22 @@ class MyPrinter():
                             '-sDEVICE=mswinpr2',
                             f'-sOutputFile=%printer%{printer_name}',
                             '-dBATCH', '-dNOPAUSE',
-                            file])
+                            self.file])
 
-    @classmethod
-    def print_pdf(data):
-        make_pdf(file, data)
-        start_print_job(file)
+    
+    def print_pdf(self):
+        make_pdf(self.file, self.data)
+        self.start_print_job(self.file)
 
-    @classmethod
-    def preview_pdf(data):
-        make_pdf(file, data)
-        os.startfile(file)
+    def preview_pdf(self):
+        make_pdf(self.file, self.data)
+        os.startfile(self.file)
 
-    @classmethod
-    def make_print_data(name="", age="", gender="",
-                        address="", diagnosis="",
-                        weight="", height="",
-                        linedrugs=[], followup=""):
-        return {
+    def feed_data(self, name="", age="", gender="",
+                  address="", diagnosis="",
+                  weight="", height="",
+                  linedrugs=[], followup=""):
+        self.data = {
             "name": name,
             "age": age, 
             "gender": gender,

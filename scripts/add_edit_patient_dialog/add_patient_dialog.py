@@ -1,4 +1,5 @@
 from core.__init__ import *
+from initialize import gender_dict
 import db_sql.db_func as dbf
 import other_func.other_func as otf
 import wx

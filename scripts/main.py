@@ -12,12 +12,10 @@ import argparse
 def mainloop():
     app = wx.App()
     with LogInDialog(None) as dlg:
-        if dlg.ShowModal() == wx.ID_OK:
-            dlg.save_staff_workday()
-            job = dlg.get_staff_job()
-    if job == 'Doctor':
+        job = dlg.ShowModal()
+    if job == 0: # doctor
         MainView(None).Show()
-    elif job == 'Nurse':
+    elif job == 1: # nurse
         NurseView(None).Show()
     else:
         quit()

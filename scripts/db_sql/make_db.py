@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from .__init__ import *
-import datetime as dt
+
 from sqlalchemy import Column, Integer, Float, String, DateTime,\
     Boolean, Date, Enum,\
     Text, CheckConstraint, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+
+import datetime as dt
 
 
 Base = declarative_base()
@@ -99,10 +101,11 @@ class Staff(Base):
     __tablename__ = "staffs"
 
     id = Column(Integer, primary_key=True)
-    name = Column(String(50), default='test', nullable=False)
+    name = Column(String(50), unique=True, nullable=False, index=True)
+    password = Column(String(20))
     job = Column(Enum('Doctor', 'Nurse', name='jobs'), nullable=False)
     workdays = relationship('WorkDay', lazy='dynamic', back_populates='staff')
-
+    
 
 class WorkDay(Base):
     __tablename__ = "workdays"

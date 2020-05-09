@@ -13,6 +13,7 @@ class MyMenuBar(wx.MenuBar):
         super().__init__()
         self.mv = mv
         self._createMenu()
+        self.printer = MyPrinter()
 
     def _createMenu(self):
         homeMenu = wx.Menu()
@@ -41,8 +42,8 @@ class MyMenuBar(wx.MenuBar):
         self.Bind(wx.EVT_MENU, self.onSaveVisit, menuSaveVisit)
         self.Bind(wx.EVT_MENU, self.onReportToday, menuReportToday)
 
-    def make_print_data(self):
-        return MyPrinter.make_print_data(
+    def feed_data_to_printer(self):
+        return self.printer.feed_data(
             name=self.mv.basic_info.name.Value,
             age=self.mv.basic_info.age.Value,
             gender=gender_dict[self.mv.basic_info.gender.Selection],
@@ -55,10 +56,12 @@ class MyMenuBar(wx.MenuBar):
         )
 
     def onPrint(self, e):
-        MyPrinter.print_pdf(self.make_print_data())
+        self.feed_data_to_printer()
+        self.printer.print_pdf()
 
     def onPrintPreview(self, e):
-        MyPrinter.preview_pdf(self.make_print_data())
+        self.feed_data_to_printer()
+        self.printer.preview_pdf()
 
     def onNewVisit(self, e):
         self.mv.visit_info.NewVisit()

@@ -7,9 +7,9 @@ from sqlalchemy import func, extract
 #  login
 def query_staff_list(sess=None):
     return sess.query(Staff)
+    
 
-
-def save_staff_workday(staff, date=dt.date.today(), sess=None):
+def save_staff_workday(staff, sess=None):
     staff.workdays.append(WorkDay())
     sess.commit()
 

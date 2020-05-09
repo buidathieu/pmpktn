@@ -25,8 +25,3 @@ d_name_w = 150
 d_l1cu_w = 80
 d_socu_w = 60
 d_tc_w = 80
-
-gender_dict = {0: 'nam',
-               1: 'nữ',
-               'nam': 0,
-               'nữ': 1}

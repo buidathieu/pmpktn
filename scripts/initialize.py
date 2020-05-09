@@ -51,3 +51,11 @@ with open(os.path.join(DIR_PATH, 'config.json'), 'r') as f:
     DEBUG = json.load(f)['DEBUG']
     if DEBUG:
         logging.basicConfig(level=logging.DEBUG)
+
+gender_dict = {0: 'nam',
+               1: 'nữ',
+               'nam': 0,
+               'nữ': 1}
+               
+job_dict = {"Doctor": 0,
+            "Nurse": 1}

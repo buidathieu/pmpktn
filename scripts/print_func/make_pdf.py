@@ -59,8 +59,8 @@ signature_x = date_x + 1.5 * cm
 signature_y = followup_y - 0.6 * cm
 
 # set default
-x = 1 * cm
-y = A5[1] - logo_size - 2 * cm
+default_x = 1 * cm
+default_y = A5[1] - logo_size - 2 * cm
 text_spacing = 0.6 * cm
 
 
@@ -237,6 +237,10 @@ def drawLayout(c, data):
 
 
 def make_pdf(filename, data):
+    global x
+    global y
+    x = default_x
+    y = default_y
     c = canvas.Canvas(filename=filename,
                       pagesize=A5)
     # draw
