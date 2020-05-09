@@ -1,73 +1,67 @@
 # -*- encoding: utf-8 -*-
-from initialize import logo, fonts
+from initialize import logo
+from .fonts import *
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A5
 from reportlab.lib.units import cm
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.utils import simpleSplit
 
 import datetime as dt
-import subprocess
-import os
-import tempfile
 
 
-def start_print_job(filepath, delete=True):
-    if os.name == 'nt':
-        import win32print
-        printer_name = win32print.GetDefaultPrinter()
-        subprocess.run(['gs', '-sPapersize=A5',
-                        '-sDEVICE=mswinpr2',
-                        f'-sOutputFile=%printer%{printer_name}',
-                        '-dBATCH', '-dNOPAUSE',
-                        filepath])
-        if delete:
-            os.remove(filepath)
+# some configs
+logo_size = 3 * cm
+logo_x = 1.5 * cm
+logo_y = A5[1] - 1 * cm - logo_size
+title_text = "PHÒNG KHÁM"
+title_x = 6 * cm
+title_y = A5[1] - 2 * cm
+title_fontName = 'SVN-Sansation'
+title_fontSize = 20
+title_horizontalScale = 110
 
+title_2_text = 'CHUYÊN KHOA NHI'
+title_2_x = 6 * cm
+title_2_y = A5[1] - 3 * cm
+title_2_fontName = 'SVN-Cookies'
+title_2_fontSize = 26
 
-def print_prescription_pdf(data):
-    with tempfile.TemporaryFile(suffix=".pdf", delete=False) as f:
-        filepath = f.name
-        # create Canvas object
-        c = canvas.Canvas(filename=f,
-                          pagesize=A5)
-        # draw
-        drawLayout(c, data)
-        # Next page
-        c.showPage()
-        # output to pdf
-        c.save()
-        start_print_job(filepath)
+address_text = "355 Đặng Nguyên Cẩn, Phường 13, Quận 6, TPHCM"
+address_x = 6 * cm
+address_y = A5[1] - 3.5 * cm
+address_fontName = "EBGaramond"
+address_fontSize = 8
 
+title_3_text = "TOA THUỐC"
+title_3_x = 6 * cm
+title_3_y = logo_y - 0.5 * cm
+title_3_fontName = "Merriweather"
+title_3_fontSize = 16
 
-# fonts
-Merriweather_fonts = os.path.join(fonts, "Merriweather")
-EBGaramond_fonts = os.path.join(fonts, "EBGaramond")
-Alegreya_fonts = os.path.join(fonts, "Alegreya")
-SVN_fonts = os.path.join(fonts, "SVN")
-pdfmetrics.registerFont(TTFont(
-    'Merriweather',
-    os.path.join(Merriweather_fonts, 'Merriweather-Regular.ttf')))
-pdfmetrics.registerFont(TTFont(
-    'Alegreya',
-    os.path.join(Alegreya_fonts, 'Alegreya-Regular.ttf')))
-pdfmetrics.registerFont(TTFont(
-    'Alegreya-italic',
-    os.path.join(Alegreya_fonts, 'Alegreya-Italic.ttf')))
-pdfmetrics.registerFont(TTFont(
-    'EBGaramond',
-    os.path.join(EBGaramond_fonts, 'static', 'EBGaramond-Regular.ttf')))
-pdfmetrics.registerFont(TTFont(
-    'EBGaramond-semibold',
-    os.path.join(EBGaramond_fonts, 'static', 'EBGaramond-SemiBold.ttf')))
-pdfmetrics.registerFont(TTFont(
-    'SVN-Cookies',
-    os.path.join(SVN_fonts, 'SVN-Cookies.ttf')))
-pdfmetrics.registerFont(TTFont(
-    'SVN-Sansation',
-    os.path.join(SVN_fonts, 'SVN-Sansation.ttf')))
+info_fontName = 'Alegreya-italic'
+
+height_x = 7 * cm
+weight_x = 10.5 * cm
+
+quantity_x = 12 * cm
+max_num_of_med = 6
+
+followup_x = 1 * cm
+followup_y = 4.6 * cm
+followup_border = 7 * cm
+followup_fontSize = 10
+
+date_x = 9 * cm
+date_y = followup_y
+
+signature_x = date_x + 1.5 * cm
+signature_y = followup_y - 0.6 * cm
+
+# set default
+x = 1 * cm
+y = A5[1] - logo_size - 2 * cm
+text_spacing = 0.6 * cm
 
 
 class customLine():
@@ -113,70 +107,21 @@ class customLine():
         obj.setTextOrigin(self.x, self.y)
         obj.setFont(self.fontName, self.fontSize, self.leading)
         obj.setLeading(leading)
-        obj.textLines('\\n'.join(lines))
+        obj.textLines('\n'.join(lines))
         c.drawText(obj)
         c.restoreState()
 
         return (leading * len(lines)) - leading
 
+
 def drawLayout(c, data):
-
-    logo_size = 3 * cm
-    logo_x = 1.5 * cm
-    logo_y = A5[1] - 1 * cm - logo_size
-    title_text = "PHÒNG KHÁM"
-    title_x = 6 * cm
-    title_y = A5[1] - 2 * cm
-    title_fontName = 'SVN-Sansation'
-    title_fontSize = 20
-    title_horizontalScale = 110
-
-    title_2_text = 'CHUYÊN KHOA NHI'
-    title_2_x = 6 * cm
-    title_2_y = A5[1] - 3 * cm
-    title_2_fontName = 'SVN-Cookies'
-    title_2_fontSize = 26
-
-    address_text = "355 Đặng Nguyên Cẩn, Phường 13, Quận 6, TPHCM"
-    address_x = 6 * cm
-    address_y = A5[1] - 3.5 * cm
-    address_fontName = "EBGaramond"
-    address_fontSize = 8
-
-    title_3_text = "TOA THUỐC"
-    title_3_x = 6 * cm
-    title_3_y = logo_y - 0.5 * cm
-    title_3_fontName = "Merriweather"
-    title_3_fontSize = 16
-
-    info_fontName = 'Alegreya-italic'
-
-    height_x = 7 * cm
-    weight_x = 10.5 * cm
-
-    quantity_x = 12 * cm
-    max_num_of_med = 6
-
-    followup_x = 1 * cm
-    followup_y = 4.6 * cm
-    followup_border = 7 * cm
-    followup_fontSize = 10
-
-    date_x = 9 * cm
-    date_y = followup_y
-
-    signature_x = date_x + 1.5 * cm
-    signature_y = followup_y - 0.6 * cm
-
-    # set default
-    x = 1 * cm
-    y = A5[1] - logo_size - 2 * cm
-    text_spacing = 0.6 * cm
+    global x
+    global y
 
     def nextrow():
-        nonlocal x
+        global x
+        global y
         x = 1 * cm
-        nonlocal y
         y -= text_spacing
 
     # draw logo
@@ -288,4 +233,15 @@ def drawLayout(c, data):
     customLine(text, date_x, date_y).draw(c)
 
     # draw signature
-    customLine('Ký tên', signature_x, signature_y, label=True).draw
+    customLine('Ký tên', signature_x, signature_y, label=True).draw(c)
+
+
+def make_pdf(filename, data):
+    c = canvas.Canvas(filename=filename,
+                      pagesize=A5)
+    # draw
+    drawLayout(c, data)
+    # Next page
+    c.showPage()
+    # output to pdf
+    c.save()

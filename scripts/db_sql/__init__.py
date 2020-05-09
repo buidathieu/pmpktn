@@ -6,7 +6,6 @@ from contextlib import contextmanager
 import json
 
 
-
 with open(os.path.join(DIR_PATH, "config.json"), "r", encoding="utf-8-sig") as f:
     setting = json.load(f)
 

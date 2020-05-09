@@ -18,10 +18,13 @@ def save_staff_workday(staff, date=dt.date.today(), sess=None):
 def search_patient(name, gender, birthyear, sess=None):
     query = sess.query(Patient).\
         filter(Patient.name.contains(name))
-    if gender in [0,1]:
+    if gender in [0, 1]:
         query = query.filter(Patient.gender == bool(gender))
     if birthyear.isnumeric():
-        query = query.filter(extract('year', Patient.birthdate) == int(birthyear))
+        query = query.filter(
+            extract(
+                'year',
+                Patient.birthdate) == int(birthyear))
     return query
 
 
@@ -29,6 +32,11 @@ def add_new_visitqueue(pid, sess=None):
     vq = sess.add(VisitQueue(patient_id=pid))
     sess.commit()
     return vq
+
+
+def remove_visitqueue(queue, sess=None):
+    sess.delete(queue)
+    sess.commit()
 
 
 def get_visitqueue(sess=None):
@@ -57,7 +65,7 @@ def query_linedrug_list_by_name(s):
             filter(DrugWarehouse.name.like(s))
 
 
-def create_new_patient(name, gender, birthdate, address, past_history, sess=None):
+def add_patient(name, gender, birthdate, address, past_history, sess=None):
     new_patient = Patient(name=name, gender=gender, birthdate=birthdate,
                           address=address, past_history=past_history,
                           )
@@ -66,15 +74,19 @@ def create_new_patient(name, gender, birthdate, address, past_history, sess=None
     return new_patient
 
 
-def update_patient(pid, name, birthdate, address, past_history, sess):
+def edit_patient(pid, name, gender, birthdate, address, past_history, sess):
     p = sess.query(Patient).get(pid)
     p.name = name
+    p.gender = gender
     p.birthdate = birthdate
     p.address = address
     p.past_history = past_history
+    sess.commit()
+    return p
 
 
-def update_visit(vid, note, diag, weight, days, followup, bill, linedrugs, sess):
+def update_visit(vid, note, diag, weight, days,
+                 followup, bill, linedrugs, sess):
     v = sess.query(Visit).get(vid)
     v.note = note
     v.diag = diag

@@ -3,7 +3,7 @@
     "password" : "admin",
     "host" : "localhost",
     "port" : 5432,
-    "db_name" : "pmpktn",
+    "db_name" : "kite-clinic",
     "gssencmode" : "disable",
     "DEBUG" : true
 }

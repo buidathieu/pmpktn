@@ -4,6 +4,7 @@ import other_func.other_func as otf
 import wx
 import logging
 
+
 class NewPatientDialog(wx.Dialog):
 
     def __init__(self, parent):
@@ -74,14 +75,14 @@ class NewPatientDialog(wx.Dialog):
         else:
             e.Skip()
 
-    def add_a_new_patient(self, sess):
+    def add_patient(self):
         kwargs = {'name': self.name.Value.upper(),
-                  'gender': self.gender.Selection,
+                  'gender': bool(self.gender.Selection),
                   'birthdate': otf.wxdate2pydate(self.birthdate.Value),
-                  'address': self.address.Value, 
+                  'address': self.address.Value,
                   'past_history': self.past_history.Value,
                   'sess': self.Parent.sess
                   }
-        logging.debug(f'NewPatientDialog: add_a_new_patient {kwargs}')
-        new_patient = dbf.create_new_patient(**kwargs)
+        logging.debug(f'NewPatientDialog: add_patient {kwargs}')
+        new_patient = dbf.add_patient(**kwargs)
         return new_patient

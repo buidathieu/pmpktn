@@ -292,3 +292,13 @@ class DrugList(wx.ListCtrl):
             ld['usage'] = self.GetItemText(i, 5)
             linedrugs.append(ld)
         return linedrugs
+        
+    def build_linedrugs_for_pdf(self):
+        linedrugs = []
+        for i in range(self.ItemCount):
+            ld = []
+            ld.append(self.GetItemText(i,1))
+            ld.append(self.GetItemText(i, 5))
+            ld.append(self.GetItemText(i, 4))
+            linedrugs.append(ld)
+        return linedrugs

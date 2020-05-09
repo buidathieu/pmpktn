@@ -10,7 +10,7 @@ import wx
 import logging
 
 
-class Mainview(wx.Frame):
+class MainView(wx.Frame):
 
     def __init__(self, parent, *args, **kw):
 

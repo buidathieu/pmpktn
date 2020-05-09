@@ -2,7 +2,8 @@ from initialize import *
 from core.__init__ import *
 import other_func.other_func as otf
 import db_sql.db_func as dbf
-from core.add_a_new_patient_dialog import NewPatientDialog
+from add_edit_patient_dialog.add_patient_dialog import NewPatientDialog
+from print_func.print_func import MyPrinter
 import wx
 
 
@@ -14,49 +15,50 @@ class MyMenuBar(wx.MenuBar):
         self._createMenu()
 
     def _createMenu(self):
+        homeMenu = wx.Menu()
+        menuPrint = homeMenu.Append(wx.ID_PRINT, "Print\tCTRL+P")
+        menuPrintPreview = homeMenu.Append(wx.ID_ANY, "Print Preview")
+        homeMenu.AppendSeparator()
+        menuRefresh = homeMenu.Append(wx.ID_REFRESH, "Refresh\tF5")
+        menuExit = homeMenu.Append(wx.ID_EXIT, "Exit\tALT+F4")
+
         patientmenu = wx.Menu()
-        menuAbout = patientmenu.Append(wx.ID_ABOUT, "Thông tin")
-        menuNewPatient = patientmenu.Append(id_new_patient, "Bệnh nhân mới\tF1")
         menuNewVisit = patientmenu.Append(id_new_visit, "Lượt khám mới\tF2")
         menuSaveVisit = patientmenu.Append(id_save_visit, "Lưu lượt khám\tF3")
-        menuExit = patientmenu.Append(wx.ID_EXIT, "&Exit\tALT+F4")
-
-        editmenu = wx.Menu()
-        menuRefresh = editmenu.Append(wx.ID_REFRESH, "Refresh\tF5")
 
         reportmenu = wx.Menu()
-        menureporttoday = reportmenu.Append(wx.ID_ANY, "Báo cáo hôm nay")
+        menuReportToday = reportmenu.Append(wx.ID_ANY, "Báo cáo hôm nay")
 
-        self.Append(patientmenu, "Khám bệnh")
-        self.Append(editmenu, "Edit")
+        self.Append(homeMenu, "Home")
+        self.Append(patientmenu, "Bệnh nhân")
         self.Append(reportmenu, "Báo cáo")
 
-        self.Bind(wx.EVT_MENU, self.onAbout, menuAbout)
-        self.Bind(wx.EVT_MENU, self.onNewPatient, menuNewPatient)
+        self.Bind(wx.EVT_MENU, self.onPrint, menuPrint)
+        self.Bind(wx.EVT_MENU, self.onPrintPreview, menuPrintPreview)
+        self.Bind(wx.EVT_MENU, self.onRefresh, menuRefresh)
+        self.Bind(wx.EVT_MENU, self.onExit, menuExit)
         self.Bind(wx.EVT_MENU, self.onNewVisit, menuNewVisit)
         self.Bind(wx.EVT_MENU, self.onSaveVisit, menuSaveVisit)
-        self.Bind(wx.EVT_MENU, self.onExit, menuExit)
+        self.Bind(wx.EVT_MENU, self.onReportToday, menuReportToday)
 
-        self.Bind(wx.EVT_MENU, self.onRefresh, menuRefresh)
+    def make_print_data(self):
+        return MyPrinter.make_print_data(
+            name=self.mv.basic_info.name.Value,
+            age=self.mv.basic_info.age.Value,
+            gender=gender_dict[self.mv.basic_info.gender.Selection],
+            address=self.mv.basic_info.address.Value,
+            diagnosis=self.mv.visit_info.diag.Value,
+            weight=self.mv.visit_info.weight.Value,
+            height="",
+            linedrugs = self.mv.visit_info.d_list.build_linedrugs_for_pdf(),
+            followup=self.mv.visit_info.followup.Value
+        )
 
-        self.Bind(wx.EVT_MENU, self.onReportToday, menureporttoday)
+    def onPrint(self, e):
+        MyPrinter.print_pdf(self.make_print_data())
 
-    def onAbout(self, e):
-        with wx.MessageDialog(self.mv, "Tạo bởi Vương Kiến Thanh\nthanhstardust@outlook.com",
-                              "Phần mềm phòng khám tại nhà", wx.OK) as dlg:
-            dlg.ShowModal()
-
-    def onNewPatient(self, e):
-        with NewPatientDialog(self.mv) as dlg:
-            if dlg.ShowModal() == wx.ID_OK:
-                patient = dlg.add_a_new_patient(sess=self.mv.sess)
-                with wx.MessageDialog(self,
-                                      "Thêm vào danh sách chờ?",
-                                      "Thêm vào danh sách chờ?",
-                                      style=wx.OK | wx.CANCEL) as dlg:
-                    if dlg.ShowModal() == wx.ID_OK:
-                        dbf.add_new_visitqueue(patient.id, sess=self.mv.sess)
-                        self.mv.Refresh()
+    def onPrintPreview(self, e):
+        MyPrinter.preview_pdf(self.make_print_data())
 
     def onNewVisit(self, e):
         self.mv.visit_info.NewVisit()

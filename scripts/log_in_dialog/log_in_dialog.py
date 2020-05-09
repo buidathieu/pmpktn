@@ -29,7 +29,8 @@ class LogInDialog(wx.Dialog):
         idx = self.staff_ctrl.Selection
         if idx >= 0:
             staff = self.staff_list[idx]
-            logging.debug(f'LoginDialog: save_staff_workday: selection={idx}, name={staff.name}, job={staff.job}')
+            logging.debug(
+                f'LoginDialog: save_staff_workday: selection={idx}, name={staff.name}, job={staff.job}')
             dbf.save_staff_workday(staff, sess=self.sess)
 
     def get_staff_job(self):
@@ -39,7 +40,7 @@ class LogInDialog(wx.Dialog):
 
     def onClose(self, e):
         self.EndModal(wx.ID_CLOSE)
-        
+
     def Destroy(self):
         logging.debug('LoginDialog destroyed, session closed')
         self.sess.commit()

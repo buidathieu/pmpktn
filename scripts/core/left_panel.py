@@ -72,7 +72,7 @@ class QueuingPatientList(wx.ListCtrl):
 
     def RefreshQueueTimer(self):
         self.Refresh()
-        return wx.CallLater(1000 *60 * 5, self.RefreshQueueTimer)
+        return wx.CallLater(1000 * 60 * 5, self.RefreshQueueTimer)
 
 
 class SeenPatientList(wx.ListCtrl):

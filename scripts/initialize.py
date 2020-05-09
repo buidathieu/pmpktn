@@ -16,7 +16,7 @@ DIR_PATH = os.path.dirname(SCRIPTS_PATH)
 logo = os.path.join(DIR_PATH, "logo.png")
 
 # fonts_path
-fonts = os.path.join(DIR_PATH, "fonts")
+FONTS_PATH = os.path.join(DIR_PATH, "fonts")
 
 # BM_PATH_paths
 BM_PATH = os.path.join(DIR_PATH, 'bitmaps')
@@ -46,7 +46,7 @@ default_exlpath = os.path.join(DIR_PATH, "excel")
 
 with open(os.path.join(DIR_PATH, "setting.json"), "r", encoding="utf-8-sig") as f:
     setting = json.load(f)
-    
+
 with open(os.path.join(DIR_PATH, 'config.json'), 'r') as f:
     DEBUG = json.load(f)['DEBUG']
     if DEBUG:
