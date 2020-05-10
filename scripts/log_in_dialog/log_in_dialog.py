@@ -15,7 +15,7 @@ class LogInDialog(wx.Dialog):
         self.staff_ctrl = wx.Choice(
             self, choices=[i.name for i in self.staff_list])
         self.password_ctrl = wx.TextCtrl(self, style=wx.TE_PASSWORD)
-        
+
         self.ok_btn = wx.Button(self, id=wx.ID_OK)
         self.ok_btn.AuthNeeded = True
 
@@ -26,7 +26,7 @@ class LogInDialog(wx.Dialog):
         btns.Realize()
 
         sizer.Add(self.staff_ctrl, 0, wx.EXPAND | wx.ALL, 10)
-        sizer.Add(self.password_ctrl,0,  wx.EXPAND |wx.ALL ^ wx.TOP,10)
+        sizer.Add(self.password_ctrl, 0, wx.EXPAND | wx.ALL ^ wx.TOP, 10)
         sizer.Add(btns, 0, wx.ALL ^ wx.TOP, 10)
         self.SetSizerAndFit(sizer)
 
@@ -47,7 +47,10 @@ class LogInDialog(wx.Dialog):
                 self.EndModal(job_dict[job])
             else:
                 logging.debug("wrong password")
-                wx.MessageBox("Sai mật khẩu","Lỗi", style=wx.OK|wx.CENTRE|wx.ICON_ERROR)
+                wx.MessageBox(
+                    "Sai mật khẩu",
+                    "Lỗi",
+                    style=wx.OK | wx.CENTRE | wx.ICON_ERROR)
         else:
             pass
 

@@ -424,6 +424,13 @@ class Visit_Info_Panel(wx.Panel):
                     self.usage_unit.Label = i.drug.usage_unit
                     self.sale_unit.Label = i.drug.sale_unit
                     self._calc_quantity(None)
-                    self.d_list.Add_or_Update()
+                    kwargs = {
+                        "d": self.drugpicker.drugWH,
+                        "times": self.times.Value,
+                        "dosage_per": self.dosage_per.Value,
+                        "quantity": self.quantity.Value,
+                        "usage": self.usage.Value
+                    }
+                    self.d_list.Add_or_Update(**kwargs)
                 self.total_cost.ChangeValue(otf.bill_int_to_str(
                     setting['cong_kham_benh'] + self.d_list.total_drug_price))

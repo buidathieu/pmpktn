@@ -3,7 +3,7 @@ from db_sql.make_db import make_db, drop_db
 from log_in_dialog.log_in_dialog import LogInDialog
 from core.main_view import MainView
 from nurse_view.nurse_view import NurseView
-
+from print_func.print_func import MyPrinter
 import wx
 
 import argparse
@@ -13,9 +13,9 @@ def mainloop():
     app = wx.App()
     with LogInDialog(None) as dlg:
         job = dlg.ShowModal()
-    if job == 0: # doctor
+    if job == 0:  # doctor
         MainView(None).Show()
-    elif job == 1: # nurse
+    elif job == 1:  # nurse
         NurseView(None).Show()
     else:
         quit()
@@ -39,6 +39,6 @@ if __name__ == "__main__":
     if args["sample"]:
         commit_population()
     if args["testpdf"]:
-        from print_func import test
+        MyPrinter().preview_test()
     if not any(args.values()):
         mainloop()

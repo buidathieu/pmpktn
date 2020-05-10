@@ -105,7 +105,7 @@ class Staff(Base):
     password = Column(String(20))
     job = Column(Enum('Doctor', 'Nurse', name='jobs'), nullable=False)
     workdays = relationship('WorkDay', lazy='dynamic', back_populates='staff')
-    
+
 
 class WorkDay(Base):
     __tablename__ = "workdays"

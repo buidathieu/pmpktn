@@ -1,3 +1,3 @@
-CALL activate pmpktn
+CALL activate app
 cd scripts
-python gui.py
+python main.py

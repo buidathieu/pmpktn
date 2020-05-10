@@ -233,26 +233,26 @@ class DrugList(wx.ListCtrl):
     def onDrugDeselect(self, e):
         self.Parent.drugpicker.Clear()
 
-    def Add_or_Update(self, **kwargs):
+    def Add_or_Update(self, d, times, dosage_per, quantity, usage):
         assert self.ItemCount == len(self.dwh_list)
         inf = self.Parent
         try:
             # find if already added drug
             row = [i.id for i in self.dwh_list].index(d.id)
             loggin.debug('drug found -> UPDATE ')
-            self.SetItem(row, 2, times.Value)
-            self.SetItem(row, 3, f"{dosage_per.Value} {d.usage_unit}")
-            self.SetItem(row, 4, f"{quantity.Value} {d.sale_unit}")
-            self.SetItem(row, 5, usage.Value)
+            self.SetItem(row, 2, times)
+            self.SetItem(row, 3, f"{dosage_per} {d.usage_unit}")
+            self.SetItem(row, 4, f"{quantity} {d.sale_unit}")
+            self.SetItem(row, 5, usage)
         except ValueError:
             logging.debug('drug not found -> ADD')
             self.Append([
                 self.ItemCount + 1,
                 d.name,
-                times.Value,
-                f"{dosage_per.Value} {d.usage_unit}",
-                f"{quantity.Value} {d.sale_unit}",
-                usage.Value
+                times,
+                f"{dosage_per} {d.usage_unit}",
+                f"{quantity} {d.sale_unit}",
+                usage
             ])
             self.dwh_list.append(d)
         inf.drugpicker.Clear()
@@ -292,12 +292,12 @@ class DrugList(wx.ListCtrl):
             ld['usage'] = self.GetItemText(i, 5)
             linedrugs.append(ld)
         return linedrugs
-        
+
     def build_linedrugs_for_pdf(self):
         linedrugs = []
         for i in range(self.ItemCount):
             ld = []
-            ld.append(self.GetItemText(i,1))
+            ld.append(self.GetItemText(i, 1))
             ld.append(self.GetItemText(i, 5))
             ld.append(self.GetItemText(i, 4))
             linedrugs.append(ld)

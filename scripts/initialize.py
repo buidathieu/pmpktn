@@ -56,6 +56,6 @@ gender_dict = {0: 'nam',
                1: 'nữ',
                'nam': 0,
                'nữ': 1}
-               
+
 job_dict = {"Doctor": 0,
             "Nurse": 1}

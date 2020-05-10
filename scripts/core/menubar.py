@@ -51,7 +51,7 @@ class MyMenuBar(wx.MenuBar):
             diagnosis=self.mv.visit_info.diag.Value,
             weight=self.mv.visit_info.weight.Value,
             height="",
-            linedrugs = self.mv.visit_info.d_list.build_linedrugs_for_pdf(),
+            linedrugs=self.mv.visit_info.d_list.build_linedrugs_for_pdf(),
             followup=self.mv.visit_info.followup.Value
         )
 
