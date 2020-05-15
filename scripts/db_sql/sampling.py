@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .make_db import *
-from .__init__ import *
+from initialize import Session
 import datetime as dt
 from random import randint, choices, uniform, sample
 import math
@@ -147,32 +147,15 @@ def random_sample_linedrug(k=10):
     return li
 
 
-def make_staff():
-    li = ["NGUYỄN DUY KHẢI", "VƯƠNG KIẾN THANH", "TRẦN VŨ",
-          "HUỲNH HỮU DANH", "QUÁCH NGỌC VINH", "BÙI THỊ LỆ HUYỀN"]
-    res = []
-    for i in li:
-        res.append(Staff(name=i))
-    return res
-
-
 def commit_population(k=10):
     li = [random_patient_list(k),
           random_visit_list(k),
           sample_warehouse(),
           random_linedrug(k),
           random_sample_prescription(),
-          random_sample_linedrug(),
-          make_staff()]
-    flatten_li = [obj for sublist in li for obj in sublist]
-    with session_scope() as sess:
-        sess.add_all(flatten_li)
-
-
-def commit_drugwarehouse():
-    li = [sample_warehouse(),
-          random_sample_prescription(),
           random_sample_linedrug()]
     flatten_li = [obj for sublist in li for obj in sublist]
-    with session_scope() as sess:
-        sess.add_all(flatten_li)
+    sess = Session()
+    sess.add_all(flatten_li)
+    sess.commit()
+    sess.close()

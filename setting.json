@@ -10,5 +10,9 @@
         "Tái khám sau 3 ngày",
         "Tái khám sau 1 tuần",
         "Tái khám sau 1 tháng"
-    ]
+    ],
+	"database_name": "database",
+	"drugwarehouse_name": "drugwarehouse.xlsx",
+	"echo": false,
+	"time_between_search": 800
 }

@@ -1,10 +1,11 @@
 from initialize import *
-from mainview.__init__ import *
-import mainview.other_func as otf
+import other_func as otf
 from db_sql.db_func import query_linedrug_list_by_name
-import os
+
 import wx
 import wx.adv
+
+import os
 
 
 class NewPatientDialog(wx.Dialog):
@@ -206,47 +207,38 @@ class DrugPicker(wx.ComboCtrl):
     @drugWH.setter
     def drugWH(self, dwh):
         self._drugWH = dwh
-        v_inf = self.Parent
+        RP = self.Parent
         if dwh:
-            v_inf.usage_unit.Label = dwh.usage_unit
-            v_inf.sale_unit.Label = dwh.sale_unit
+            RP.usage_unit.Label = dwh.usage_unit
+            RP.sale_unit.Label = dwh.sale_unit
         else:
             self.ChangeValue('')
-            v_inf.dosage_per.ChangeValue('')
-            v_inf.usage_unit.Label = '{Đơn vị}'
-            v_inf.times.ChangeValue("")
-            v_inf.quantity.ChangeValue("")
-            v_inf.sale_unit.Label = '{Đơn vị}'
-            v_inf.usage.ChangeValue("")
+            RP.dosage_per.ChangeValue('')
+            RP.usage_unit.Label = '{Đơn vị}'
+            RP.times.ChangeValue("")
+            RP.quantity.ChangeValue("")
+            RP.sale_unit.Label = '{Đơn vị}'
+            RP.usage.ChangeValue("")
 
     def onKeyPress(self, e):
-        if os.name == "posix":
-            if e.GetKeyCode() in [wx.WXK_RETURN, wx.WXK_DOWN]:
-                if not self.IsPopupShown():
-                    self.Popup()
-            else:
-                e.Skip()
-        else:
-            if e.GetKeyCode() not in [wx.WXK_RETURN, wx.WXK_UP, wx.WXK_DOWN, wx.WXK_ESCAPE]:
-                if self.IsPopupShown():
-                    a = self.Value
-                    self.Dismiss()
-                    self.ChangeValue(a)
-                    self.SetInsertionPointEnd()
-            e.Skip()
+        if e.GetKeyCode() not in [wx.WXK_RETURN, wx.WXK_UP, wx.WXK_DOWN, wx.WXK_ESCAPE]:
+            if self.IsPopupShown():
+                a = self.Value
+                self.Dismiss()
+                self.ChangeValue(a)
+                self.SetInsertionPointEnd()
+        e.Skip()
 
     def onTextChange(self, e):
-        if os.name == "nt":
-            if e.String == "":
-                self.Clear()
-            elif len(e.String) >= 1:
-                if not self.IsPopupShown():
-                    self.Popup()
+        if e.String == "":
+            self.Clear()
+        else:
+            if not self.IsPopupShown():
+                self.Popup()
                 self.SetInsertionPointEnd()
-        if os.name == "posix":
-            if e.String == "":
-                self.Clear()
+        e.Skip()
 
+       
     def Clear(self):
         self.drugWH = None
 
@@ -255,7 +247,7 @@ class DrugList(wx.ListCtrl):
 
     def __init__(self, parent):
         super().__init__(parent, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        self._total_price = setting['cong_kham_benh']
+        self.total_drug_price = 0
         self.dwh_list = []
         self.AppendColumn('STT', width=d_stt_w)
         self.AppendColumn('Thuốc', width=d_name_w)
@@ -266,22 +258,10 @@ class DrugList(wx.ListCtrl):
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onDrugSelect)
         self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onDrugDeselect)
 
-    @property
-    def total_price(self):
-        return self._total_price
-
-    @total_price.setter
-    def total_price(self, val):
-        self._total_price = val
-        self.Parent.total_cost.ChangeValue(
-            otf.bill_int_to_str(val))
-
-    def Update(self, linedruglist=None):
-        if not linedruglist:
-            linedruglist = self.Parent.Parent.visit.linedrugs
-        self.dwh_list = [i.drug for i in linedruglist]
+    def Update(self, linedrugs):
+        self.dwh_list = [i.drug for i in linedrugs]
         self.DeleteAllItems()
-        for i, ld in enumerate(linedruglist, start=1):
+        for i, ld in enumerate(linedrugs, start=1):
             self.Append(
                 [i,
                  ld.drug.name,
@@ -289,83 +269,60 @@ class DrugList(wx.ListCtrl):
                  f"{ld.dosage_per} {ld.drug.usage_unit}",
                  f"{ld.quantity} {ld.drug.sale_unit}",
                  ld.usage])
-        self.calc_total_price()
+        self.calc_total_drug_price()
 
     def Clear(self):
         self.DeleteAllItems()
         self.dwh_list = []
-        self.total_price = setting['cong_kham_benh']
-
+        self.total_drug_price = 0
+      
     def onDrugSelect(self, e):
         i = e.Index
-        inf = self.Parent
-        inf.drugpicker.drugWH = self.dwh_list[i]
-        inf.drugpicker.ChangeValue(self.dwh_list[i].name)
-        inf.times.ChangeValue(self.GetItemText(i, 2))
-        inf.dosage_per.ChangeValue(self.GetItemText(i, 3).partition(' ')[0])
-        inf.quantity.ChangeValue(self.GetItemText(i, 4).partition(' ')[0])
-        inf.usage.ChangeValue(self.GetItemText(i, 5))
+        RP = self.Parent
+        RP.drugpicker.drugWH = self.dwh_list[i]
+        RP.drugpicker.ChangeValue(self.dwh_list[i].name)
+        RP.times.ChangeValue(self.GetItemText(i, 2))
+        RP.dosage_per.ChangeValue(self.GetItemText(i, 3).partition(' ')[0])
+        RP.quantity.ChangeValue(self.GetItemText(i, 4).partition(' ')[0])
+        RP.usage.ChangeValue(self.GetItemText(i, 5))
 
     def onDrugDeselect(self, e):
         self.Parent.drugpicker.Clear()
 
-    def Add_or_Update(self):
-        inf = self.Parent
-        d = inf.drugpicker.drugWH
-        assert d is not None
-        assert inf.dosage_per.Value != ''
-        assert int(inf.times.Value)
-        assert int(inf.quantity.Value)
+    def Add_or_Update(self, d, times, dosage_per, quantity, usage):
         try:
-            # find if already added drug
             row = [i.id for i in self.dwh_list].index(d.id)
-            self.SetItem(row, 2, inf.times.Value)
-            self.SetItem(row, 3, f"{inf.dosage_per.Value} {d.usage_unit}")
-            self.SetItem(row, 4, f"{inf.quantity.Value} {d.sale_unit}")
-            self.SetItem(row, 5, inf.usage.Value)
+            self.SetItem(row, 2, times)
+            self.SetItem(row, 3, f"{dosage_per} {d.usage_unit}")
+            self.SetItem(row, 4, f"{quantity} {d.sale_unit}")
+            self.SetItem(row, 5, usage)
         except ValueError:
             self.Append([
                 self.ItemCount + 1,
-                d.name,
-                inf.times.Value,
-                f"{inf.dosage_per.Value} {d.usage_unit}",
-                f"{inf.quantity.Value} {d.sale_unit}",
-                inf.usage.Value]
-            )
+                d.name, times,
+                f"{dosage_per} {d.usage_unit}",
+                f"{quantity} {d.sale_unit}",
+                usage])
             self.dwh_list.append(d)
-        inf.drugpicker.Clear()
-        inf.drugpicker.SetFocus()
-        self.calc_total_price()
+        self.calc_total_drug_price()
 
-    def Remove(self):
-        inf = self.Parent
-        d = inf.drugpicker.drugWH
-        a = [i.id for i in self.dwh_list]
-        assert d is not None
-        try:
-            # find if already added drug
-            row = a.index(d.id)
-            self.DeleteItem(row)
-            self.dwh_list.pop(row)
-            for row in range(1, len(a)):
-                self.SetItem(row - 1, 0, str(row))
-            inf.drugpicker.Clear()
-            inf.drugpicker.SetFocus()
-        except ValueError:
-            pass
-        self.calc_total_price()
-
-    def calc_total_price(self):
+    def Remove(self, d):
         assert self.ItemCount == len(self.dwh_list)
-        if self.ItemCount == 0:
-            self.total_price = setting['cong_kham_benh']
-        else:
-            res = setting['cong_kham_benh']
+        idx = self.GetFirstSelected()   
+        self.dwh_list.pop(idx)
+        self.DeleteItem(idx)
+        for row in range(1, self.ItemCount):
+            self.SetItem(row - 1, 0, str(row))
+        self.calc_total_drug_price()
+
+    def calc_total_drug_price(self):
+        assert self.ItemCount == len(self.dwh_list)
+        self.total_drug_price = 0
+        if self.ItemCount > 0:
             for i in range(self.ItemCount):
                 qty = int(self.GetItemText(i, 4).partition(' ')[0])
                 p = self.dwh_list[i].sale_price
-                res += (qty * p)
-            self.total_price = res
+                self.total_drug_price += (qty * p)
 
     def build_linedrugs(self):
         linedrugs = []

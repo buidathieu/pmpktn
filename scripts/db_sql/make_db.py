@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .__init__ import *
+from initialize import engine
 import datetime as dt
 from sqlalchemy import Column, Integer, Float, String, DateTime,\
     Boolean, Date,\
@@ -95,23 +95,6 @@ class SampleLineDrug(Base):
     dosage_per = Column(String(5), default=0)
     sampleprescription_id = Column(ForeignKey("sampleprescription.id"))
     drug = relationship('DrugWarehouse', lazy='selectin')
-
-
-class Staff(Base):
-    __tablename__ = "staff"
-
-    id = Column(Integer, primary_key=True)
-    name = Column(String(50), default='test', nullable=False)
-    workdays = relationship('WorkDay', lazy='dynamic', back_populates='staff')
-
-
-class WorkDay(Base):
-    __tablename__ = "workdays"
-
-    id = Column(Integer, primary_key=True)
-    date = Column(Date, nullable=False, unique=True)
-    staff_id = Column(ForeignKey("staff.id"))
-    staff = relationship('Staff', back_populates='workdays')
 
 
 def make_db():
