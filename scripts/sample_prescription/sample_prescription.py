@@ -294,14 +294,14 @@ class AddEditSamplePrescriptionDialog(wx.Dialog):
             assert self.name.Value != ""
             sess = self.Parent.sess
             if self.mode == 'add':
-                with wx.MessageDialog(self, "Lưu toa mẫu mới?", "Lưu toa mẫu") as dlg:
+                with wx.MessageDialog(self, "Lưu toa mẫu mới?", "Lưu toa mẫu", style=wx.OK|wx.CANCEL) as dlg:
                     if dlg.ShowModal() == wx.ID_OK:
                         ps = self.add_sample_prescription(sess)
                         self.Parent.sample_prescription_list.append(ps)
                         self.Parent.RefreshTree()
                         self.EndModal(wx.ID_OK)
             elif self.mode == 'edit':
-                with wx.MessageDialog(self, "Lưu thay đổi toa mẫu ?", "Lưu toa mẫu") as dlg:
+                with wx.MessageDialog(self, "Lưu thay đổi toa mẫu ?", "Lưu toa mẫu", style=wx.OK|wx.CANCEL) as dlg:
                     if dlg.ShowModal() == wx.ID_OK:
                         self.upd_sample_prescription(sess)
                         self.Parent.RefreshTree()

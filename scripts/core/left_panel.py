@@ -4,8 +4,8 @@ from initialize import *
 import other_func as otf
 
 import wx
-        
-        
+
+
 class PatientBook(wx.Notebook):
 
     def __init__(self, parent):
@@ -32,7 +32,7 @@ class AllPatientList(wx.ListCtrl):
     def _initialize_p_list(self):
         mv = self.Parent.Parent.Parent
         self.init_p_list = dbf.query_all_patient(sess=mv.sess).all()
-        
+
     def _make_p_list(self):
         self.p_list = self.init_p_list.copy()
 
@@ -46,7 +46,7 @@ class AllPatientList(wx.ListCtrl):
     def Update(self, s=''):
         self.p_list = list(
             filter(lambda x: s.upper() in x.name, self.init_p_list))
-        self._reappend_to_ctrl()        
+        self._reappend_to_ctrl()
 
     def addNewPatient(self, p):
         self.init_p_list.append(p)
@@ -64,7 +64,7 @@ class TodayPatientList(wx.ListCtrl):
         self.AppendColumn('Mã BN', width=ma_bn_width)
         self.AppendColumn('Bệnh nhân', width=bn_width)
         self.Refresh()
-        
+
     def Refresh(self):
         self.DeleteAllItems()
         mv = self.Parent.Parent.Parent
@@ -79,7 +79,7 @@ class TodayPatientList(wx.ListCtrl):
 
 
 class LeftPanel(wx.Panel):
-    
+
     def __init__(self, parent):
         super().__init__(parent)
         self.book = PatientBook(self)
@@ -87,22 +87,27 @@ class LeftPanel(wx.Panel):
         self.timer = self._createTimer()
         self.visit_listctrl = self._createVisitListCtrl()
         self.visit_list = []
-        
+
         self._setBind()
         self._setSizer()
-        
+
     def _setBind(self):
         for i in range(self.book.PageCount):
-            self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onPatientSelect, self.book.GetPage(i))
-            self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onPatientDeselect, self.book.GetPage(i))
-        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onVisitSelect, self.visit_listctrl)
-        self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onVisitDeselect, self.visit_listctrl)
+            self.Bind(wx.EVT_LIST_ITEM_SELECTED,
+                      self.onPatientSelect, self.book.GetPage(i))
+            self.Bind(wx.EVT_LIST_ITEM_DESELECTED,
+                      self.onPatientDeselect, self.book.GetPage(i))
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED,
+                  self.onVisitSelect, self.visit_listctrl)
+        self.Bind(wx.EVT_LIST_ITEM_DESELECTED,
+                  self.onVisitDeselect, self.visit_listctrl)
 
     def _setSizer(self):
         searchsizer = wx.BoxSizer(wx.HORIZONTAL)
-        searchsizer.Add(wx.StaticText(self, label="Tìm kiếm: "), 0, wx.ALIGN_CENTER)
+        searchsizer.Add(wx.StaticText(
+            self, label="Tìm kiếm: "), 0, wx.ALIGN_CENTER)
         searchsizer.Add(self.search_entry, 1)
-        
+
         sizer = wx.BoxSizer(wx.VERTICAL)
         sizer.Add(self.book, 10, wx.LEFT | wx.TOP, 10)
         sizer.Add(searchsizer, 0, wx.EXPAND | wx.LEFT | wx.BOTTOM, 15)
@@ -111,33 +116,33 @@ class LeftPanel(wx.Panel):
         sizer.Add(self.visit_listctrl, 4, wx.EXPAND | wx.LEFT | wx.BOTTOM, 10)
 
         self.SetSizerAndFit(sizer)
-        
+
     def _createSearchEntry(self):
         w = wx.TextCtrl(self)
         w.SetHint("Tên bệnh nhân")
         w.Bind(wx.EVT_TEXT, self.onText)
         return w
-        
+
     def _createTimer(self):
         w = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.onSearch)
         return w
-        
+
     def _createVisitListCtrl(self):
         w = wx.ListCtrl(self, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         w.AppendColumn('Mã lượt khám', width=ma_lk_width)
         w.AppendColumn('Ngày giờ khám', width=date_width)
         w.AppendColumn('Chẩn đoán', width=date_width)
-        
+
         return w
-                         
+
     def onText(self, e):
         self.timer.StartOnce(setting["time_between_search"])
 
     def onSearch(self, e):
         tab = self.book.GetPage(0)
         tab.Update(self.search_entry.Value)
-        
+
     def onPatientSelect(self, e):
         self.Parent.patient = e.EventObject.p_list[e.Index]
         self.updateVisitList()
@@ -150,7 +155,7 @@ class LeftPanel(wx.Panel):
         self.visit_list = []
         self.Parent.right.clearPatientInfo()
         self.Parent.right.clearVisitInfo()
-        
+
     def onVisitSelect(self, e):
         self.Parent.visit = self.visit_list[e.Index]
         self.Parent.right.updateVisitInfo()
@@ -158,11 +163,11 @@ class LeftPanel(wx.Panel):
     def onVisitDeselect(self, e):
         self.Parent.visit = None
         self.Parent.right.clearVisitInfo()
-        
+
     def updateVisitList(self):
         self.visit_list = self.Parent.patient.visits.order_by(Visit.id.desc())
         self._reappend_visit_list()
-    
+
     def _reappend_visit_list(self):
         self.visit_listctrl.DeleteAllItems()
         for v in self.visit_list:
@@ -170,7 +175,7 @@ class LeftPanel(wx.Panel):
                 v.id,
                 v.exam_date.strftime('%d/%m/%Y %H:%M'),
                 v.diag])
-        
+
     def Refresh(self):
         self.book.ChangeSelection(0)
         tab = self.book.GetPage(0)
@@ -181,7 +186,3 @@ class LeftPanel(wx.Panel):
         self.search_entry.ChangeValue("")
         self.visit_listctrl.DeleteAllItems()
         self.visit_list = []
-        
-    def addNewPatient(self, p):
-        self.book.GetPage(0).addNewPatient(p)
-        self.book.GetPage(1).addNewPatient(p)

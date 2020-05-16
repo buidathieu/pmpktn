@@ -1,7 +1,7 @@
 from initialize import *
 import other_func as otf
 import db_sql.db_func as dbf
-
+from patient_dialog import EditPatientDialog
 import wx
 
 
@@ -16,10 +16,16 @@ class MyMenuBar(wx.MenuBar):
         homeMenu = wx.Menu()
         menuAbout = homeMenu.Append(wx.ID_ABOUT, "Thông tin")
         menuExit = homeMenu.Append(wx.ID_EXIT, "&Exit\tALT+F4")
-        
+
         patientMenu = wx.Menu()
         menuNewPatient = patientMenu.Append(
             id_new_patient, "Bệnh nhân mới\tF1")
+        menuEditPatient = patientMenu.Append(
+            id_edit_patient, "Chỉnh sửa thông tin bệnh nhân")
+        menuDelPatient = patientMenu.Append(
+            id_del_patient, "Xoá bệnh nhân")
+        patientMenu.AppendSeparator()
+
         menuNewVisit = patientMenu.Append(id_new_visit, "Lượt khám mới\tF2")
         menuSaveVisit = patientMenu.Append(id_save_visit, "Lưu lượt khám\tF3")
 
@@ -36,6 +42,8 @@ class MyMenuBar(wx.MenuBar):
 
         self.Bind(wx.EVT_MENU, self.onAbout, menuAbout)
         self.Bind(wx.EVT_MENU, self.onNewPatient, menuNewPatient)
+        self.Bind(wx.EVT_MENU, self.onEditPatient, menuEditPatient)
+        self.Bind(wx.EVT_MENU, self.onDelPatient, menuDelPatient)
         self.Bind(wx.EVT_MENU, self.onNewVisit, menuNewVisit)
         self.Bind(wx.EVT_MENU, self.onSaveVisit, menuSaveVisit)
         self.Bind(wx.EVT_MENU, self.onExit, menuExit)
@@ -50,13 +58,34 @@ class MyMenuBar(wx.MenuBar):
             dlg.ShowModal()
 
     def onNewPatient(self, e):
-        self.mv.visit_info.NewPatient()
+        self.mv.right.NewPatient()
+
+    def onEditPatient(self, e):
+        pid = int(wx.GetTextFromUser(
+            "Mã bệnh nhân cần chỉnh sửa", "Chỉnh sửa thông tin bệnh nhân", parent=self.mv))
+        if pid != "":
+            patient = next(filter(lambda x: x.id == pid,
+                                  self.mv.left.book.GetPage(0).init_p_list))
+            with EditPatientDialog(self.mv, patient) as dlg:
+                if dlg.ShowModal() == wx.ID_OK:
+                    dlg.edit_patient()
+                    wx.MessageBox("Đã lưu thay đổi", "Chỉnh sửa thông tin bệnh nhân")
+
+    def onDelPatient(self, e):
+        pid = int(wx.GetTextFromUser(
+            "Mã bệnh nhân cần xoá", "Xoá bệnh nhân", parent=self.mv))
+        if pid != "":
+            patient = next(filter(lambda x: x.id == pid,
+                                  self.mv.left.book.GetPage(0).init_p_list))
+            dbf.delete_patient(patient, sess=self.mv.sess)
+            wx.MessageBox("Đã xoá bệnh nhân", "Xoá bệnh nhân")
+
 
     def onNewVisit(self, e):
-        self.mv.visit_info.NewVisit()
+        self.mv.right.NewVisit()
 
     def onSaveVisit(self, e):
-        self.mv.visit_info.SaveVisit()
+        self.mv.right.SaveVisit()
 
     def onExit(self, e):
         self.mv.Close()
@@ -76,5 +105,3 @@ class MyMenuBar(wx.MenuBar):
                               f"Lời từ thuốc: {profit}",
                               "Báo cáo hôm nay") as dlg:
             dlg.ShowModal()
-
-    

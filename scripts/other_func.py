@@ -1,20 +1,22 @@
 import wx
-import datetime
+import datetime as dt
 from initialize import setting
 
 
 def bd_to_age(bd):
-    try:
+    if isinstance(bd, dt.date):
+        now = dt.date.today()
+        delta = (now - bd).days
+    else:
         now = wx.DateTime.Today()
         delta = (now - bd).GetDays()
-        if delta <= 60:
-            age = f'{delta} ngày tuổi'
-        elif delta <= (30 * 24):
-            age = f'{int(delta / 30)} tháng tuổi'
-        else:
-            age = f'{int(delta / 365)} tuổi'
-    except ValueError:
-        age = "ERROR"
+
+    if delta <= 60:
+        age = f'{delta} ngày tuổi'
+    elif delta <= (30 * 24):
+        age = f'{int(delta / 30)} tháng tuổi'
+    else:
+        age = f'{int(delta / 365)} tuổi'
     return age
 
 
@@ -41,7 +43,7 @@ def age_to_bd(age):
 
 
 def pydate2wxdate(date):
-    assert isinstance(date, (datetime.datetime, datetime.date))
+    assert isinstance(date, (dt.datetime, dt.date))
     tt = date.timetuple()
     dmy = (tt[2], tt[1] - 1, tt[0])
     return wx.DateTime.FromDMY(*dmy)
@@ -51,7 +53,7 @@ def wxdate2pydate(date):
     assert isinstance(date, wx.DateTime)
     if date.IsValid():
         ymd = map(int, date.FormatISODate().split('-'))
-        return datetime.date(*ymd)
+        return dt.date(*ymd)
     else:
         return None
 

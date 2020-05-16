@@ -55,9 +55,9 @@ class Mainview(wx.Frame):
         self.patient = None
         self.visit = None
 
-
     def onClose(self, e):
-        dlg = wx.MessageDialog(self, "Kết thúc", "Close app?", style=wx.OK | wx.CANCEL)
+        dlg = wx.MessageDialog(
+            self, "Kết thúc", "Close app?", style=wx.OK | wx.CANCEL)
         if dlg.ShowModal() == wx.ID_OK:
             self.sess.close()
             e.Skip()

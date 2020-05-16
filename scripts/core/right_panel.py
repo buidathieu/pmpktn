@@ -1,6 +1,7 @@
 from initialize import *
 from .custom_ctrl import *
 import other_func as otf
+from patient_dialog import AddPatientDialog, EditPatientDialog
 import db_sql.db_func as dbf
 from sample_prescription.sample_prescription import SamplePrescriptionDialog
 
@@ -9,7 +10,7 @@ import wx.adv
 
 from fractions import Fraction as fr
 import math
-    
+
 
 class RightPanel(wx.Panel):
 
@@ -20,13 +21,14 @@ class RightPanel(wx.Panel):
         self.gender = self._createGender()
         self.birthdate = self._createBirthdate()
         self.age = self._createAge()
-        self.address = wx.TextCtrl(self)
+        self.address = self._createAddress()
         self.past_history = self._createPastHistory()
         self.group_label_2 = wx.StaticText(self, label='Thông tin lượt khám')
         self.dt_label = wx.StaticText(self)
         self.note = self._createNote()
         self.diag = wx.TextCtrl(self)
         self.weight = self._createWeight()
+        self.getweightbtn = self._createGetWeightBtn()
         self.days = self._createDays()
         self.drugpicker = DrugPicker(self)
         self.times = self._createTimes()
@@ -45,36 +47,27 @@ class RightPanel(wx.Panel):
         self.reuse_btn = self._createReusebtn()
         self.sample_prescription_btn = self._createSamplePrescriptionbtn()
         self.save_visit_btn = self._createSaveVisitbtn()
-        
+
         self._setSizer()
-           
+
     def _createName(self):
-        w = wx.TextCtrl(self, size=name_size)
+        w = wx.TextCtrl(self, size=name_size, style=wx.TE_READONLY)
         return w
 
     def _createGender(self):
-        w = wx.Choice(self, choices=[gender_dict[0], gender_dict[1]])
-        w.Selection = 0
+        w = wx.TextCtrl(self, style=wx.TE_READONLY)
         return w
 
     def _createBirthdate(self):
-
-        def onBirthdateChange(e):
-            self.age.ChangeValue(otf.bd_to_age(w.Value).ljust(16))
-            e.Skip()
-
-        w = wx.adv.DatePickerCtrl(self, dt=wx.DateTime(31, 11, 2010))
-        w.Bind(wx.adv.EVT_DATE_CHANGED, onBirthdateChange)
+        w = wx.TextCtrl(self, style=wx.TE_READONLY)
         return w
 
     def _createAge(self):
+        w = wx.TextCtrl(self, style=wx.TE_READONLY)
+        return w
 
-        def onAgeChange(e):
-            self.birthdate.SetValue(otf.age_to_bd(w.Value))
-            e.Skip()
-
-        w = wx.TextCtrl(self)
-        w.Bind(wx.EVT_TEXT, onAgeChange)
+    def _createAddress(self):
+        w = wx.TextCtrl(self, style=wx.TE_READONLY)
         return w
 
     def _createPastHistory(self):
@@ -88,7 +81,7 @@ class RightPanel(wx.Panel):
         w = wx.TextCtrl(self, style=wx.TE_MULTILINE, size=note_size)
         w.Bind(wx.EVT_CHAR, onTab)
         return w
-        
+
     def _createNote(self):
 
         def on_tab(e):
@@ -108,6 +101,11 @@ class RightPanel(wx.Panel):
         w.Bind(wx.EVT_CHAR,
                lambda e: otf.only_nums(e, decimal=True))
         w.SetHint('Kg')
+        return w
+
+    def _createGetWeightBtn(self):
+        w = wx.BitmapButton(self, bitmap=wx.Bitmap(weight_bm))
+        w.Bind(wx.EVT_BUTTON, self.getWeight)
         return w
 
     def _createDays(self):
@@ -207,7 +205,7 @@ class RightPanel(wx.Panel):
         btn.SetBitmap(wx.Bitmap(save_visit_bm))
         btn.Bind(wx.EVT_BUTTON, self.onSaveVisit)
         return btn
-        
+
     def _setSizer(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
         row_1 = wx.BoxSizer(wx.HORIZONTAL)
@@ -226,7 +224,7 @@ class RightPanel(wx.Panel):
 
         row_1.Add(self.group_label_1, 0)
         row_1.Add(wx.StaticLine(self), 1, wx.ALIGN_CENTER)
-        
+
         row_2.Add(wx.StaticText(
             self, label='Họ tên:'), 0, wx.ALIGN_CENTER)
         row_2.Add(self.name, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
@@ -237,11 +235,11 @@ class RightPanel(wx.Panel):
         row_2.Add(wx.StaticText(
             self, label='Tuổi:'), 0, wx.ALIGN_CENTER)
         row_2.Add(self.age, 1, wx.ALIGN_CENTER)
-        
+
         row_3.Add(wx.StaticText(
             self, label='Địa chỉ:'), 0, wx.ALIGN_CENTER)
         row_3.Add(self.address, 1, wx.EXPAND)
-        
+
         sizer.Add(row_1, 0, wx.EXPAND)
         sizer.Add(row_2, 0, wx.EXPAND)
         sizer.Add(row_3, 0, wx.EXPAND | wx.TOP, 3)
@@ -252,31 +250,32 @@ class RightPanel(wx.Panel):
 
         row_4.Add(self.group_label_2)
         row_4.Add(wx.StaticLine(self), 1, wx.ALIGN_CENTER)
-        
+
         row_5.Add(wx.StaticText(
             self, label='Bệnh sử, triệu chứng, ghi chú,... (theo từng lượt khám):'))
         row_5.Add(self.dt_label, 1, wx.RIGHT, 10)
-        
+
         row_6.Add(wx.StaticText(self, label='Chẩn đoán:'),
-                     0, wx.ALIGN_CENTER | wx.TOP, 3)
+                  0, wx.ALIGN_CENTER | wx.TOP, 3)
         row_6.Add(self.diag, 1)
-        
+
         row_7.Add(wx.StaticText(self, label='Toa thuốc'), 0)
         row_7.Add(wx.StaticLine(self), 1, wx.ALIGN_CENTER)
-        
+
         row_8.Add(wx.StaticText(self, label='Cân nặng:'),
-                            0, wx.ALIGN_CENTER)
+                  0, wx.ALIGN_CENTER)
         row_8.Add(self.weight, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
+        row_8.Add(self.getweightbtn, 0, wx.RIGHT, 5)
         row_8.Add(wx.StaticText(self, label='Số ngày:'),
-                            0, wx.ALIGN_CENTER)
+                  0, wx.ALIGN_CENTER)
         row_8.Add(self.days, 0, wx.ALIGN_CENTER)
-        
+
         row_9.Add(wx.StaticText(self, label='Thuốc:'),
-                           0, wx.ALIGN_CENTER | wx.RIGHT, 5)
+                  0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         row_9.Add(self.drugpicker, 1, wx.ALIGN_CENTER | wx.RIGHT, 5)
         row_9.Add(self.times, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         row_9.Add(wx.StaticText(self, label='lần, lần'),
-                           0, wx.ALIGN_CENTER | wx.RIGHT, 5)
+                  0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         row_9.Add(
             self.dosage_per, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         row_9.Add(self.usage_unit, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
@@ -286,18 +285,18 @@ class RightPanel(wx.Panel):
             self.quantity, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         row_9.Add(self.sale_unit, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         row_9.Add(self.save_drug_btn, 0,
-                           wx.ALIGN_CENTER | wx.RIGHT, 5)
+                  wx.ALIGN_CENTER | wx.RIGHT, 5)
         row_9.Add(self.erase_drug_btn, 0,
-                           wx.ALIGN_CENTER | wx.RIGHT, 5)
+                  wx.ALIGN_CENTER | wx.RIGHT, 5)
 
         row_10.Add(wx.StaticText(
             self, label='Cách dùng:'), 0, wx.CENTRE | wx.RIGHT, 5)
         row_10.Add(self.usage, 1)
-        
+
         row_11.Add(wx.StaticText(self, label='Dặn dò:'),
-                         0, wx.CENTRE | wx.RIGHT, 5)
+                   0, wx.CENTRE | wx.RIGHT, 5)
         row_11.Add(self.followup, 1)
-        
+
         row_12.Add(self.reuse_btn, 0, wx.RIGHT, 5)
         row_12.Add(self.sample_prescription_btn, 0)
         row_12.AddStretchSpacer()
@@ -322,7 +321,11 @@ class RightPanel(wx.Panel):
         sizer.AddSpacer(20)
         sizer.Add(row_13, 0, wx.EXPAND | wx.BOTTOM, 10)
         self.SetSizer(sizer)
-        
+
+    def getWeight(self, e):
+        weight = self.Parent.patient.visits[-1].weight
+        self.weight.Value = str(weight)
+
     def _calc_quantity(self, e):
         day = self.days.Value
         dosage = self.dosage_per.Value
@@ -355,7 +358,7 @@ class RightPanel(wx.Panel):
                     drug.usage_unit))
         except AssertionError:
             pass
-            
+
     def onSaveDrug(self, e):
         kwargs = {
             "d": self.drugpicker.drugWH,
@@ -369,7 +372,7 @@ class RightPanel(wx.Panel):
             assert self.dosage_per.Value != ''
             assert int(self.times.Value)
             assert int(self.quantity.Value)
-            
+
             self.d_list.Add_or_Update(**kwargs)
         except AssertionError:
             pass
@@ -404,7 +407,7 @@ class RightPanel(wx.Panel):
         self.total_cost.ChangeValue(p)
 
     def onSamplePrescriptionbtn(self, e):
-        with SamplePrescriptionDialog(self) as dlg:
+        with SamplePrescriptionDialog(self.Parent) as dlg:
             if dlg.ShowModal() == wx.ID_APPLY:
                 ps, _ = dlg.get_selected_sample_prescription()
                 self.d_list.Clear()
@@ -415,9 +418,16 @@ class RightPanel(wx.Panel):
                     self.usage_unit.Label = i.drug.usage_unit
                     self.sale_unit.Label = i.drug.sale_unit
                     self._calc_quantity(None)
-                    self.d_list.Add_or_Update()
-                    
-    
+                    kwargs = {
+                        "d": self.drugpicker.drugWH,
+                        "times": self.times.Value,
+                        "dosage_per": self.dosage_per.Value,
+                        "quantity": self.quantity.Value,
+                        "usage": self.usage.Value
+                    }
+                    self.d_list.Add_or_Update(**kwargs)
+                self.total_cost.ChangeValue(otf.bill_int_to_str(
+                    setting['cong_kham_benh'] + self.d_list.total_drug_price))
 
     def onNewPatientbtn(self, e):
         self.NewPatient()
@@ -429,22 +439,15 @@ class RightPanel(wx.Panel):
         self.SaveVisit()
 
     def NewPatient(self):
-        with NewPatientDialog(self) as dlg:
+        with AddPatientDialog(self.Parent) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
-                new_patient = dbf.create_new_patient(
-                    name=dlg.name.Value.upper(),
-                    gender=dlg.gender.Selection,
-                    birthdate=otf.wxdate2pydate(
-                        dlg.birthdate.Value),
-                    address=dlg.address.Value,
-                    past_history=dlg.past_history.Value,
-                    sess=self.Parent.sess
-                )
-                tab0 = self.Parent.book.GetPage(0)
-                tab0.Add_new_patient(new_patient)
+                p = dlg.add_patient()
+                tab0 = self.Parent.left.book.GetPage(0)
+                tab0.addNewPatient(p)
 
     def NewVisit(self):
         self.Parent.visit = None
+        self.clearVisitInfo()
 
     def SaveVisit(self):
         mv = self.Parent
@@ -453,11 +456,7 @@ class RightPanel(wx.Panel):
         assert self.diag.Value != ""
 
         kwargs = {
-            'pid': mv.patient.id,
-            'name': self.name.Value,
-            'birthdate': otf.wxdate2pydate(
-                self.birthdate.Value),
-            'address': self.address.Value,
+            'p': mv.patient,
             'past_history': self.past_history.Value,
             'note': self.note.Value,
             'diag': self.diag.Value,
@@ -471,39 +470,40 @@ class RightPanel(wx.Panel):
         if mv.visit:
             ans = wx.MessageBox("Cập nhật lượt khám?", "Lưu", style=wx.YES_NO)
             if ans == wx.YES:
-                p, v = dbf.save_old_visit(**kwargs, vid=mv.visit.id, sess=self.Parent.sess)
+                dbf.save_old_visit(**kwargs, v=mv.visit,
+                                   sess=self.Parent.sess)
                 wx.MessageBox("Đã cập nhật")
                 self.updateAfterSave()
-                
+
         else:
             ans = wx.MessageBox("Lưu lượt khám mới?", "Lưu", style=wx.YES_NO)
             if ans == wx.YES:
-                p, v = dbf.save_new_visit(**kwargs, sess=self.Parent.sess)
+                dbf.save_new_visit(**kwargs, sess=self.Parent.sess)
                 wx.MessageBox("Đã lưu")
                 self.updateAfterSave()
-                
+
     def updateAfterSave(self):
         self.Parent.left.updateVisitList()
-              
+
     def updatePatientInfo(self):
         p = self.Parent.patient
         self.group_label_1.Label = f'Thông tin bệnh nhân (Mã BN: {p.id})'
         self.name.ChangeValue(p.name)
-        self.gender.Selection = p.gender
-        self.birthdate.SetValue(otf.pydate2wxdate(p.birthdate))
-        self.age.ChangeValue(otf.bd_to_age(self.birthdate.Value).ljust(16))
+        self.gender.ChangeValue(gender_dict[p.gender])
+        self.birthdate.ChangeValue(p.birthdate.strftime("%d/%m/%Y"))
+        self.age.ChangeValue(otf.bd_to_age(p.birthdate).ljust(16))
         self.address.ChangeValue(p.address)
-        self.past_history.ChangeValue(p.past_history)          
-     
+        self.past_history.ChangeValue(p.past_history)
+
     def clearPatientInfo(self):
         self.group_label_1.Label = 'Thông tin bệnh nhân'
-        self.name.ChangeValue('')
-        self.gender.Selection = 0
-        self.birthdate.SetValue(wx.DateTime(31, 11, 2010))
+        self.name.ChangeValue("")
+        self.gender.ChangeValue("")
+        self.birthdate.ChangeValue("")
         self.age.ChangeValue("")
-        self.address.ChangeValue('')
-        self.past_history.ChangeValue('') 
-        
+        self.address.ChangeValue("")
+        self.past_history.ChangeValue("")
+
     def updateVisitInfo(self):
 
         def _dt_to_label(p_dt):
@@ -524,6 +524,7 @@ class RightPanel(wx.Panel):
         self.days.ChangeValue(str(v.days))
         self.drugpicker.Clear()
         self.d_list.Update(v.linedrugs)
+        self.total_cost.ChangeValue(otf.bill_int_to_str(v.bill))
         self.followup.ChangeValue(v.followup)
 
     def clearVisitInfo(self):
@@ -533,10 +534,12 @@ class RightPanel(wx.Panel):
         self.diag.ChangeValue("")
         self.weight.ChangeValue('0')
         self.days.ChangeValue('2')
+        self.total_cost.ChangeValue(
+            otf.bill_int_to_str(setting["cong_kham_benh"]))
         self.followup.Selection = 0
         self.d_list.Clear()
         self.drugpicker.Clear()
-    
+
     def Refresh(self):
         self.clearPatientInfo()
         self.clearVisitInfo()

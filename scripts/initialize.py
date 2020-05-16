@@ -16,27 +16,27 @@ from contextlib import contextmanager
 SCRIPTS_PATH = os.path.dirname(os.path.abspath(__file__))
 DIR_PATH = os.path.dirname(SCRIPTS_PATH)
 
-# bm_path_paths
-bm_path = os.path.join(SCRIPTS_PATH, 'bitmaps')
+# BM_PATH_paths
+BM_PATH = os.path.join(SCRIPTS_PATH, 'bitmaps')
 
-new_p_bm = os.path.join(bm_path, 'new_patient.png')
-del_p_bm = os.path.join(bm_path, 'delete_patient.png')
+new_p_bm = os.path.join(BM_PATH, 'new_patient.png')
+del_p_bm = os.path.join(BM_PATH, 'delete_patient.png')
 
-save_drug_bm = os.path.join(bm_path, 'save_drug.png')
-erase_drug_bm = os.path.join(bm_path, 'erase_drug.png')
+save_drug_bm = os.path.join(BM_PATH, 'save_drug.png')
+erase_drug_bm = os.path.join(BM_PATH, 'erase_drug.png')
 
-new_visit_bm = os.path.join(bm_path, 'new_visit.png')
-save_visit_bm = os.path.join(bm_path, 'save_visit.png')
-del_visit_bm = os.path.join(bm_path, 'del_visit.png')
+new_visit_bm = os.path.join(BM_PATH, 'new_visit.png')
+save_visit_bm = os.path.join(BM_PATH, 'save_visit.png')
+del_visit_bm = os.path.join(BM_PATH, 'del_visit.png')
 
-print_bm = os.path.join(bm_path, 'print.png')
-refresh_bm = os.path.join(bm_path, 'refresh.png')
+print_bm = os.path.join(BM_PATH, 'print.png')
+refresh_bm = os.path.join(BM_PATH, 'refresh.png')
 
-plus_bm = os.path.join(bm_path, 'plus.png')
-pencil_bm = os.path.join(bm_path, 'pencil.png')
-minus_bm = os.path.join(bm_path, 'minus.png')
+plus_bm = os.path.join(BM_PATH, 'plus.png')
+pencil_bm = os.path.join(BM_PATH, 'pencil.png')
+minus_bm = os.path.join(BM_PATH, 'minus.png')
 
-
+weight_bm = os.path.join(BM_PATH, 'weight.png')
 
 with open(os.path.join(DIR_PATH, "setting.json"), "r", encoding="utf-8-sig") as f:
     setting = json.load(f)
@@ -48,8 +48,10 @@ Session = sessionmaker(bind=engine)
 
 
 
-#  my ids
+#  menu ids
 id_new_patient = NewId()
+id_edit_patient = NewId()
+id_del_patient = NewId()
 id_new_visit = NewId()
 id_save_visit = NewId()
 
