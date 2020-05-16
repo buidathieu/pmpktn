@@ -1,8 +1,8 @@
 import db_sql.db_func as dbf
 from db_sql.make_db import Visit
 from initialize import *
-from core.__init__ import *
-import other_func.other_func as otf
+import other_func as otf
+
 import wx
 import logging
 
@@ -14,7 +14,7 @@ class PatientBook(wx.Notebook):
 
         self.AddPage(page=QueuingPatientList(self),
                      text='Danh sách chờ khám', select=True)
-        self.AddPage(page=SeenPatientList(self),
+        self.AddPage(page=TodayPatientList(self),
                      text='Danh sách đã khám hôm nay')
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.onChangePage)
 
@@ -75,7 +75,7 @@ class QueuingPatientList(wx.ListCtrl):
         return wx.CallLater(1000 * 60 * 5, self.RefreshQueueTimer)
 
 
-class SeenPatientList(wx.ListCtrl):
+class TodayPatientList(wx.ListCtrl):
 
     def __init__(self, parent):
         super().__init__(parent, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
@@ -88,7 +88,7 @@ class SeenPatientList(wx.ListCtrl):
         self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onDeselect)
 
     def _make_p_list(self):
-        self.p_list = dbf.get_seen_patient_list(
+        self.p_list = dbf.get_today_patient_list(
             sess=self.Parent.Parent.sess).all()
 
     def _append(self):

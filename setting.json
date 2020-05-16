@@ -10,5 +10,14 @@
         "Tái khám sau 3 ngày",
         "Tái khám sau 1 tuần",
         "Tái khám sau 1 tháng"
-    ]
+    ],
+    "echo": false,
+    "time_between_search": 800,
+    "username" : "postgres",
+    "password" : "admin",
+    "host" : "localhost",
+    "port" : 5432,
+    "db_name" : "kite-clinic",
+    "gssencmode" : "disable",
+    "DEBUG" : true
 }

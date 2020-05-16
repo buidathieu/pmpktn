@@ -1,2 +1,3 @@
-# pmpktn
-app phòng mạch tư
+# Phần mềm phòng mạch tư
+
+Dùng thêm postgresql và reportlab

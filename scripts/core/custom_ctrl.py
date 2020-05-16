@@ -1,5 +1,4 @@
 from initialize import *
-from core.__init__ import *
 from db_sql.db_func import query_linedrug_list_by_name
 import os
 import wx

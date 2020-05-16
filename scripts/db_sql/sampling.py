@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .make_db import *
-from .__init__ import *
+from initialize import *
 import datetime as dt
 from random import randint, choices, uniform, sample
 import math

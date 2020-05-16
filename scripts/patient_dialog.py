@@ -1,16 +1,12 @@
-from core.__init__ import *
-from initialize import gender_dict
+from initialize import *
 import db_sql.db_func as dbf
-import other_func.other_func as otf
+import other_func as otf
 import wx
-import logging
 
 
-class EditPatientDialog(wx.Dialog):
-
-    def __init__(self, parent, patient):
-        super().__init__(parent, title="Thêm bệnh nhân mới")
-        self.patient = patient
+class BasePatientDialog(wx.Dialog):
+    def __init__(self, parent, title):
+        super().__init__(parent, title=title)
         self.name = wx.TextCtrl(self, size=name_size)
         self.gender = self._createGender()
         self.birthdate = self._createBirthdate()
@@ -22,12 +18,9 @@ class EditPatientDialog(wx.Dialog):
         self.Bind(wx.EVT_KEY_DOWN, self.onESC)
         self._setSizer()
 
-        self.populate()
-        logging.debug(
-            f'EditPatientDialog initialize, using parent session, populate data, name={patient.name}')
-
     def _createGender(self):
         w = wx.Choice(self, choices=[gender_dict[0], gender_dict[1]])
+        w.Selection = 0
         return w
 
     def _createBirthdate(self):
@@ -79,6 +72,32 @@ class EditPatientDialog(wx.Dialog):
         else:
             e.Skip()
 
+class AddPatientDialog(BasePatientDialog):
+
+    def __init__(self, parent):
+        super().__init__(parent, title="Thêm bệnh nhân mới")
+        logging.debug('AddPatientDialog initialize, using parent session')
+
+    def add_patient(self):
+        kwargs = {'name': self.name.Value.upper(),
+                  'gender': bool(self.gender.Selection),
+                  'birthdate': otf.wxdate2pydate(self.birthdate.Value),
+                  'address': self.address.Value,
+                  'past_history': self.past_history.Value
+                  }
+        logging.debug(f'AddPatientDialog: add_patient {kwargs}')
+        new_patient = dbf.add_patient(**kwargs, sess=self.Parent.sess)
+        return new_patient
+
+class EditPatientDialog(BasePatientDialog):
+
+    def __init__(self, parent, patient):
+        super().__init__(parent, title="Thêm bệnh nhân mới")
+        self.patient = patient
+        self.populate()
+        logging.debug(
+            f'EditPatientDialog initialize, using parent session, populate data, name={patient.name}')
+
     def populate(self):
         self.name.ChangeValue(self.patient.name)
         self.gender.Selection = int(self.patient.gender)
@@ -89,14 +108,14 @@ class EditPatientDialog(wx.Dialog):
 
     def edit_patient(self):
         kwargs = {
-            'pid': self.patient.id,
+            'p': self.patient,
             'name': self.name.Value.upper(),
             'gender': bool(self.gender.Selection),
             'birthdate': otf.wxdate2pydate(self.birthdate.Value),
             'address': self.address.Value,
-            'past_history': self.past_history.Value,
-            'sess': self.Parent.sess
+            'past_history': self.past_history.Value
         }
         logging.debug(f'EditPatientDialog: edit_patient {kwargs}')
-        edited_patient = dbf.edit_patient(**kwargs)
+        edited_patient = dbf.edit_patient(
+            **kwargs, sess=self.Parent.sess)
         return edited_patient

@@ -1,8 +1,8 @@
 from db_sql.sampling import commit_population
 from db_sql.make_db import make_db, drop_db
-from log_in_dialog.log_in_dialog import LogInDialog
+from log_in_dialog import LogInDialog
 from core.main_view import MainView
-from nurse_view.nurse_view import NurseView
+from nurse_view import NurseView
 from print_func.print_func import MyPrinter
 import wx
 

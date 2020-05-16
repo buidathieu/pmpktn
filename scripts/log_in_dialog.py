@@ -1,6 +1,5 @@
 import db_sql.db_func as dbf
-from db_sql.__init__ import Session
-from initialize import job_dict
+from initialize import *
 import wx
 import logging
 

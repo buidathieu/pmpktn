@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .__init__ import *
+from initialize import *
 
 from sqlalchemy import Column, Integer, Float, String, DateTime,\
     Boolean, Date, Enum,\

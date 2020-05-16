@@ -1,8 +1,7 @@
 from initialize import *
-from core.__init__ import *
-import other_func.other_func as otf
+import other_func as otf
 import db_sql.db_func as dbf
-from add_edit_patient_dialog.add_patient_dialog import NewPatientDialog
+# from patient_dialog import AddPatientDialog
 from print_func.print_func import MyPrinter
 import wx
 

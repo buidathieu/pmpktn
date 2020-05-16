@@ -1,11 +1,8 @@
-
 from initialize import *
-from core.__init__ import *
-from core.left_panel import *
-from core.visit_info import Visit_Info_Panel
-from core.basic_info import Basic_Info_Panel
-from core.menubar import MyMenuBar
-from db_sql.__init__ import Session
+from .left_panel import *
+from .visit_info import Visit_Info_Panel
+from .basic_info import Basic_Info_Panel
+from .menubar import MyMenuBar
 import wx
 import logging
 

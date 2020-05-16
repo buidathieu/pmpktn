@@ -1,9 +1,7 @@
-from add_edit_patient_dialog.add_patient_dialog import NewPatientDialog
-from add_edit_patient_dialog.edit_patient_dialog import EditPatientDialog
-from core.__init__ import *
+from patient_dialog import AddPatientDialog, EditPatientDialog
 import db_sql.db_func as dbf
-from db_sql.__init__ import Session
-import other_func.other_func as otf
+import other_func as otf
+from initialize import *
 import wx
 import logging
 
@@ -167,7 +165,7 @@ class NurseView(wx.Frame):
     # Functions
 
     def NewPatient(self):
-        with NewPatientDialog(self) as dlg:
+        with AddPatientDialog(self) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 new_patient = dlg.add_patient()
                 with wx.MessageDialog(self,

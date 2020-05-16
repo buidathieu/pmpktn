@@ -1,5 +1,5 @@
 from .make_db import *
-from .__init__ import *
+from initialize import *
 import datetime as dt
 from sqlalchemy import func, extract
 
@@ -45,7 +45,7 @@ def get_visitqueue(sess=None):
 
 
 # mainview
-def get_seen_patient_list(sess=None):
+def get_today_patient_list(sess=None):
     return sess.query(Patient).\
         join(Visit).\
         filter(func.DATE(Visit.exam_date) == dt.date.today())

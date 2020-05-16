@@ -1,9 +1,8 @@
 from initialize import *
-from core.custom_ctrl import *
-from core.__init__ import *
-import other_func.other_func as otf
+from .custom_ctrl import *
+import other_func as otf
 import db_sql.db_func as dbf
-from sample_prescription.sample_prescription import SamplePrescriptionDialog
+from sample_prescription import SamplePrescriptionDialog
 from fractions import Fraction as fr
 import math
 import wx

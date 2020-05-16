@@ -1,7 +1,6 @@
 from initialize import *
 import db_sql.db_func as dbf
-from sample_prescription.__init__ import *
-import other_func.other_func as otf
+import other_func as otf
 import wx
 import logging
 
