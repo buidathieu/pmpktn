@@ -12,9 +12,10 @@
 - In toa thuốc bằng cách tạo PDF tự động.
 
 ## Requirements:
-python=3.7
-sqlalchemy
-wxpython=4.0.7
+python=3.7  
+sqlalchemy  
+wxpython=4.0.7  
+sqlite
 
 ## Hướng dẫn bắt đầu sử dụng:
 
@@ -25,6 +26,7 @@ wxpython=4.0.7
 - Ví dụ: công khám bệnh là 50.000
 
 2. Quản lý kho thuốc:
+
 Dùng tools vào database, trong bảng DrugWareHouse có các cột như sau:
 - `name`: tên thuốc
 - `quantity`: số lượng
