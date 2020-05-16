@@ -1,9 +1,9 @@
-from initialize import *
+﻿from initialize import *
 from .custom_ctrl import *
 import other_func as otf
 from patient_dialog import AddPatientDialog, EditPatientDialog
 import db_sql.db_func as dbf
-from sample_prescription.sample_prescription import SamplePrescriptionDialog
+from sample_prescription_dialog import SamplePrescriptionDialog
 
 import wx
 import wx.adv

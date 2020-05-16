@@ -1,4 +1,4 @@
-from initialize import *
+﻿from initialize import *
 import db_sql.db_func as dbf
 import other_func as otf
 
@@ -25,7 +25,7 @@ class SamplePrescriptionDialog(wx.Dialog):
 
     def _createTree(self):
         w = wx.TreeCtrl(self, size=tree_size,
-                        style=wx.TR_HIDE_ROOT | wx.TR_HAS_BUTTONS)
+                        style=wx.TR_LINES_AT_ROOT |wx.TR_HAS_BUTTONS | wx.TR_HIDE_ROOT)
         return w
 
     def _createAddBtn(self):
