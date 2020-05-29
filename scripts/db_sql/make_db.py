@@ -127,6 +127,36 @@ class VisitQueue(Base):
     patient = relationship('Patient', lazy='selectin')
 
 
+class Therapy(Base):
+    __tablename__ = "therapy"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), unique=True, nullable=False, index=True)
+    sale_price = Column(Integer, default=0)
+    therapylinecost = relationship("TheparyLineCost", lazy="selectin",
+                                   back_populates="therapy")
+
+    def quantity(self):
+        res = {}
+        for lc in self.therapylinecost:
+            res[lc.name] = lc.quantity
+            print(f"{lc.name} has {lc.quantity} {lc.unit} left, \
+                       each time use {lc.cost_on_1_use} => \
+                       {lc.quantity / lc.cost_on_1_use} times left")
+        return res
+
+
+class TheparyLineCost(Base):
+    __tablename__ = "therapylinecost"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), unique=True, nullable=False, index=True)
+    quantity = Column(Integer, default=0)
+    unit = Column(String(10), nullable=False)
+    cost_on_1_use = Column(Integer, default=1)
+    therapy_id = Column(ForeignKey("therapy.id"))
+    therapy = relationship("Therapy", lazy="selectin",
+                           back_populates="therapylinecost")
+
+
 def make_db():
     Base.metadata.create_all(engine)
 
