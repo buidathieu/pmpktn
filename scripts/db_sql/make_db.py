@@ -29,13 +29,16 @@ class Patient(Base):
 
 class Visit(Base):
     __tablename__ = 'visits'
+    __table_args__ = (CheckConstraint("days > 0"),
+                      CheckConstraint("weight >= 0"),
+                      CheckConstraint("bill >= 0"))
 
     id = Column(Integer, primary_key=True)
     exam_date = Column(DateTime, default=dt.datetime.now,
                        onupdate=dt.datetime.now)
     note = Column(Text)
     diag = Column(String(50), nullable=False)
-    weight = Column(Float, default=0)
+    weight = Column(Float(precision=1), default=0)
     days = Column(Integer, default=2)
     followup = Column(Text, default='')
     bill = Column(Integer, default=0)

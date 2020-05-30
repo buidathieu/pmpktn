@@ -1,3 +1,5 @@
+from initialize import *
+
 import wx
 import logging
 
@@ -16,12 +18,10 @@ class DrugList(wx.ListCtrl):
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onDrugSelect)
         self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onDrugDeselect)
 
-    def Update(self, linedruglist=None):
-        if not linedruglist:
-            linedruglist = self.Parent.Parent.visit.linedrugs
-        self.dwh_list = [i.drug for i in linedruglist]
+    def Update(self, linedrugs=None):
+        self.dwh_list = [i.drug for i in linedrugs]
         self.DeleteAllItems()
-        for i, ld in enumerate(linedruglist, start=1):
+        for i, ld in enumerate(linedrugs, start=1):
             self.Append(
                 [i,
                  ld.drug.name,
@@ -38,20 +38,20 @@ class DrugList(wx.ListCtrl):
 
     def onDrugSelect(self, e):
         i = e.Index
-        inf = self.Parent
-        inf.drugpicker.drugWH = self.dwh_list[i]
-        inf.drugpicker.ChangeValue(self.dwh_list[i].name)
-        inf.times.ChangeValue(self.GetItemText(i, 2))
-        inf.dosage_per.ChangeValue(self.GetItemText(i, 3).partition(' ')[0])
-        inf.quantity.ChangeValue(self.GetItemText(i, 4).partition(' ')[0])
-        inf.usage.ChangeValue(self.GetItemText(i, 5))
+        pg = self.Parent
+        pg.drugpicker.drugWH = self.dwh_list[i]
+        pg.drugpicker.ChangeValue(self.dwh_list[i].name)
+        pg.times.ChangeValue(self.GetItemText(i, 2))
+        pg.dosage_per.ChangeValue(self.GetItemText(i, 3).partition(' ')[0])
+        pg.quantity.ChangeValue(self.GetItemText(i, 4).partition(' ')[0])
+        pg.usage.ChangeValue(self.GetItemText(i, 5))
 
     def onDrugDeselect(self, e):
         self.Parent.drugpicker.Clear()
 
     def Add_or_Update(self, d, times, dosage_per, quantity, usage):
         assert self.ItemCount == len(self.dwh_list)
-        inf = self.Parent
+        pg = self.Parent
         try:
             # find if already added drug
             row = [i.id for i in self.dwh_list].index(d.id)
@@ -71,9 +71,8 @@ class DrugList(wx.ListCtrl):
                 usage
             ])
             self.dwh_list.append(d)
-        inf.drugpicker.Clear()
-        inf.drugpicker.SetFocus()
-        self.calc_total_drug_price()
+        pg.drugpicker.Clear()
+        pg.drugpicker.SetFocus()
 
     def Remove(self):
         assert self.ItemCount == len(self.dwh_list)
@@ -85,17 +84,17 @@ class DrugList(wx.ListCtrl):
             for row in range(1, self.ItemCount):
                 self.SetItem(row - 1, 0, str(row))
         else:
-            logging.debug('drug not selected when delete')
-        self.calc_total_drug_price()
+            logging.debug('drug not found when delete')
 
-    def calc_total_drug_price(self):
+    def get_total_price(self):
         assert self.ItemCount == len(self.dwh_list)
-        self.total_drug_price = 0
+        total = 0
         if self.ItemCount > 0:
             for i in range(self.ItemCount):
                 qty = int(self.GetItemText(i, 4).partition(' ')[0])
                 p = self.dwh_list[i].sale_price
-                self.total_drug_price += (qty * p)
+                total += (qty * p)
+        return total
 
     def build_linedrugs(self):
         linedrugs = []
