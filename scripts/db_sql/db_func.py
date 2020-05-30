@@ -127,19 +127,19 @@ def do_seen_patient(pid, sess):
     vq.is_seen = True
 
 
-def save_old_visit(pid, name, birthdate, address, past_history,
+def save_old_visit(pid, name, gender, birthdate, address, past_history,
                    vid, note, diag, weight, days, followup, bill, linedrugs,
                    sess=None):
-    update_patient(pid, name, birthdate, address, past_history, sess)
+    edit_patient(pid, name, gender, birthdate, address, past_history, sess)
     update_visit(vid, note, diag, weight, days,
                  followup, bill, linedrugs, sess)
     sess.commit()
 
 
-def save_new_visit(pid, name, birthdate, address, past_history,
+def save_new_visit(pid, name, gender, birthdate, address, past_history,
                    note, diag, weight, days, followup, bill, linedrugs,
                    sess=None):
-    update_patient(pid, name, birthdate, address, past_history, sess)
+    edit_patient(pid, name, gender, birthdate, address, past_history, sess)
     add_visit(pid, note, diag, weight, days,
               followup, bill, linedrugs, sess)
     do_seen_patient(pid, sess)

@@ -384,6 +384,7 @@ class Visit_Info_Panel(wx.Panel):
         kwargs = {
             'pid': p.id,
             'name': bs_inf.name.Value,
+            'gender': bs_inf.gender.Selection,
             'birthdate': otf.wxdate2pydate(
                 bs_inf.birthdate.Value),
             'address': bs_inf.address.Value,
