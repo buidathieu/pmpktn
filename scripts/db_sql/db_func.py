@@ -44,8 +44,8 @@ def get_visitqueue(sess=None):
         filter(VisitQueue.is_seen == False)
 
 
-# mainview
-def get_today_patient_list(sess=None):
+# left_panel_classes.py
+def get_today_seen_patient_list(sess=None):
     return sess.query(Patient).\
         join(Visit).\
         filter(func.DATE(Visit.exam_date) == dt.date.today())
@@ -56,7 +56,9 @@ def get_queuing_patient_list(sess=None):
         join(VisitQueue).\
         filter(VisitQueue.is_seen == False).\
         order_by(VisitQueue.id)
+        
 
+# mainview
 
 def query_linedrug_list_by_name(s):
     with session_scope() as sess:
@@ -74,12 +76,8 @@ def add_patient(name, gender, birthdate, address, past_history, sess=None):
     return new_patient
 
 
-def edit_patient(pid, name, gender, birthdate, address, past_history, sess):
+def edit_patient(pid, past_history, sess):
     p = sess.query(Patient).get(pid)
-    p.name = name
-    p.gender = gender
-    p.birthdate = birthdate
-    p.address = address
     p.past_history = past_history
     sess.commit()
     return p
@@ -127,19 +125,19 @@ def do_seen_patient(pid, sess):
     vq.is_seen = True
 
 
-def save_old_visit(pid, name, gender, birthdate, address, past_history,
+def save_old_visit(pid, past_history,
                    vid, note, diag, weight, days, followup, bill, linedrugs,
                    sess=None):
-    edit_patient(pid, name, gender, birthdate, address, past_history, sess)
+    edit_patient(pid, past_history, sess)
     update_visit(vid, note, diag, weight, days,
                  followup, bill, linedrugs, sess)
     sess.commit()
 
 
-def save_new_visit(pid, name, gender, birthdate, address, past_history,
+def save_new_visit(pid, past_history,
                    note, diag, weight, days, followup, bill, linedrugs,
                    sess=None):
-    edit_patient(pid, name, gender, birthdate, address, past_history, sess)
+    edit_patient(pid, past_history, sess)
     add_visit(pid, note, diag, weight, days,
               followup, bill, linedrugs, sess)
     do_seen_patient(pid, sess)

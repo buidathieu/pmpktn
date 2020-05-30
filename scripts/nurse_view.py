@@ -105,7 +105,7 @@ class NurseView(wx.Frame):
         w = wx.ListCtrl(self, style=wx.LC_REPORT)
         w.AppendColumn("Mã bn", width=ma_bn_width)
         w.AppendColumn("Tên bệnh nhân", width=bn_width)
-        w.AppendColumn("Giới tính", width=gioi_width)
+        w.AppendColumn("Giới tính", width=gender_width)
         w.AppendColumn("Ngày tháng năm sinh", width=date_width)
         w.Bind(wx.EVT_LIST_ITEM_SELECTED,
                lambda e: self.add_queue_button.Enable())
@@ -117,7 +117,7 @@ class NurseView(wx.Frame):
         w = wx.ListCtrl(self, style=wx.LC_REPORT)
         w.AppendColumn("Mã bn", width=ma_bn_width)
         w.AppendColumn("Tên bệnh nhân", width=bn_width)
-        w.AppendColumn("Giới tính", width=gioi_width)
+        w.AppendColumn("Giới tính", width=gender_width)
         w.AppendColumn("Ngày tháng năm sinh", width=date_width)
         return w
 

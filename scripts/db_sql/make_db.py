@@ -136,13 +136,7 @@ class Therapy(Base):
                                    back_populates="therapy")
 
     def quantity(self):
-        res = {}
-        for lc in self.therapylinecost:
-            res[lc.name] = lc.quantity
-            print(f"{lc.name} has {lc.quantity} {lc.unit} left, \
-                       each time use {lc.cost_on_1_use} => \
-                       {lc.quantity / lc.cost_on_1_use} times left")
-        return res
+        return min([lc.quantity / lc.cost_on_1_use for lc in self.therapylinecost])
 
 
 class TheparyLineCost(Base):

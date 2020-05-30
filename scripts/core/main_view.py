@@ -1,8 +1,12 @@
 from initialize import *
 from .left_panel import *
-from .visit_info import Visit_Info_Panel
-from .basic_info import Basic_Info_Panel
+from .right_panel import *
+
 from .menubar import MyMenuBar
+from .accel import my_accel
+
+from .core_func import onPatientSelect, onPatientDeselect, onVisitSelect, onVisitDeselect
+
 import wx
 import logging
 
@@ -19,7 +23,7 @@ class MainView(wx.Frame):
         super().__init__(
             parent,
             title='APP PHÒNG MẠCH TƯ, created by thanhstardust@outlook.com',
-            pos=(0, 20), *args, **kw)
+            pos=(0, 20), size=window_size, *args, **kw)
         self.SetBackgroundColour(wx.Colour(206, 219, 186))
 
         self._createInterface()
@@ -28,38 +32,23 @@ class MainView(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self.onClose)
 
     def _createInterface(self):
-        self.book = PatientBook(self)
-        self.visit_list = VisitList(self)
-        self.basic_info = Basic_Info_Panel(self)
-        self.visit_info = Visit_Info_Panel(self)
+        create_left_panel_widgets(self)
+        create_right_panel_widgets(self)
 
-        leftpanel = wx.BoxSizer(wx.VERTICAL)
-        leftpanel.Add(self.book, 10, wx.LEFT | wx.TOP, 10)
-        leftpanel.Add(wx.StaticText(
-            self, label='Lượt khám cũ:'), 0, wx.LEFT, 20)
-        leftpanel.Add(self.visit_list, 4, wx.EXPAND | wx.LEFT | wx.BOTTOM, 20)
-
-        rightpanel = wx.BoxSizer(wx.VERTICAL)
-        rightpanel.Add(self.basic_info, 0, wx.EXPAND)
-        rightpanel.Add(self.visit_info, 1, wx.EXPAND)
-
-        wholepanel = wx.BoxSizer(wx.HORIZONTAL)
-        wholepanel.Add(leftpanel, 0, wx.EXPAND)
-        wholepanel.Add(rightpanel, 0, wx.EXPAND | wx.LEFT | wx.RIGHT, 10)
-        self.SetSizerAndFit(wholepanel)
+        left_panel = create_left_panel_sizer(self)
+        right_panel = create_right_panel_sizer(self)
+        
+        whole_panel = wx.BoxSizer(wx.HORIZONTAL)
+        whole_panel.Add(left_panel, 0, wx.EXPAND)
+        whole_panel.Add(right_panel, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        self.SetSizer(whole_panel)
 
     def _setMenuBar(self):
         self.menubar = MyMenuBar(self)
         self.SetMenuBar(self.menubar)
 
     def _setAccelTable(self):
-        accel = wx.AcceleratorTable(
-            [wx.AcceleratorEntry(wx.ACCEL_NORMAL, wx.WXK_F1, id_new_patient),
-             wx.AcceleratorEntry(wx.ACCEL_NORMAL, wx.WXK_F2, id_new_visit),
-             wx.AcceleratorEntry(wx.ACCEL_NORMAL, wx.WXK_F3, id_save_visit),
-             wx.AcceleratorEntry(wx.ACCEL_NORMAL, wx.WXK_F5, wx.ID_REFRESH),
-             wx.AcceleratorEntry(wx.ACCEL_ALT, wx.WXK_F4, wx.ID_EXIT)])
-        self.SetAcceleratorTable(accel)
+        self.SetAcceleratorTable(my_accel)
 
     @property
     def patient(self):
@@ -68,15 +57,12 @@ class MainView(wx.Frame):
     @patient.setter
     def patient(self, p):
         self._patient = p
+        logging.debug(f'Set mainview patient = {p}')
         if p:
-            logging.debug(f'Set mainview patient = {p.name}')
-            self.basic_info.Update()
-            self.visit_list.Update()
+            onPatientSelect(self, p)
         else:
-            logging.debug(f'Set mainview patient to None')
-            self.basic_info.Clear()
-            self.visit_list.Clear()
-            self.visit_info.Clear()
+            self.visit = None
+            onPatientDeselect(self)
 
     @property
     def visit(self):
@@ -85,12 +71,11 @@ class MainView(wx.Frame):
     @visit.setter
     def visit(self, v):
         self._visit = v
+        logging.debug(f'Set mainview visit = {v}')
         if v:
-            logging.debug(f'Set mainview visit = {v.exam_date}')
-            self.visit_info.Update()
+            onVisitSelect(self, v)
         else:
-            logging.debug(f'Set mainview visit to None')
-            self.visit_info.Clear()
+            onVisitDeselect(self)
 
     def Refresh(self):
         self.book.Refresh()

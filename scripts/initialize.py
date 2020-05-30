@@ -63,14 +63,16 @@ id_new_visit = NewId()
 id_save_visit = NewId()
 
 # some size
+window_size = (1250, 690)
 ma_bn_width = 50
 bn_width = 250
-gioi_width = 50
+gender_width = 50
 ns_width = 100
 date_width = 150
 ma_lk_width = 130
 days_size = (70, -1)
 name_size = (bn_width, -1)
+gender_size = (gender_width, -1)
 bd_size = (ns_width, -1)
 note_size = (-1, 60)
 dose_size = (50, -1)

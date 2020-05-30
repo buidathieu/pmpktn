@@ -31,7 +31,6 @@ class Visit_Info_Panel(wx.Panel):
         self.usage_unit = wx.StaticText(self, label='{Đơn vị}')
         self.sale_unit = wx.StaticText(self, label='{Đơn vị}')
         self.usage = wx.TextCtrl(self)
-        self.total_cost = self._createTotalCost()
         self.d_list = DrugList(self)
         self.followup = self._createFollowup()
         self.save_drug_btn = self._createSaveDrugbtn()
@@ -40,6 +39,7 @@ class Visit_Info_Panel(wx.Panel):
         self.reuse_btn = self._createReusebtn()
         self.sample_prescription_btn = self._createSamplePrescriptionbtn()
         self.save_visit_btn = self._createSaveVisitbtn()
+        self.total_cost = self._createTotalCost()
 
     def _createNote(self):
 
@@ -168,7 +168,7 @@ class Visit_Info_Panel(wx.Panel):
         drug_input_row = wx.BoxSizer(wx.HORIZONTAL)
         usage_row = wx.BoxSizer(wx.HORIZONTAL)
         followup_row = wx.BoxSizer(wx.HORIZONTAL)
-        price_row = wx.BoxSizer(wx.HORIZONTAL)
+        btn_row_1 = wx.BoxSizer(wx.HORIZONTAL)
         btn_row = wx.BoxSizer(wx.HORIZONTAL)
         sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -215,14 +215,14 @@ class Visit_Info_Panel(wx.Panel):
         followup_row.Add(wx.StaticText(self, label='Dặn dò:'),
                          0, wx.CENTRE | wx.RIGHT, 5)
         followup_row.Add(self.followup, 1)
-        price_row.Add(self.reuse_btn, 0, wx.RIGHT, 5)
-        price_row.Add(self.sample_prescription_btn, 0)
-        price_row.AddStretchSpacer()
-        price_row.Add(wx.StaticText(self, label='Tổng tiền:'), 0, wx.CENTRE)
-        price_row.Add(self.total_cost, 0, wx.CENTRE)
-
+        btn_row_1.Add(self.reuse_btn, 0, wx.RIGHT, 5)
+        btn_row_1.Add(self.sample_prescription_btn, 0)
+        
         btn_row.Add(self.new_visit_btn)
         btn_row.Add(self.save_visit_btn)
+        btn_row.AddStretchSpacer()
+        btn_row.Add(wx.StaticText(self, label='Tổng tiền:'), 0, wx.CENTRE)
+        btn_row.Add(self.total_cost, 0, wx.CENTRE)
 
         sizer.Add(label_1_row, 0, wx.EXPAND)
         sizer.Add(datetime_row, 0, wx.EXPAND)
@@ -234,7 +234,7 @@ class Visit_Info_Panel(wx.Panel):
         sizer.Add(usage_row, 0, wx.EXPAND)
         sizer.Add(self.d_list, 1, wx.EXPAND | wx.TOP, 3)
         sizer.Add(followup_row, 0, wx.EXPAND | wx.TOP, 3)
-        sizer.Add(price_row, 0, wx.EXPAND | wx.TOP, 3)
+        sizer.Add(btn_row_1, 0, wx.EXPAND | wx.TOP, 3)
         sizer.AddSpacer(20)
         sizer.Add(btn_row, 0, wx.EXPAND | wx.BOTTOM, 10)
         self.SetSizer(sizer)
@@ -383,11 +383,6 @@ class Visit_Info_Panel(wx.Panel):
 
         kwargs = {
             'pid': p.id,
-            'name': bs_inf.name.Value,
-            'gender': bs_inf.gender.Selection,
-            'birthdate': otf.wxdate2pydate(
-                bs_inf.birthdate.Value),
-            'address': bs_inf.address.Value,
             'past_history': bs_inf.past_history.Value,
             'note': v_inf.note.Value,
             'diag': v_inf.diag.Value,
