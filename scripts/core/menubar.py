@@ -1,7 +1,7 @@
 from initialize import *
 import other_func as otf
 import db_sql.db_func as dbf
-# from patient_dialog import AddPatientDialog
+from .core_func import onSaveVisit
 from print_func.print_func import MyPrinter
 import wx
 
@@ -23,7 +23,6 @@ class MyMenuBar(wx.MenuBar):
         menuExit = homeMenu.Append(wx.ID_EXIT, "Exit\tALT+F4")
 
         patientmenu = wx.Menu()
-        menuNewVisit = patientmenu.Append(id_new_visit, "Lượt khám mới\tF2")
         menuSaveVisit = patientmenu.Append(id_save_visit, "Lưu lượt khám\tF3")
 
         reportmenu = wx.Menu()
@@ -37,21 +36,21 @@ class MyMenuBar(wx.MenuBar):
         self.Bind(wx.EVT_MENU, self.onPrintPreview, menuPrintPreview)
         self.Bind(wx.EVT_MENU, self.onRefresh, menuRefresh)
         self.Bind(wx.EVT_MENU, self.onExit, menuExit)
-        self.Bind(wx.EVT_MENU, self.onNewVisit, menuNewVisit)
         self.Bind(wx.EVT_MENU, self.onSaveVisit, menuSaveVisit)
         self.Bind(wx.EVT_MENU, self.onReportToday, menuReportToday)
 
     def feed_data_to_printer(self):
-        return self.printer.feed_data(
-            name=self.mv.basic_info.name.Value,
-            age=self.mv.basic_info.age.Value,
-            gender=gender_dict[self.mv.basic_info.gender.Selection],
-            address=self.mv.basic_info.address.Value,
-            diagnosis=self.mv.visit_info.diag.Value,
-            weight=self.mv.visit_info.weight.Value,
+        pg = self.mv.order_book.GetPage(0)
+        self.printer.feed_data(
+            name=self.mv.name.Value,
+            age=self.mv.age.Value,
+            gender=self.mv.gender.Value,
+            address=self.mv.address.Value,
+            diagnosis=self.mv.diag.Value,
+            weight=pg.weight.Value,
             height="",
-            linedrugs=self.mv.visit_info.d_list.build_linedrugs_for_pdf(),
-            followup=self.mv.visit_info.followup.Value
+            linedrugs=pg.d_list.build_linedrugs_for_pdf(),
+            followup=pg.followup.Value
         )
 
     def onPrint(self, e):
@@ -62,11 +61,9 @@ class MyMenuBar(wx.MenuBar):
         self.feed_data_to_printer()
         self.printer.preview_pdf()
 
-    def onNewVisit(self, e):
-        self.mv.visit_info.NewVisit()
-
     def onSaveVisit(self, e):
-        self.mv.visit_info.SaveVisit()
+        onSaveVisit(self.mv)
+
 
     def onExit(self, e):
         self.mv.Close()

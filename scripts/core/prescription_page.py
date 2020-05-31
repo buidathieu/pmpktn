@@ -2,12 +2,12 @@ from initialize import *
 from .custom_popup import DrugPicker
 from .drug_list import DrugList
 import other_func as otf
-import db_sql.db_func as dbf
-from sample_prescription import SamplePrescriptionDialog
-from fractions import Fraction as fr
-import math
-import wx
+from .core_func import getWeight, calc_quantity,\
+    onSaveDrug, onEraseDrug, onReuse, onSamplePrescriptionbtn
+
 import logging
+
+import wx
 
 
 class PrescriptionPage(wx.Panel):
@@ -37,7 +37,6 @@ class PrescriptionPage(wx.Panel):
         
     def _createWeight(self):
         w = wx.TextCtrl(self, size=dose_size, value='0')
-        w.Bind(wx.EVT_SET_FOCUS, lambda e: w.SelectAll())
         w.Bind(wx.EVT_CHAR,
                lambda e: otf.only_nums(e, decimal=True))
         w.SetHint('Kg')
@@ -45,12 +44,11 @@ class PrescriptionPage(wx.Panel):
 
     def _createGetWeightBtn(self):
         w = wx.BitmapButton(self, bitmap=wx.Bitmap(weight_bm))
-        w.Bind(wx.EVT_BUTTON, self.getWeight)
+        w.Bind(wx.EVT_BUTTON, self._getWeight)
         return w
 
     def _createDays(self):
         w = wx.TextCtrl(self, size=days_size, value='2')
-        w.Bind(wx.EVT_SET_FOCUS, lambda e: w.SelectAll())
         w.Bind(wx.EVT_CHAR, otf.only_nums)
         w.Bind(wx.EVT_TEXT, self._calc_quantity)
         return w
@@ -94,22 +92,22 @@ class PrescriptionPage(wx.Panel):
         
     def _createSaveDrugbtn(self):
         btn = wx.BitmapButton(self, bitmap=wx.Bitmap(plus_bm))
-        btn.Bind(wx.EVT_BUTTON, self.onSaveDrug)
+        btn.Bind(wx.EVT_BUTTON, self._onSaveDrug)
         return btn
 
     def _createEraseDrugbtn(self):
         btn = wx.BitmapButton(self, bitmap=wx.Bitmap(minus_bm))
-        btn.Bind(wx.EVT_BUTTON, self.onEraseDrug)
+        btn.Bind(wx.EVT_BUTTON, self._onEraseDrug)
         return btn
 
     def _createReusebtn(self):
         btn = wx.Button(self, label='Lượt khám mới với toa cũ')
-        # btn.Bind(wx.EVT_BUTTON, self.onReuse)
+        btn.Bind(wx.EVT_BUTTON, self._onReuse)
         return btn
 
     def _createSamplePrescriptionbtn(self):
         btn = wx.Button(self, label="Toa mẫu")
-        # btn.Bind(wx.EVT_BUTTON, self.onSamplePrescriptionbtn)
+        btn.Bind(wx.EVT_BUTTON, self._onSamplePrescriptionbtn)
         return btn
         
     def _setSizer(self):       
@@ -163,110 +161,20 @@ class PrescriptionPage(wx.Panel):
         sizer.Add(btn_row, 0, wx.EXPAND | wx.TOP, 3)
         self.SetSizer(sizer)
         
-    def getWeight(self, e):
-        logging.debug('get latest weight')
-        weight = self.Parent.patient.visits[-1].weight
-        self.weight.Value = str(weight)
-        
+    def _getWeight(self, e):
+        self.weight.ChangeValue(getWeight(mv=self.Parent.Parent))
+
     def _calc_quantity(self, e):
-        logging.debug('recalculate quantity')
-        day = self.days.Value
-        dosage = self.dosage_per.Value
-        time = self.times.Value
-        drug = self.drugpicker.drugWH
-        try:
-            assert day != 0
-            assert dosage != ''
-            assert time != ''
-            assert drug is not None
-            # numberize
-            day = int(day)
-            time = int(time)
-            if "/" in dosage:
-                dosage = fr(dosage)
-            elif "." in dosage:
-                dosage = float(dosage)
-            else:
-                dosage = int(dosage)
-            # cal qty
-            if drug.sale_unit == 'chai':
-                qty = '1'
-            else:
-                qty = math.ceil(dosage * time * day)
-
-            self.quantity.ChangeValue(str(qty))
-            self.usage.ChangeValue(
-                "Ngày {} {} lần, lần {} {}".format(
-                    drug.usage,
-                    time,
-                    dosage,
-                    drug.usage_unit))
-        except AssertionError:
-            pass
+        calc_quantity(self)
             
-    def onSaveDrug(self, e):
-        kwargs = {
-            "d": self.drugpicker.drugWH,
-            "times": self.times.Value,
-            "dosage_per": self.dosage_per.Value,
-            "quantity": self.quantity.Value,
-            "usage": self.usage.Value
-        }
-        assert kwargs["d"] is not None
-        assert int(kwargs["times"])
-        assert kwargs['dosage_per'] != ""
-        assert int(kwargs['quantity'])
+    def _onSaveDrug(self, e):
+        onSaveDrug(self)
 
-        logging.debug(f"Add or update drug, recalc total_drug_price:\n\t\
-                      {kwargs['d'].name}\n{kwargs}")
-        self.d_list.Add_or_Update(**kwargs)
-        self.total_cost.ChangeValue(otf.bill_int_to_str(
-            setting['cong_kham_benh'] + self.d_list.total_drug_price))
-
-    def onEraseDrug(self, e):
-        logging.debug("Del drug, recalc total_drug_price")
-        self.d_list.Remove()
-        self.total_cost.ChangeValue(otf.bill_int_to_str(
-            setting['cong_kham_benh'] + self.d_list.total_drug_price))
-        self.drugpicker.Clear()
-        self.drugpicker.SetFocus()
+    def _onEraseDrug(self, e):
+        onEraseDrug(self)
         
-    def onReuse(self, e):
-        # keep old values
-        logging.debug('on Reuse weight, days, linedruglist, total_cost')
-        linedruglist = self.Parent.visit.linedrugs.copy()
-        w = self.weight.Value
-        d = self.days.Value
-        p = self.total_cost.Value
-        # unselect
-        self.Parent.visit = None
-        # populate field with old values
-        self.d_list.Update(linedruglist=linedruglist)
-        self.weight.ChangeValue(w)
-        self.days.ChangeValue(d)
-        self.total_cost.ChangeValue(p)
-        
-    def Update(self):
-
-        def _dt_to_label(p_dt):
-            return ' ' * 20 + 'Giờ khám: {}:{} ngày {} tháng {} năm {}'.\
-                format(str(p_dt.hour).rjust(2, '0'),
-                       str(p_dt.minute).rjust(2, '0'),
-                       p_dt.day,
-                       p_dt.month,
-                       p_dt.year)
-
-        v = self.Parent.Parent.Parent.visit
-        logging.debug(f"update visit_info with selected visit:\n\t\
-                      {v.exam_date} {v.bill}")
-        self.group_label.Label =\
-            f'Thông tin lượt khám (Mã lượt khám: {v.id})'
-        self.dt_label.Label = _dt_to_label(v.exam_date)
-        self.note.ChangeValue(v.note)
-        self.diag.ChangeValue(v.diag)
-        self.weight.ChangeValue(str(v.weight))
-        self.days.ChangeValue(str(v.days))
-        self.drugpicker.Clear()
-        self.d_list.Update()
-        self.total_cost.ChangeValue(otf.bill_int_to_str(v.bill))
-        self.followup.ChangeValue(v.followup)
+    def _onReuse(self, e):
+        onReuse(self)
+    
+    def _onSamplePrescriptionbtn(self, e):
+        onSamplePrescriptionbtn(self)

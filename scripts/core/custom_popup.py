@@ -135,18 +135,18 @@ class DrugPicker(wx.ComboCtrl):
     @drugWH.setter
     def drugWH(self, dwh):
         self._drugWH = dwh
-        v_inf = self.Parent
+        pg = self.Parent
         if dwh:
-            v_inf.usage_unit.Label = dwh.usage_unit
-            v_inf.sale_unit.Label = dwh.sale_unit
+            pg.usage_unit.Label = dwh.usage_unit
+            pg.sale_unit.Label = dwh.sale_unit
         else:
             self.ChangeValue('')
-            v_inf.dosage_per.ChangeValue('')
-            v_inf.usage_unit.Label = '{Đơn vị}'
-            v_inf.times.ChangeValue("")
-            v_inf.quantity.ChangeValue("")
-            v_inf.sale_unit.Label = '{Đơn vị}'
-            v_inf.usage.ChangeValue("")
+            pg.dosage_per.ChangeValue('')
+            pg.usage_unit.Label = '{Đơn vị}'
+            pg.times.ChangeValue("")
+            pg.quantity.ChangeValue("")
+            pg.sale_unit.Label = '{Đơn vị}'
+            pg.usage.ChangeValue("")
 
     def onKeyPress(self, e):
         if os.name == "posix":

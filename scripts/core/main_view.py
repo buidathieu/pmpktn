@@ -7,7 +7,6 @@ from .accel import my_accel
 from .binding import button_bindings
 
 from .core_func import onPatientSelect, onPatientDeselect, onVisitSelect, onVisitDeselect
-
 import wx
 import logging
 
@@ -78,6 +77,7 @@ class MainView(wx.Frame):
             onVisitSelect(self, v)
         else:
             onVisitDeselect(self)
+            
 
     def Refresh(self):
         self.book.Refresh()

@@ -9,7 +9,7 @@ class SamplePrescriptionDialog(wx.Dialog):
 
     def __init__(self, parent):
         super().__init__(parent, title="Toa mẫu")
-        self.sess = self.Parent.Parent.sess
+        self.sess = parent.sess
         self.sample_prescription_list = dbf.query_sample_prescription_list(
             self.sess).all()
         self.tree = self._createTree()
@@ -27,7 +27,7 @@ class SamplePrescriptionDialog(wx.Dialog):
 
     def _createTree(self):
         w = wx.TreeCtrl(self, size=tree_size,
-                        style=wx.TR_HIDE_ROOT | wx.TR_HAS_BUTTONS)
+                        style=wx.TR_HIDE_ROOT | wx.TR_HAS_BUTTONS | wx.TR_LINES_AT_ROOT)
         return w
 
     def _createAddBtn(self):
@@ -90,9 +90,9 @@ class SamplePrescriptionDialog(wx.Dialog):
         try:
             self.sess.commit()
         except Exception:
+            print("something happened and sess rollback")
             self.sess.rollback()
         finally:
-            self.sess.close()
             e.Skip()
 
     def onCancelBtn(self, e):
@@ -163,6 +163,7 @@ class AddEditSamplePrescriptionDialog(wx.Dialog):
                          size=add_edit_prescription_dialog_size)
 
         self.drugs = dbf.query_drugWH_list(self.Parent.sess).all()
+        self.drugs.sort(key=lambda x: x.name)
         self.drugWH_id_list = []
 
         self.name = self._createName()
@@ -195,7 +196,6 @@ class AddEditSamplePrescriptionDialog(wx.Dialog):
     def _createDrugPicker(self):
         choices = [f"{i.name} ({i.usage_unit})" for i in self.drugs]
         w = wx.Choice(self,
-                      style=wx.CB_SORT,
                       choices=choices)
         return w
 
@@ -302,7 +302,8 @@ class AddEditSamplePrescriptionDialog(wx.Dialog):
             if self.mode == 'add':
                 with wx.MessageDialog(self,
                                       "Lưu toa mẫu mới?",
-                                      "Lưu toa mẫu") as dlg:
+                                      "Lưu toa mẫu",
+                                      style=wx.OK | wx.CANCEL) as dlg:
                     if dlg.ShowModal() == wx.ID_OK:
                         ps = self.add_sample_prescription(sess)
                         self.Parent.sample_prescription_list.append(ps)
@@ -311,7 +312,8 @@ class AddEditSamplePrescriptionDialog(wx.Dialog):
             elif self.mode == 'edit':
                 with wx.MessageDialog(self,
                                       "Lưu thay đổi toa mẫu ?",
-                                      "Lưu toa mẫu") as dlg:
+                                      "Lưu toa mẫu",
+                                      style=wx.OK | wx.CANCEL) as dlg:
                     if dlg.ShowModal() == wx.ID_OK:
                         self.upd_sample_prescription(sess)
                         self.Parent.RefreshTree()

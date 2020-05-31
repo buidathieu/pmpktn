@@ -17,18 +17,16 @@ def create_right_panel_widgets(mv):
         return btn
     
     def _createTotalCost(mv):
-
         def on_bill(e):
             val = int("".join(w.Value.split(".")))
             w.ChangeValue(otf.bill_int_to_str(val))
             w.SetInsertionPointEnd()
-
         def _kill_focus(e):
             if w.Value == '':
                 w.ChangeValue('0')
-
-        w = wx.TextCtrl(mv,
-                        value=otf.bill_int_to_str(setting['cong_kham_benh']))
+        w = wx.TextCtrl(
+            mv,
+            value=otf.bill_int_to_str(setting['cong_kham_benh']))
         w.Bind(wx.EVT_CHAR, otf.only_nums)
         w.Bind(wx.EVT_TEXT, on_bill)
         w.Bind(wx.EVT_KILL_FOCUS, _kill_focus)
@@ -48,6 +46,10 @@ def create_right_panel_widgets(mv):
     # mv.new_visit_btn = _createNewVisitbtn(mv)
     mv.save_visit_btn = _createSaveVisitbtn(mv)
     mv.total_cost = _createTotalCost(mv)
+    
+    mv.past_history.Bind(wx.EVT_CHAR, lambda e: otf.onTab(e, mv.note))
+    mv.note.Bind(wx.EVT_CHAR, lambda e: otf.onTab(e, mv.diag))
+    mv.diag.Bind(wx.EVT_CHAR, lambda e: otf.onTab(e, mv.order_book.GetPage(0).weight))
     
     
    

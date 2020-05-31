@@ -1,7 +1,14 @@
 from initialize import *
 import db_sql.db_func as dbf
 import other_func as otf
+from sample_prescription import SamplePrescriptionDialog
+
+from fractions import Fraction as fr
+import math
+import logging
+
 import wx
+
 
 def onPatientSelect(mv, p):
     mv.visit_list.buildVisitList(p)
@@ -44,7 +51,7 @@ def onVisitSelect(mv, v):
     pg.weight.ChangeValue(str(v.weight))
     pg.days.ChangeValue(str(v.days))
     pg.drugpicker.Clear()
-    pg.d_list.Update(v.linedrugs)
+    pg.d_list.Populate(v.linedrugs)
     pg.followup.ChangeValue(v.followup)
     mv.total_cost.ChangeValue(otf.bill_int_to_str(v.bill))
     
@@ -61,10 +68,6 @@ def onVisitDeselect(mv, v=None):
     pg.d_list.Clear()
     pg.followup.Selection = 0
     mv.total_cost.ChangeValue(otf.bill_int_to_str(setting['cong_kham_benh']))
-
-    
-def onNewVisit(mv):
-    mv.visit = None
 
 
 def onSaveVisit(mv):
@@ -101,3 +104,117 @@ def onSaveVisit(mv):
             dbf.save_new_visit(**kwargs, sess=mv.sess)
             wx.MessageBox("Đã lưu")
     mv.Refresh()
+    
+    
+def getWeight(mv):
+    logging.debug('get latest weight')
+    return str(mv.patient.visits[-1].weight)
+    
+
+def calc_quantity(pg):
+    logging.debug('recalculate quantity')
+    day = pg.days.Value
+    dosage = pg.dosage_per.Value
+    time = pg.times.Value
+    drug = pg.drugpicker.drugWH
+    try:
+        assert day != 0
+        assert dosage != ''
+        assert time != ''
+        assert drug is not None
+        # numberize
+        day = int(day)
+        time = int(time)
+        if "/" in dosage:
+            dosage = fr(dosage)
+        elif "." in dosage:
+            dosage = float(dosage)
+        else:
+            dosage = int(dosage)
+        # cal qty
+        if drug.sale_unit == 'chai':
+            qty = '1'
+        else:
+            qty = math.ceil(dosage * time * day)
+
+        pg.quantity.ChangeValue(str(qty))
+        pg.usage.ChangeValue(
+            "Ngày {} {} lần, lần {} {}".format(
+                drug.usage,
+                time,
+                dosage,
+                drug.usage_unit))
+    except AssertionError:
+        pass
+
+
+def onSaveDrug(pg):
+    kwargs = {
+        "d": pg.drugpicker.drugWH,
+        "times": pg.times.Value,
+        "dosage_per": pg.dosage_per.Value,
+        "quantity": pg.quantity.Value,
+        "usage": pg.usage.Value
+    }
+    assert kwargs["d"] is not None
+    assert int(kwargs["times"])
+    assert kwargs['dosage_per'] != ""
+    assert int(kwargs['quantity'])
+
+    logging.debug(f"Add or update drug, recalc total_drug_price:\n\t\
+                  {kwargs['d'].name}\n{kwargs}")
+    pg.d_list.add_or_update(**kwargs)
+    calc_price(pg.Parent.Parent)
+
+
+def onEraseDrug(pg):
+    logging.debug("Del drug, recalc total_drug_price")
+    pg.d_list.remove_selected()
+    pg.drugpicker.Clear()
+    pg.drugpicker.SetFocus()
+    calc_price(pg.Parent.Parent)
+    
+    
+def calc_price(mv):
+    price = setting["cong_kham_benh"]
+    price += mv.order_book.GetPage(0).d_list.get_total_price()
+    mv.total_cost.ChangeValue(otf.bill_int_to_str(price))
+
+
+def onReuse(pg):
+    mv = pg.Parent.Parent
+    # keep old values
+    logging.debug('on Reuse weight, days, linedruglist, total_cost')
+    linedrugs = mv.visit.linedrugs.copy()
+    w = pg.weight.Value
+    d = pg.days.Value
+    # unselect
+    v_idx = mv.visit_list.GetFirstSelected()
+    mv.visit_list.Select(v_idx, 0)
+    # populate field with old values
+    pg.d_list.Populate(linedrugs=linedrugs)
+    pg.weight.ChangeValue(w)
+    pg.days.ChangeValue(d)
+    calc_price(mv)
+
+
+def onSamplePrescriptionbtn(pg):
+    mv = pg.Parent.Parent
+    with SamplePrescriptionDialog(mv) as dlg:
+        if dlg.ShowModal() == wx.ID_APPLY:
+            ps, _ = dlg.get_selected_sample_prescription()
+            pg.d_list.Clear()
+            for i in ps.samplelinedrugs:
+                pg.drugpicker.drugWH = i.drug
+                pg.times.ChangeValue(str(i.times))
+                pg.dosage_per.ChangeValue(i.dosage_per)
+                calc_quantity(pg)
+                kwargs = {
+                    "d": i.drug,
+                    "times": str(i.times),
+                    "dosage_per": i.dosage_per,
+                    "quantity": pg.quantity.Value,
+                    "usage": pg.usage.Value
+                }
+                pg.d_list.add_or_update(**kwargs)
+    calc_price(mv)

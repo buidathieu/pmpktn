@@ -18,7 +18,7 @@ class DrugList(wx.ListCtrl):
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onDrugSelect)
         self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onDrugDeselect)
 
-    def Update(self, linedrugs=None):
+    def Populate(self, linedrugs=None):
         self.dwh_list = [i.drug for i in linedrugs]
         self.DeleteAllItems()
         for i, ld in enumerate(linedrugs, start=1):
@@ -48,7 +48,7 @@ class DrugList(wx.ListCtrl):
     def onDrugDeselect(self, e):
         self.Parent.drugpicker.Clear()
 
-    def Add_or_Update(self, d, times, dosage_per, quantity, usage):
+    def add_or_update(self, d, times, dosage_per, quantity, usage):
         assert self.ItemCount == len(self.dwh_list)
         pg = self.Parent
         try:
@@ -73,7 +73,7 @@ class DrugList(wx.ListCtrl):
         pg.drugpicker.Clear()
         pg.drugpicker.SetFocus()
 
-    def Remove(self):
+    def remove_selected(self):
         assert self.ItemCount == len(self.dwh_list)
         idx = self.GetFirstSelected()
         logging.debug(f"Delete drug {self.dwh_list[idx].name} ")

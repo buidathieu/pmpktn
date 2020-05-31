@@ -22,7 +22,7 @@ class MyPrinter():
 
     def print_pdf(self):
         make_pdf(self.file, self.data)
-        self.start_print_job(self.file)
+        self.start_print_job()
 
     def preview_pdf(self):
         make_pdf(self.file, self.data)

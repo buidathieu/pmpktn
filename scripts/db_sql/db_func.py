@@ -167,7 +167,7 @@ def query_drugWH_list(sess):
     return sess.query(DrugWarehouse)
 
 
-def del_sample_precription(ps, sess):
+def del_sample_prescription(ps, sess):
     sess.delete(ps)
 
 

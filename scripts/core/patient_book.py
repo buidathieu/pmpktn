@@ -67,11 +67,11 @@ class QueuingPatientList(BasePatientList):
 
     def __init__(self, parent):
         super().__init__(parent)
-        self.vq_list = dbf.get_waiting_queue(sess=self.Parent.Parent.sess).all()
         self.vq = None
         self.timer = self.RefreshQueueTimer()    
 
     def _make_p_list(self):
+        self.vq_list = dbf.get_waiting_queue(sess=self.Parent.Parent.sess).all()
         self.p_list = [vq.patient for vq in self.vq_list]
 
     def RefreshQueueTimer(self):
@@ -80,11 +80,11 @@ class QueuingPatientList(BasePatientList):
     
     def onSelect(self, e):
         self.vq = self.vq_list[e.Index]
-        super().onSelect(self, e)
+        super().onSelect(e)
 
     def onDeselect(self, e):
         self.vq = None
-        super().onDeselect(self, e)
+        super().onDeselect(e)
 
 
 class TodayPatientList(BasePatientList):
