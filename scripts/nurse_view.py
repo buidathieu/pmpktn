@@ -228,7 +228,7 @@ class NurseView(wx.Frame):
 
     def RefreshQueueTimer(self):
         self.RefreshQueue()
-        return wx.CallLater(1000 * 60 * 5, self.RefreshQueueTimer)
+        return wx.CallLater(setting["time_between_rebuild_visitqueue"], self.RefreshQueueTimer)
 
     def Search(self):
         kwargs = {

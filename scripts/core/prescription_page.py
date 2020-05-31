@@ -87,7 +87,9 @@ class PrescriptionPage(wx.Panel):
         return w
 
     def _createFollowup(self):
-        w = wx.TextCtrl(self)
+        choices = setting["followup_list"]
+        choices.extend(list(setting["followup_dict"]))
+        w = wx.ComboBox(self, style=wx.CB_DROPDOWN, choices=choices)
         return w
         
     def _createSaveDrugbtn(self):

@@ -1,4 +1,5 @@
 from initialize import *
+import db_sql.db_func as dbf
 import other_func as otf
 import wx
 
@@ -66,33 +67,37 @@ def onNewVisit(mv):
     mv.visit = None
 
 
-def SaveVisit(mv):
+def onSaveVisit(mv):
     assert mv.patient is not None
     assert mv.name.Value != ""
     assert mv.diag.Value != ""
+    
+    pg = mv.order_book.GetPage(0)
 
     kwargs = {
-        'pid': mv.patient.id,
+        'p': mv.patient,
+        'v': mv.visit,
+        'vq': mv.book.GetPage(0).vq,
         'past_history': mv.past_history.Value,
         'note': mv.note.Value,
         'diag': mv.diag.Value,
-        'weight': float(mv.weight.Value),
-        'days': int(mv.days.Value),
-        'followup': mv.followup.Value,
+        'weight': float(pg.weight.Value),
+        'days': int(pg.days.Value),
+        'followup': pg.followup.Value,
         'bill': otf.bill_str_to_int(
             mv.total_cost.Value),
-        'linedrugs': mv.d_list.build_linedrugs()
+        'linedrugs': pg.d_list.build_linedrugs()
     }
     if mv.visit:
         ans = wx.MessageBox("Cập nhật lượt khám?", "Lưu", style=wx.YES_NO)
         if ans == wx.YES:
-            logging.debug(f"update selected visit: {mv.visit.exam_date}")
-            dbf.save_old_visit(**kwargs, vid=mv.visit.id, sess=mv.sess)
+            logging.debug(f"update selected visit: {kwargs}")
+            dbf.save_old_visit(**kwargs, sess=mv.sess)
             wx.MessageBox("Đã cập nhật")
     else:
         ans = wx.MessageBox("Lưu lượt khám mới?", "Lưu", style=wx.YES_NO)
         if ans == wx.YES:
-            logging.debug("save new visit")
+            logging.debug(f"save new visit: {kwargs}")
             dbf.save_new_visit(**kwargs, sess=mv.sess)
             wx.MessageBox("Đã lưu")
     mv.Refresh()

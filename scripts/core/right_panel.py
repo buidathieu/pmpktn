@@ -45,7 +45,7 @@ def create_right_panel_widgets(mv):
     mv.note = wx.TextCtrl(mv, size=note_size, style=wx.TE_MULTILINE)
     mv.diag = wx.TextCtrl(mv)
     mv.order_book = OrderBook(mv)
-    mv.new_visit_btn = _createNewVisitbtn(mv)
+    # mv.new_visit_btn = _createNewVisitbtn(mv)
     mv.save_visit_btn = _createSaveVisitbtn(mv)
     mv.total_cost = _createTotalCost(mv)
     
@@ -81,7 +81,7 @@ def create_right_panel_sizer(mv):
     diag_row.Add(wx.StaticText(mv, label='Chẩn đoán:'),
                  0, wx.ALIGN_CENTER | wx.TOP, 3)
     diag_row.Add(mv.diag, 1)
-    btn_row.Add(mv.new_visit_btn, 0, wx.CENTRE)
+    # btn_row.Add(mv.new_visit_btn, 0, wx.CENTRE)
     btn_row.Add(mv.save_visit_btn, 0, wx.CENTRE)
     btn_row.AddStretchSpacer()
     btn_row.Add(wx.StaticText(mv, label='Tổng tiền:'), 0, wx.CENTRE)

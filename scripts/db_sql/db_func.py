@@ -51,9 +51,8 @@ def get_today_seen_patient_list(sess=None):
         filter(func.DATE(Visit.exam_date) == dt.date.today())
 
 
-def get_queuing_patient_list(sess=None):
-    return sess.query(Patient).\
-        join(VisitQueue).\
+def get_waiting_queue(sess=None):
+    return sess.query(VisitQueue).\
         filter(VisitQueue.is_seen == False).\
         order_by(VisitQueue.id)
         
@@ -76,16 +75,17 @@ def add_patient(name, gender, birthdate, address, past_history, sess=None):
     return new_patient
 
 
-def edit_patient(pid, past_history, sess):
-    p = sess.query(Patient).get(pid)
+# save button
+def update_patient(p, past_history, sess):
     p.past_history = past_history
-    sess.commit()
-    return p
 
 
-def update_visit(vid, note, diag, weight, days,
+def do_seen_patient(vq, sess):
+    vq.is_seen = True
+
+
+def update_visit(v, note, diag, weight, days,
                  followup, bill, linedrugs, sess):
-    v = sess.query(Visit).get(vid)
     v.note = note
     v.diag = diag
     v.weight = weight
@@ -102,15 +102,14 @@ def update_visit(vid, note, diag, weight, days,
         drug.quantity -= i['quantity']
 
 
-def add_visit(pid, note, diag, weight, days, followup, bill, linedrugs, sess):
+def add_visit(p, note, diag, weight, days, followup, bill, linedrugs, sess):
     v = Visit(note=note,
               diag=diag,
               weight=weight,
               days=days,
               followup=followup,
               bill=bill,
-              patient_id=pid)
-    v.linedrugs = []
+              patient_id=p.id)
     for i in linedrugs:
         v.linedrugs.append(LineDrug(**i))
         drug = sess.query(DrugWarehouse).get(i['drug_id'])
@@ -118,32 +117,28 @@ def add_visit(pid, note, diag, weight, days, followup, bill, linedrugs, sess):
     sess.add(v)
 
 
-def do_seen_patient(pid, sess):
-    vq = sess.query(VisitQueue).join(Patient).\
-        filter(Patient.id == pid).\
-        filter(VisitQueue.is_seen == False).first()
-    vq.is_seen = True
-
-
-def save_old_visit(pid, past_history,
-                   vid, note, diag, weight, days, followup, bill, linedrugs,
+def save_old_visit(p, v, vq, past_history,
+                   note, diag, weight, days,
+                   followup, bill, linedrugs,
                    sess=None):
-    edit_patient(pid, past_history, sess)
-    update_visit(vid, note, diag, weight, days,
+    update_patient(p, past_history, sess)
+    update_visit(v, note, diag, weight, days,
                  followup, bill, linedrugs, sess)
     sess.commit()
 
 
-def save_new_visit(pid, past_history,
-                   note, diag, weight, days, followup, bill, linedrugs,
+def save_new_visit(p, v, vq, past_history,
+                   note, diag, weight, days,
+                   followup, bill, linedrugs,
                    sess=None):
-    edit_patient(pid, past_history, sess)
-    add_visit(pid, note, diag, weight, days,
+    update_patient(p, past_history, sess)
+    add_visit(p, note, diag, weight, days,
               followup, bill, linedrugs, sess)
-    do_seen_patient(pid, sess)
+    do_seen_patient(vq, sess)
     sess.commit()
 
 
+# report
 def GetTodayReport():
     with session_scope() as sess:
         query = sess.query(Visit).filter(

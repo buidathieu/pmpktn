@@ -4,6 +4,7 @@ from .right_panel import *
 
 from .menubar import MyMenuBar
 from .accel import my_accel
+from .binding import button_bindings
 
 from .core_func import onPatientSelect, onPatientDeselect, onVisitSelect, onVisitDeselect
 
@@ -29,6 +30,7 @@ class MainView(wx.Frame):
         self._createInterface()
         self._setMenuBar()
         self._setAccelTable()
+        button_bindings(self)
         self.Bind(wx.EVT_CLOSE, self.onClose)
 
     def _createInterface(self):

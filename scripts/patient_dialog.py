@@ -2,6 +2,7 @@ from initialize import *
 import db_sql.db_func as dbf
 import other_func as otf
 import wx
+import wx.adv
 
 
 class BasePatientDialog(wx.Dialog):
@@ -92,7 +93,7 @@ class AddPatientDialog(BasePatientDialog):
 class EditPatientDialog(BasePatientDialog):
 
     def __init__(self, parent, patient):
-        super().__init__(parent, title="Thêm bệnh nhân mới")
+        super().__init__(parent, title="Chỉnh sửa thông tin bệnh nhân")
         self.patient = patient
         self.populate()
         logging.debug(

@@ -29,7 +29,6 @@ class DrugList(wx.ListCtrl):
                  f"{ld.dosage_per} {ld.drug.usage_unit}",
                  f"{ld.quantity} {ld.drug.sale_unit}",
                  ld.usage])
-        self.calc_total_drug_price()
 
     def Clear(self):
         self.DeleteAllItems()

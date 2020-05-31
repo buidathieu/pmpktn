@@ -67,15 +67,24 @@ class QueuingPatientList(BasePatientList):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.vq_list = dbf.get_waiting_queue(sess=self.Parent.Parent.sess).all()
+        self.vq = None
         self.timer = self.RefreshQueueTimer()    
 
     def _make_p_list(self):
-        self.p_list = dbf.get_queuing_patient_list(
-            sess=self.Parent.Parent.sess).all()
+        self.p_list = [vq.patient for vq in self.vq_list]
 
     def RefreshQueueTimer(self):
         self.Refresh()
-        return wx.CallLater(1000 * 60 * 5, self.RefreshQueueTimer)
+        return wx.CallLater(setting["time_between_rebuild_visitqueue"], self.RefreshQueueTimer)
+    
+    def onSelect(self, e):
+        self.vq = self.vq_list[e.Index]
+        super().onSelect(self, e)
+
+    def onDeselect(self, e):
+        self.vq = None
+        super().onDeselect(self, e)
 
 
 class TodayPatientList(BasePatientList):
