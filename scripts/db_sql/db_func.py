@@ -11,7 +11,7 @@ def query_staff_list(sess=None):
 
 def save_staff_workday(staff, sess=None):
     staff.workdays.append(WorkDay())
-    sess.commit()
+    commit_(sess)
 
 
 # nurseview
@@ -30,18 +30,28 @@ def search_patient(name, gender, birthyear, sess=None):
 
 def add_new_visitqueue(pid, sess=None):
     vq = sess.add(VisitQueue(patient_id=pid))
-    sess.commit()
+    commit_(sess)
     return vq
 
 
 def remove_visitqueue(queue, sess=None):
     sess.delete(queue)
-    sess.commit()
+    commit_(sess)
 
 
 def get_visitqueue(sess=None):
-    return sess.query(VisitQueue).\
-        filter(VisitQueue.is_seen == False)
+    return sess.query(VisitQueue)
+
+
+def edit_patient(p, name, gender, birthdate,
+                 address, past_history, sess):
+    p.name = name
+    p.gender = gender
+    p.birthdate = birthdate
+    p.address = address
+    p.past_history = past_history
+    commit_(sess)
+    return p
 
 
 # left_panel_classes.py
@@ -51,47 +61,37 @@ def get_today_seen_patient_list(sess=None):
         filter(func.DATE(Visit.exam_date) == dt.date.today())
 
 
-def get_waiting_queue(sess=None):
-    return sess.query(VisitQueue).\
-        filter(VisitQueue.is_seen == False).\
-        order_by(VisitQueue.id)
-        
+# picker popup
+def query_linedrug_list(sess):
+    return sess.query(DrugWarehouse)
+
+
+def query_therapy_list(sess):
+    return sess.query(Therapy)
+
 
 # mainview
-
-def query_linedrug_list_by_name(s):
-    with session_scope() as sess:
-        s = '%' + s + '%'
-        return sess.query(DrugWarehouse).\
-            filter(DrugWarehouse.name.like(s))
-
-
 def add_patient(name, gender, birthdate, address, past_history, sess=None):
     new_patient = Patient(name=name, gender=gender, birthdate=birthdate,
                           address=address, past_history=past_history,
                           )
     sess.add(new_patient)
-    sess.commit()
+    commit_(sess)
     return new_patient
 
 
 # save button
 def update_patient(p, past_history, sess):
     p.past_history = past_history
+    return p
 
 
 def do_seen_patient(vq, sess):
-    vq.is_seen = True
+    sess.delete(vq)
+    return vq
 
 
-def update_visit(v, note, diag, weight, days,
-                 followup, bill, linedrugs, sess):
-    v.note = note
-    v.diag = diag
-    v.weight = weight
-    v.days = days
-    v.followup = followup
-    v.bill = bill
+def add_linedrugs_to_visit(v, linedrugs, sess):
     for i in v.linedrugs:
         drug = sess.query(DrugWarehouse).get(i.drug_id)
         drug.quantity += i.quantity
@@ -102,7 +102,38 @@ def update_visit(v, note, diag, weight, days,
         drug.quantity -= i['quantity']
 
 
-def add_visit(p, note, diag, weight, days, followup, bill, linedrugs, sess):
+def add_linetherapies_to_visit(v, linetherapies, sess):
+    for lt in v.linetherapies:
+        therapy = sess.query(Therapy).get(lt.therapy_id)
+        for tld in therapy.therapylinedrugs:
+            drug = sess.query(DrugWarehouse).get(tld.drug_id)
+            drug.quantity += tld.cost_on_1_use
+        sess.delete(lt)
+    for t_id in linetherapies:
+        v.linetherapies.append(LineTherapy(therapy_id=t_id))
+        therapy = sess.query(Therapy).get(t_id)
+        for tld in therapy.therapylinedrugs:
+            drug = sess.query(DrugWarehouse).get(tld.drug_id)
+            drug.quantity -= tld.cost_on_1_use
+
+
+def update_visit(v, note, diag, weight, days,
+                 followup, bill, linedrugs, linetherapies,
+                 sess):
+    v.note = note
+    v.diag = diag
+    v.weight = weight
+    v.days = days
+    v.followup = followup
+    v.bill = bill
+    add_linedrugs_to_visit(v, linedrugs, sess)
+    add_linetherapies_to_visit(v, linetherapies, sess)
+    return v
+
+
+def add_visit(p, note, diag, weight, days,
+              followup, bill, linedrugs, linetherapies,
+              sess):
     v = Visit(note=note,
               diag=diag,
               weight=weight,
@@ -110,32 +141,33 @@ def add_visit(p, note, diag, weight, days, followup, bill, linedrugs, sess):
               followup=followup,
               bill=bill,
               patient_id=p.id)
-    for i in linedrugs:
-        v.linedrugs.append(LineDrug(**i))
-        drug = sess.query(DrugWarehouse).get(i['drug_id'])
-        drug.quantity -= i['quantity']
+    add_linedrugs_to_visit(v, linedrugs, sess)
+    add_linetherapies_to_visit(v, linetherapies, sess)
     sess.add(v)
+    return v
 
 
 def save_old_visit(p, v, vq, past_history,
                    note, diag, weight, days,
-                   followup, bill, linedrugs,
+                   followup, bill, linedrugs, linetherapies,
                    sess=None):
-    update_patient(p, past_history, sess)
-    update_visit(v, note, diag, weight, days,
-                 followup, bill, linedrugs, sess)
-    sess.commit()
+    patient = update_patient(p, past_history, sess)
+    visit = update_visit(v, note, diag, weight, days,
+                         followup, bill, linedrugs, linetherapies, sess)
+    commit_(sess)
+    return patient, visit
 
 
 def save_new_visit(p, v, vq, past_history,
                    note, diag, weight, days,
-                   followup, bill, linedrugs,
+                   followup, bill, linedrugs, linetherapies,
                    sess=None):
-    update_patient(p, past_history, sess)
-    add_visit(p, note, diag, weight, days,
-              followup, bill, linedrugs, sess)
+    patient = update_patient(p, past_history, sess)
+    visit = add_visit(p, note, diag, weight, days,
+                      followup, bill, linedrugs, linetherapies, sess)
     do_seen_patient(vq, sess)
-    sess.commit()
+    commit_(sess)
+    return patient, visit
 
 
 # report
@@ -157,8 +189,6 @@ def GetTodayReport():
 
 
 # Query with the same sess in functions related to SamplePrescription
-
-
 def query_sample_prescription_list(sess):
     return sess.query(SamplePrescription)
 
@@ -181,7 +211,7 @@ def add_sample_prescription(name, samplelinedrugs, sess):
                            dosage_per=dosage_per)
         )
     sess.add(new_ps)
-    sess.commit()
+    commit_(sess)
     return new_ps
 
 
@@ -195,4 +225,4 @@ def upd_sample_prescription(ps, name, samplelinedrugs, sess):
                            times=times,
                            dosage_per=dosage_per)
         )
-    sess.commit()
+    commit_(sess)

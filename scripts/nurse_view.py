@@ -181,7 +181,7 @@ class NurseView(wx.Frame):
             patient = self.p_list[idx]
             with EditPatientDialog(self, patient) as dlg:
                 if dlg.ShowModal() == wx.ID_OK:
-                    edited_patient = dlg.edit_patient()
+                    dlg.edit_patient()
                     self.p_listctrl.DeleteAllItems()
                     self.p_list = []
         else:
@@ -228,7 +228,9 @@ class NurseView(wx.Frame):
 
     def RefreshQueueTimer(self):
         self.RefreshQueue()
-        return wx.CallLater(setting["time_between_rebuild_visitqueue"], self.RefreshQueueTimer)
+        return wx.CallLater(
+            setting["time_between_rebuild_visitqueue"],
+            self.RefreshQueueTimer)
 
     def Search(self):
         kwargs = {

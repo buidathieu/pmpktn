@@ -6,7 +6,7 @@ import wx
 def create_left_panel_widgets(mv):
     mv.book = PatientBook(mv)
     mv.visit_list = VisitList(mv)
-    
+
 
 def create_left_panel_sizer(mv):
     sizer = wx.BoxSizer(wx.VERTICAL)

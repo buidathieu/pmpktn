@@ -3,11 +3,11 @@ from initialize import *
 import wx
 import logging
 
+
 class DrugList(wx.ListCtrl):
 
     def __init__(self, parent):
         super().__init__(parent, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        self.total_drug_price = 0
         self.dwh_list = []
         self.AppendColumn('STT', width=d_stt_w)
         self.AppendColumn('Thuốc', width=d_name_w)
@@ -33,7 +33,6 @@ class DrugList(wx.ListCtrl):
     def Clear(self):
         self.DeleteAllItems()
         self.dwh_list = []
-        self.total_drug_price = 0
 
     def onDrugSelect(self, e):
         i = e.Index
@@ -80,7 +79,7 @@ class DrugList(wx.ListCtrl):
         if idx >= 0:
             self.dwh_list.pop(idx)
             self.DeleteItem(idx)
-            for row in range(1, self.ItemCount):
+            for row in range(1, self.ItemCount + 1):
                 self.SetItem(row - 1, 0, str(row))
         else:
             logging.debug('drug not found when delete')

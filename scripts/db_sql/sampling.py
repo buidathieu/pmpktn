@@ -115,14 +115,14 @@ def random_linedrug(k=10):
                 quantity = fr(a) * b
             if sample_drugs[j][3] == "chai":
                 quantity = 1
-            li.append(LineDrug(drug_id=j + 1,
-                               dosage_per=a,
-                               times=b,
-                               quantity=math.ceil(quantity),
-                               usage=f"Ngày {sample_drugs[j][5]} {b} lần, lần {a} {sample_drugs[j][2]}",
-                               visit_id=i + 1
-                               )
-                      )
+            li.append(
+                LineDrug(
+                    drug_id=j + 1,
+                    dosage_per=a,
+                    times=b,
+                    quantity=math.ceil(quantity),
+                    usage=f"Ngày {sample_drugs[j][5]} {b} lần, lần {a} {sample_drugs[j][2]}",
+                    visit_id=i + 1))
     return li
 
 

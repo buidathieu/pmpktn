@@ -139,3 +139,4 @@ dmypy.json
 *.sublime-project
 *.sublime-workspace
 *.ipynb
+*.pdf

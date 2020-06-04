@@ -21,13 +21,15 @@ class SamplePrescriptionDialog(wx.Dialog):
 
         self._setSizer()
         self.RefreshTree()
-        self._bind()
+        self.Bind(wx.EVT_CLOSE, self.onCloseDialog)
         logging.debug(
             "SamplePrescriptionDialog initialized, using mainview session")
 
     def _createTree(self):
-        w = wx.TreeCtrl(self, size=tree_size,
-                        style=wx.TR_HIDE_ROOT | wx.TR_HAS_BUTTONS | wx.TR_LINES_AT_ROOT)
+        w = wx.TreeCtrl(
+            self,
+            size=tree_size,
+            style=wx.TR_HIDE_ROOT | wx.TR_HAS_BUTTONS | wx.TR_LINES_AT_ROOT)
         return w
 
     def _createAddBtn(self):
@@ -74,50 +76,54 @@ class SamplePrescriptionDialog(wx.Dialog):
         sizer.Add(applybtns, 0, wx.EXPAND | wx.ALL ^ wx.TOP, 5)
         self.SetSizerAndFit(sizer)
 
+    def add_linedrugs_to_node(self, node, samplelinedrugs):
+        for ld in samplelinedrugs:
+            self.tree.AppendItem(
+                node,
+                f"{ld.drug.name}".ljust(30) + f"{ld.times} x {ld.dosage_per}({ld.drug.usage_unit})")
+
     def RefreshTree(self):
         t = self.tree
         t.DeleteAllItems()
         root = t.AddRoot("All sample prescriptions")
         for i in self.sample_prescription_list:
-            ps = t.AppendItem(root, i.name)
-            for ld in i.samplelinedrugs:
-                t.AppendItem(ps, ld.drug.name)
-
-    def _bind(self):
-        self.Bind(wx.EVT_CLOSE, self.onCloseDialog)
+            node = t.AppendItem(root, i.name)
+            self.add_linedrugs_to_node(node, i.samplelinedrugs)
 
     def onCloseDialog(self, e):
-        try:
-            self.sess.commit()
-        except Exception:
-            print("something happened and sess rollback")
-            self.sess.rollback()
-        finally:
-            e.Skip()
+        commit_(self.sess)
+        e.Skip()
 
     def onCancelBtn(self, e):
         self.EndModal(wx.ID_CANCEL)
 
     def onApplyBtn(self, e):
-        ps, idx = self.get_selected_sample_prescription()
+        ps, idx, treeitem = self.get_selected_sample_prescription()
         assert idx != -1
         self.EndModal(wx.ID_APPLY)
 
     def onAddSamplePrescription(self, e):
         with AddEditSamplePrescriptionDialog(self,
                                              mode='add') as dlg:
-            dlg.ShowModal()
+            if dlg.ShowModal() == wx.ID_OK:
+                self.sample_prescription_list.append(dlg.ps)
+                treeitem = self.tree.AppendItem(
+                    self.tree.RootItem, dlg.ps.name)
+                self.add_linedrugs_to_node(treeitem, dlg.ps.samplelinedrugs)
 
     def onUpdSamplePrescription(self, e):
-        ps, idx = self.get_selected_sample_prescription()
+        ps, idx, treeitem = self.get_selected_sample_prescription()
         assert idx != -1
         with AddEditSamplePrescriptionDialog(self,
                                              mode='edit',
                                              ps=ps) as dlg:
-            dlg.ShowModal()
+            if dlg.ShowModal() == wx.ID_OK:
+                self.tree.SetItemText(treeitem, ps.name)
+                self.tree.DeleteChildren(treeitem)
+                self.add_linedrugs_to_node(treeitem, ps.samplelinedrugs)
 
     def onDelSamplePrescription(self, e):
-        ps, idx = self.get_selected_sample_prescription()
+        ps, idx, treeitem = self.get_selected_sample_prescription()
         with wx.MessageDialog(self,
                               f'Xoá toa mẫu "{ps.name}"?',
                               "Xoá toa mẫu",
@@ -125,46 +131,49 @@ class SamplePrescriptionDialog(wx.Dialog):
             if dlg.ShowModal() == wx.ID_OK:
                 self.sample_prescription_list.pop(idx)
                 dbf.del_sample_prescription(ps, self.sess)
-                self.RefreshTree()
+                self.tree.Delete(treeitem)
 
     def get_selected_sample_prescription(self):
         '''
         return SamplePrescription and its index in list
         '''
-        sel = self.tree.Selection
-        if sel.IsOk():
+        treeitem = self.tree.Selection
+        if treeitem.IsOk():
             idx = 0
             root = self.tree.GetRootItem()
             # up 1 level if linedrug
-            if self.tree.GetItemParent(sel) != root:
-                sel = self.tree.GetItemParent(sel)
+            if self.tree.GetItemParent(treeitem) != root:
+                treeitem = self.tree.GetItemParent(treeitem)
             (child, cookie) = self.tree.GetFirstChild(root)
             # find idx
             while True:
-                if child == sel:
+                if child == treeitem:
                     break
                 else:
                     (child, cookie) = self.tree.GetNextChild(root, cookie)
                     idx += 1
-            return self.sample_prescription_list[idx], idx
+            return self.sample_prescription_list[idx], idx, treeitem
         else:
-            return None, -1
+            return None, -1, -1
 
 
 class AddEditSamplePrescriptionDialog(wx.Dialog):
 
     def __init__(self, parent, mode, ps=None):
         self.mode = mode
+        self.ps = ps
         if mode == 'add':
             title = 'Thêm toa mẫu'
+            self.drugWH_id_list = []
         elif mode == 'edit':
             title = 'Sửa toa mẫu'
+            self.drugWH_id_list = [i.drug_id for i in self.ps.samplelinedrugs]
+
         super().__init__(parent=parent, title=title,
                          size=add_edit_prescription_dialog_size)
 
         self.drugs = dbf.query_drugWH_list(self.Parent.sess).all()
         self.drugs.sort(key=lambda x: x.name)
-        self.drugWH_id_list = []
 
         self.name = self._createName()
         self.ld_list = self._createLinedrugList()
@@ -176,10 +185,7 @@ class AddEditSamplePrescriptionDialog(wx.Dialog):
         self.save_btn = self._createSaveBtn()
         self.cancel_btn = self._createCancelBtn()
         self._setSizer()
-        if mode == 'edit':
-            self.ps = ps
-            self.drugWH_id_list = [i.drug_id for i in self.ps.samplelinedrugs]
-            self.prefill(self.ps)
+        self.Populate()
 
     def _createName(self):
         w = wx.TextCtrl(self)
@@ -269,14 +275,15 @@ class AddEditSamplePrescriptionDialog(wx.Dialog):
         ])
         self.SetSizerAndFit(sizer)
 
-    def prefill(self, ps):
-        self.name.ChangeValue(ps.name)
-        for ld in ps.samplelinedrugs:
-            self.ld_list.Append([
-                ld.drug.name,
-                ld.times,
-                ld.dosage_per
-            ])
+    def Populate(self):
+        if self.ps is not None:
+            self.name.ChangeValue(self.ps.name)
+            for ld in self.ps.samplelinedrugs:
+                self.ld_list.Append([
+                    ld.drug.name,
+                    ld.times,
+                    ld.dosage_per
+                ])
 
     def onAdd(self, e):
         idx = self.drugpicker.Selection
@@ -305,9 +312,7 @@ class AddEditSamplePrescriptionDialog(wx.Dialog):
                                       "Lưu toa mẫu",
                                       style=wx.OK | wx.CANCEL) as dlg:
                     if dlg.ShowModal() == wx.ID_OK:
-                        ps = self.add_sample_prescription(sess)
-                        self.Parent.sample_prescription_list.append(ps)
-                        self.Parent.RefreshTree()
+                        self.add_sample_prescription(sess)
                         self.EndModal(wx.ID_OK)
             elif self.mode == 'edit':
                 with wx.MessageDialog(self,
@@ -316,7 +321,6 @@ class AddEditSamplePrescriptionDialog(wx.Dialog):
                                       style=wx.OK | wx.CANCEL) as dlg:
                     if dlg.ShowModal() == wx.ID_OK:
                         self.upd_sample_prescription(sess)
-                        self.Parent.RefreshTree()
                         self.EndModal(wx.ID_OK)
         except AssertionError:
             with wx.MessageDialog(self,
@@ -326,9 +330,8 @@ class AddEditSamplePrescriptionDialog(wx.Dialog):
 
     def add_sample_prescription(self, sess):
         samplelinedrugs = self.build_samplelinedrugs()
-        ps = dbf.add_sample_prescription(
+        self.ps = dbf.add_sample_prescription(
             self.name.Value, samplelinedrugs, sess)
-        return ps
 
     def upd_sample_prescription(self, sess):
         samplelinedrugs = self.build_samplelinedrugs()

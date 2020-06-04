@@ -38,10 +38,11 @@ class MainView(wx.Frame):
 
         left_panel = create_left_panel_sizer(self)
         right_panel = create_right_panel_sizer(self)
-        
+
         whole_panel = wx.BoxSizer(wx.HORIZONTAL)
         whole_panel.Add(left_panel, 0, wx.EXPAND)
-        whole_panel.Add(right_panel, 0, wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        whole_panel.Add(right_panel, 0, wx.EXPAND |
+                        wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         self.SetSizer(whole_panel)
 
     def _setMenuBar(self):
@@ -77,7 +78,6 @@ class MainView(wx.Frame):
             onVisitSelect(self, v)
         else:
             onVisitDeselect(self)
-            
 
     def Refresh(self):
         self.book.Refresh()

@@ -73,6 +73,7 @@ class BasePatientDialog(wx.Dialog):
         else:
             e.Skip()
 
+
 class AddPatientDialog(BasePatientDialog):
 
     def __init__(self, parent):
@@ -90,16 +91,17 @@ class AddPatientDialog(BasePatientDialog):
         new_patient = dbf.add_patient(**kwargs, sess=self.Parent.sess)
         return new_patient
 
+
 class EditPatientDialog(BasePatientDialog):
 
     def __init__(self, parent, patient):
         super().__init__(parent, title="Chỉnh sửa thông tin bệnh nhân")
         self.patient = patient
-        self.populate()
+        self.Populate()
         logging.debug(
             f'EditPatientDialog initialize, using parent session, populate data, name={patient.name}')
 
-    def populate(self):
+    def Populate(self):
         self.name.ChangeValue(self.patient.name)
         self.gender.Selection = int(self.patient.gender)
         self.birthdate.SetValue(otf.pydate2wxdate(self.patient.birthdate))

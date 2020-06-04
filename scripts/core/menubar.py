@@ -2,7 +2,8 @@ from initialize import *
 import other_func as otf
 import db_sql.db_func as dbf
 from .core_func import onSaveVisit
-from print_func.print_func import MyPrinter
+from print_func.my_printer import MyPrinter
+from nurse_view import NurseView
 import wx
 
 
@@ -12,12 +13,15 @@ class MyMenuBar(wx.MenuBar):
         super().__init__()
         self.mv = mv
         self._createMenu()
-        self.printer = MyPrinter()
 
     def _createMenu(self):
         homeMenu = wx.Menu()
+        menuNurseview = homeMenu.Append(wx.ID_ANY, "Cửa sổ điều dưỡng nhận bệnh")
+        homeMenu.AppendSeparator()
         menuPrint = homeMenu.Append(wx.ID_PRINT, "Print\tCTRL+P")
         menuPrintPreview = homeMenu.Append(wx.ID_ANY, "Print Preview")
+        homeMenu.AppendSeparator()
+        menuPrintBillPreview = homeMenu.Append(wx.ID_ANY, "In hoá đơn")
         homeMenu.AppendSeparator()
         menuRefresh = homeMenu.Append(wx.ID_REFRESH, "Refresh\tF5")
         menuExit = homeMenu.Append(wx.ID_EXIT, "Exit\tALT+F4")
@@ -32,38 +36,29 @@ class MyMenuBar(wx.MenuBar):
         self.Append(patientmenu, "Bệnh nhân")
         self.Append(reportmenu, "Báo cáo")
 
+        self.Bind(wx.EVT_MENU, self.onNurseview, menuNurseview)
         self.Bind(wx.EVT_MENU, self.onPrint, menuPrint)
         self.Bind(wx.EVT_MENU, self.onPrintPreview, menuPrintPreview)
+        self.Bind(wx.EVT_MENU, self.onPrintBillPreview, menuPrintBillPreview)
         self.Bind(wx.EVT_MENU, self.onRefresh, menuRefresh)
         self.Bind(wx.EVT_MENU, self.onExit, menuExit)
         self.Bind(wx.EVT_MENU, self.onSaveVisit, menuSaveVisit)
         self.Bind(wx.EVT_MENU, self.onReportToday, menuReportToday)
 
-    def feed_data_to_printer(self):
-        pg = self.mv.order_book.GetPage(0)
-        self.printer.feed_data(
-            name=self.mv.name.Value,
-            age=self.mv.age.Value,
-            gender=self.mv.gender.Value,
-            address=self.mv.address.Value,
-            diagnosis=self.mv.diag.Value,
-            weight=pg.weight.Value,
-            height="",
-            linedrugs=pg.d_list.build_linedrugs_for_pdf(),
-            followup=pg.followup.Value
-        )
+    def onNurseview(self, e):
+        NurseView(None).Show()
 
     def onPrint(self, e):
-        self.feed_data_to_printer()
-        self.printer.print_pdf()
+        MyPrinter().print_prescription_pdf(self.mv)
 
     def onPrintPreview(self, e):
-        self.feed_data_to_printer()
-        self.printer.preview_pdf()
+        MyPrinter().preview_prescription_pdf(self.mv)
+
+    def onPrintBillPreview(self, e):
+        MyPrinter().preview_bill_pdf(self.mv)
 
     def onSaveVisit(self, e):
         onSaveVisit(self.mv)
-
 
     def onExit(self, e):
         self.mv.Close()

@@ -23,7 +23,7 @@ class VisitList(wx.ListCtrl):
         self.Parent.visit = None
 
     def buildVisitList(self, p):
-        self.visit_list = p.visits.order_by(Visit.id.desc())
+        self.visit_list = p.visits.order_by(Visit.id.asc())
         logging.debug('visit list rebuilt')
         self.Clear()
         for v in self.visit_list:

@@ -1,26 +1,24 @@
 from initialize import *
-from db_sql.db_func import query_linedrug_list_by_name
+from db_sql.db_func import query_therapy_list
 import os
 import wx
-import logging
 
 
-class DrugPopup(wx.ComboPopup):
+class TherapyPopup(wx.ComboPopup):
 
     def __init__(self, parent):
         super().__init__()
         self.lc = None
-        self.init_d_l = query_linedrug_list_by_name('').all()
-        self.d_l = []
+        mv = parent.Parent.Parent.Parent
+        self.init_t_l = query_therapy_list(mv.sess).all()
+        self.t_l = []
 
     def Create(self, parent):
         self.lc = wx.ListCtrl(
             parent,
             style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.SIMPLE_BORDER)
-        self.lc.AppendColumn('Thuốc', width=200)
-        self.lc.AppendColumn('Số lượng')
+        self.lc.AppendColumn('Thủ thuật', width=200)
         self.lc.AppendColumn('Đơn giá')
-        self.lc.AppendColumn('Cách dùng', width=100)
         self.lc.Bind(wx.EVT_MOTION, self.OnMotion)
         self.lc.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
         self.lc.Bind(wx.EVT_KEY_DOWN, self.onKeyPress)
@@ -49,10 +47,11 @@ class DrugPopup(wx.ComboPopup):
 
     def Update(self, s=''):
         self.lc.DeleteAllItems()
-        self.d_l = list(filter(lambda x: s.upper() in x.name, self.init_d_l))
-        for item in self.d_l:
+        self.t_l = list(filter(lambda x: s.casefold()
+                               in x.name.casefold(), self.init_t_l))
+        for item in self.t_l:
             self.lc.Append(
-                [item.name, item.quantity, item.sale_price, item.usage])
+                [item.name, item.sale_price])
 
     def OnMotion(self, e):
         item, flags = self.lc.HitTest(e.GetPosition())
@@ -63,10 +62,8 @@ class DrugPopup(wx.ComboPopup):
     def OnLeftDown(self, e):
         try:
             self.value = self.curitem
-            self.ComboCtrl.drugWH = self.d_l[self.value]
+            self.ComboCtrl.therapy = self.t_l[self.value]
             self.Dismiss()
-            self.ComboCtrl.SelectAll()
-            self.ComboCtrl.SetInsertionPointEnd()
         except IndexError:
             self.Dismiss()
 
@@ -96,10 +93,7 @@ class DrugPopup(wx.ComboPopup):
             self.KeyESC()
 
     def KeyESC(self):
-        a = self.ComboCtrl.Value
         self.Dismiss()
-        self.ComboCtrl.ChangeValue(a)
-        self.ComboCtrl.SetInsertionPointEnd()
 
     def KeyReturn(self):
         self.OnLeftDown(None)
@@ -116,37 +110,17 @@ class DrugPopup(wx.ComboPopup):
             self.KeyReturn()
 
 
-class DrugPicker(wx.ComboCtrl):
+class TherapyPicker(wx.ComboCtrl):
 
     def __init__(self, parent):
-        super().__init__(parent, size=drugctrl_size, style=wx.TE_PROCESS_ENTER)
-        self.drug_popup = DrugPopup(self)
-        self.SetPopupControl(self.drug_popup)
+        super().__init__(parent, style=wx.TE_PROCESS_ENTER)
+        self.therapy_popup = TherapyPopup(self)
+        self.SetPopupControl(self.therapy_popup)
         self.Bind(wx.EVT_KEY_DOWN, self.onKeyPress)
         self.Bind(wx.EVT_TEXT, self.onTextChange)
-        self.SetHint("Nhấn Enter để search thuốc")
-        self._drugWH = None
+        self.SetHint("Nhấn Enter để search thủ thuật")
+        self.therapy = None
         self.EnablePopupAnimation(enable=False)
-
-    @property
-    def drugWH(self):
-        return self._drugWH
-
-    @drugWH.setter
-    def drugWH(self, dwh):
-        self._drugWH = dwh
-        pg = self.Parent
-        if dwh:
-            pg.usage_unit.Label = dwh.usage_unit
-            pg.sale_unit.Label = dwh.sale_unit
-        else:
-            self.ChangeValue('')
-            pg.dosage_per.ChangeValue('')
-            pg.usage_unit.Label = '{Đơn vị}'
-            pg.times.ChangeValue("")
-            pg.quantity.ChangeValue("")
-            pg.sale_unit.Label = '{Đơn vị}'
-            pg.usage.ChangeValue("")
 
     def onKeyPress(self, e):
         if os.name == "posix":
@@ -180,5 +154,4 @@ class DrugPicker(wx.ComboCtrl):
                 self.Clear()
 
     def Clear(self):
-        self.drugWH = None
-
+        self.therapy = None

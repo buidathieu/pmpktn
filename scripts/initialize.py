@@ -10,7 +10,6 @@ try:
     ctypes.windll.shcore.SetProcessDpiAwareness(True)
 except Exception:
     pass
-from contextlib import contextmanager
 import logging
 
 
@@ -42,6 +41,9 @@ weight_bm = os.path.join(BM_PATH, 'weight.png')
 
 with open(os.path.join(DIR_PATH, "setting.json"), "r", encoding="utf-8-sig") as f:
     setting = json.load(f)
+
+followup_choices = setting["followup_list"]
+followup_choices.extend(list(setting["followup_dict"]))
 
 
 if setting["DEBUG"]:
@@ -89,7 +91,7 @@ gender_dict = {0: 'nam',
                'nam': 0,
                'nữ': 1}
 
-tree_size = (-1, 300)
+tree_size = (400, 300)
 add_edit_prescription_dialog_size = (-1, 600)
 
 username = setting['username']
@@ -105,15 +107,9 @@ engine = create_engine(
 Session = sessionmaker(bind=engine)
 
 
-@contextmanager
-def session_scope():
-    """Provide a transactional scope around a series of operations."""
-    session = Session()
+def commit_(sess):
     try:
-        yield session
-        session.commit()
-    except Exception:
-        session.rollback()
-        raise
-    finally:
-        session.close()
+        sess.commit()
+    except Exception as e:
+        sess.rollback()
+        print('sess rollback: ', e)

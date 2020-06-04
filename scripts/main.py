@@ -3,7 +3,6 @@ from db_sql.make_db import make_db, drop_db
 from log_in_dialog import LogInDialog
 from core.main_view import MainView
 from nurse_view import NurseView
-from print_func.print_func import MyPrinter
 import wx
 
 import argparse
@@ -29,8 +28,6 @@ if __name__ == "__main__":
                     help="make a new db")
     ap.add_argument("-s", "--sample", action="store_true",
                     help="sample 10 patients")
-    ap.add_argument("-tpdf", "--testpdf", action="store_true",
-                    help="make test pdf")
     args = vars(ap.parse_args())
 
     if args['new']:
@@ -38,7 +35,5 @@ if __name__ == "__main__":
         make_db()
     if args["sample"]:
         commit_population()
-    if args["testpdf"]:
-        MyPrinter().preview_test()
     if not any(args.values()):
         mainloop()

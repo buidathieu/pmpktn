@@ -15,12 +15,13 @@ def create_right_panel_widgets(mv):
         btn = wx.Button(mv, label='Lưu lượt khám (F3)')
         btn.SetBitmap(wx.Bitmap(save_visit_bm))
         return btn
-    
+
     def _createTotalCost(mv):
         def on_bill(e):
             val = int("".join(w.Value.split(".")))
             w.ChangeValue(otf.bill_int_to_str(val))
             w.SetInsertionPointEnd()
+
         def _kill_focus(e):
             if w.Value == '':
                 w.ChangeValue('0')
@@ -46,14 +47,15 @@ def create_right_panel_widgets(mv):
     # mv.new_visit_btn = _createNewVisitbtn(mv)
     mv.save_visit_btn = _createSaveVisitbtn(mv)
     mv.total_cost = _createTotalCost(mv)
-    
+
     mv.past_history.Bind(wx.EVT_CHAR, lambda e: otf.onTab(e, mv.note))
     mv.note.Bind(wx.EVT_CHAR, lambda e: otf.onTab(e, mv.diag))
-    mv.diag.Bind(wx.EVT_CHAR, lambda e: otf.onTab(e, mv.order_book.GetPage(0).weight))
-    
-    
-   
-def create_right_panel_sizer(mv):    
+    mv.diag.Bind(
+        wx.EVT_CHAR, lambda e: otf.onTab(
+            e, mv.order_book.GetPage(0).weight))
+
+
+def create_right_panel_sizer(mv):
     sizer = wx.BoxSizer(wx.VERTICAL)
     label_1_row = wx.BoxSizer(wx.HORIZONTAL)
     name_row = wx.BoxSizer(wx.HORIZONTAL)
@@ -88,7 +90,7 @@ def create_right_panel_sizer(mv):
     btn_row.AddStretchSpacer()
     btn_row.Add(wx.StaticText(mv, label='Tổng tiền:'), 0, wx.CENTRE)
     btn_row.Add(mv.total_cost, 0, wx.CENTRE)
-    
+
     sizer.Add(label_1_row, 0, wx.EXPAND)
     sizer.Add(name_row, 0, wx.EXPAND)
     sizer.Add(addr_row, 0, wx.EXPAND | wx.TOP, 3)
@@ -100,5 +102,5 @@ def create_right_panel_sizer(mv):
     sizer.Add(diag_row, 0, wx.EXPAND | wx.TOP, 3)
     sizer.Add(mv.order_book, 0, wx.EXPAND | wx.TOP, 3)
     sizer.Add(btn_row, 0, wx.EXPAND | wx.TOP, 3)
-    
+
     return sizer

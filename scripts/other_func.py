@@ -88,7 +88,7 @@ def only_nums(e, decimal=False, slash=False):
         nums += [47, wx.WXK_DIVIDE]
     if x in nums:
         e.Skip()
-        
+
 
 def onTab(e, dst):
     if e.KeyCode == wx.WXK_TAB:

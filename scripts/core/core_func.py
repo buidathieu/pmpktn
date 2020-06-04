@@ -3,6 +3,7 @@ import db_sql.db_func as dbf
 import other_func as otf
 from sample_prescription import SamplePrescriptionDialog
 
+
 from fractions import Fraction as fr
 import math
 import logging
@@ -20,7 +21,8 @@ def onPatientSelect(mv, p):
     mv.age.ChangeValue(otf.bd_to_age(p.birthdate).ljust(16))
     mv.address.ChangeValue(p.address)
     mv.past_history.ChangeValue(p.past_history)
-    
+
+
 def onPatientDeselect(mv, p=None):
     mv.visit_list.Clear()
     # info
@@ -31,8 +33,8 @@ def onPatientDeselect(mv, p=None):
     mv.age.ChangeValue("")
     mv.address.ChangeValue("")
     mv.past_history.ChangeValue("")
-    
-    
+
+
 def onVisitSelect(mv, v):
 
     def _dt_to_label(p_dt):
@@ -43,19 +45,21 @@ def onVisitSelect(mv, v):
                    p_dt.month,
                    p_dt.year)
 
-    mv.label_2.Label =f'Thông tin lượt khám (Mã lượt khám: {v.id})'
+    mv.label_2.Label = f'Thông tin lượt khám (Mã lượt khám: {v.id})'
     mv.label_dt.Label = _dt_to_label(v.exam_date)
     mv.note.ChangeValue(v.note)
     mv.diag.ChangeValue(v.diag)
     pg = mv.order_book.GetPage(0)
     pg.weight.ChangeValue(str(v.weight))
     pg.days.ChangeValue(str(v.days))
-    pg.drugpicker.Clear()
+    pg.drug_picker.Clear()
     pg.d_list.Populate(v.linedrugs)
     pg.followup.ChangeValue(v.followup)
+    tg = mv.order_book.GetPage(1)
+    tg.t_list.Populate(v.linetherapies)
     mv.total_cost.ChangeValue(otf.bill_int_to_str(v.bill))
-    
-    
+
+
 def onVisitDeselect(mv, v=None):
     mv.label_2.Label = 'Thông tin lượt khám'
     mv.label_dt.Label = ""
@@ -64,18 +68,27 @@ def onVisitDeselect(mv, v=None):
     pg = mv.order_book.GetPage(0)
     pg.weight.ChangeValue('0')
     pg.days.ChangeValue('2')
-    pg.drugpicker.Clear()
+    pg.drug_picker.Clear()
     pg.d_list.Clear()
+    tg = mv.order_book.GetPage(1)
+    tg.t_list.Clear()
     pg.followup.Selection = 0
     mv.total_cost.ChangeValue(otf.bill_int_to_str(setting['cong_kham_benh']))
 
 
 def onSaveVisit(mv):
-    assert mv.patient is not None
-    assert mv.name.Value != ""
-    assert mv.diag.Value != ""
-    
     pg = mv.order_book.GetPage(0)
+    tg = mv.order_book.GetPage(1)
+    try:
+        assert mv.patient is not None
+        assert mv.name.Value != ""
+        assert mv.diag.Value != ""
+        assert float(pg.weight.Value) > 0
+        assert int(pg.days.Value) > 0
+        assert otf.bill_str_to_int(mv.total_cost.Value) > 0
+    except Exception as e:
+        wx.MessageBox("Kiểm tra lại: Chẩn đoán, cân nặng")
+        raise e
 
     kwargs = {
         'p': mv.patient,
@@ -89,34 +102,55 @@ def onSaveVisit(mv):
         'followup': pg.followup.Value,
         'bill': otf.bill_str_to_int(
             mv.total_cost.Value),
-        'linedrugs': pg.d_list.build_linedrugs()
+        'linedrugs': pg.d_list.build_linedrugs(),
+        'linetherapies': tg.t_list.build_linetherapies()
     }
-    if mv.visit:
-        ans = wx.MessageBox("Cập nhật lượt khám?", "Lưu", style=wx.YES_NO)
+    if mv.book.Selection == 0:
+        if mv.visit:
+            ans = wx.MessageBox(
+                f"Cập nhật lượt khám cũ {mv.visit.exam_date.strftime('%d/%m/%Y %H:%M')}?",
+                "Lưu",
+                style=wx.YES_NO)
+            if ans == wx.YES:
+                logging.debug(f"update selected visit: {kwargs}")
+                dbf.save_old_visit(**kwargs, sess=mv.sess)
+                wx.MessageBox("Đã cập nhật")
+                mv.Refresh()
+        else:
+            ans = wx.MessageBox(
+                "Lưu lượt khám mới?", "Lưu",
+                style=wx.YES_NO)
+            if ans == wx.YES:
+                logging.debug(f"save new visit: {kwargs}")
+                _, v = dbf.save_new_visit(**kwargs, sess=mv.sess)
+                mv.visit = v
+                ans2 = wx.MessageBox("Đã lưu lượt khám.\nIn toa?", "Lưu", wx.YES_NO)
+                if ans2 == wx.YES:
+                    mv.menubar.printer.print_prescription_pdf(mv)
+                mv.Refresh()
+    if mv.book.Selection == 1 and mv.visit:
+        ans = wx.MessageBox(
+            "Cập nhật lượt khám trong danh sách đã khám hôm nay?",
+            "Lưu", style=wx.YES_NO)
         if ans == wx.YES:
             logging.debug(f"update selected visit: {kwargs}")
             dbf.save_old_visit(**kwargs, sess=mv.sess)
             wx.MessageBox("Đã cập nhật")
-    else:
-        ans = wx.MessageBox("Lưu lượt khám mới?", "Lưu", style=wx.YES_NO)
-        if ans == wx.YES:
-            logging.debug(f"save new visit: {kwargs}")
-            dbf.save_new_visit(**kwargs, sess=mv.sess)
-            wx.MessageBox("Đã lưu")
-    mv.Refresh()
-    
-    
+        mv.book.GetPage(1).Refresh()
+        mv.visit_list.Clear()
+
+
 def getWeight(mv):
     logging.debug('get latest weight')
     return str(mv.patient.visits[-1].weight)
-    
+
 
 def calc_quantity(pg):
     logging.debug('recalculate quantity')
     day = pg.days.Value
     dosage = pg.dosage_per.Value
     time = pg.times.Value
-    drug = pg.drugpicker.drugWH
+    drug = pg.drug_picker.drugWH
     try:
         assert day != 0
         assert dosage != ''
@@ -148,9 +182,16 @@ def calc_quantity(pg):
         pass
 
 
+def calc_price(mv):
+    price = setting["cong_kham_benh"]
+    price += mv.order_book.GetPage(0).d_list.get_total_price()
+    price += mv.order_book.GetPage(1).t_list.get_total_price()
+    mv.total_cost.ChangeValue(otf.bill_int_to_str(price))
+
+
 def onSaveDrug(pg):
     kwargs = {
-        "d": pg.drugpicker.drugWH,
+        "d": pg.drug_picker.drugWH,
         "times": pg.times.Value,
         "dosage_per": pg.dosage_per.Value,
         "quantity": pg.quantity.Value,
@@ -161,24 +202,18 @@ def onSaveDrug(pg):
     assert kwargs['dosage_per'] != ""
     assert int(kwargs['quantity'])
 
-    logging.debug(f"Add or update drug, recalc total_drug_price:\n\t\
+    logging.debug(f"Add or update drug, recalc total_price:\n\t\
                   {kwargs['d'].name}\n{kwargs}")
     pg.d_list.add_or_update(**kwargs)
     calc_price(pg.Parent.Parent)
 
 
 def onEraseDrug(pg):
-    logging.debug("Del drug, recalc total_drug_price")
+    logging.debug("Del selected drug, recalc total_price")
     pg.d_list.remove_selected()
-    pg.drugpicker.Clear()
-    pg.drugpicker.SetFocus()
+    pg.drug_picker.Clear()
+    pg.drug_picker.SetFocus()
     calc_price(pg.Parent.Parent)
-    
-    
-def calc_price(mv):
-    price = setting["cong_kham_benh"]
-    price += mv.order_book.GetPage(0).d_list.get_total_price()
-    mv.total_cost.ChangeValue(otf.bill_int_to_str(price))
 
 
 def onReuse(pg):
@@ -202,10 +237,10 @@ def onSamplePrescriptionbtn(pg):
     mv = pg.Parent.Parent
     with SamplePrescriptionDialog(mv) as dlg:
         if dlg.ShowModal() == wx.ID_APPLY:
-            ps, _ = dlg.get_selected_sample_prescription()
+            ps, _, _ = dlg.get_selected_sample_prescription()
             pg.d_list.Clear()
             for i in ps.samplelinedrugs:
-                pg.drugpicker.drugWH = i.drug
+                pg.drug_picker.drugWH = i.drug
                 pg.times.ChangeValue(str(i.times))
                 pg.dosage_per.ChangeValue(i.dosage_per)
                 calc_quantity(pg)
@@ -218,3 +253,16 @@ def onSamplePrescriptionbtn(pg):
                 }
                 pg.d_list.add_or_update(**kwargs)
     calc_price(mv)
+
+
+def onSaveTherapy(tg):
+    t = tg.therapy_picker.therapy
+    logging.debug(f"Add therapy {t.name}, recalc total_price")
+    tg.t_list.add(t)
+    calc_price(tg.Parent.Parent)
+
+
+def onEraseTherapy(tg):
+    logging.debug("Del selected therapy, recalc total_price")
+    tg.t_list.remove_selected()
+    calc_price(tg.Parent.Parent)

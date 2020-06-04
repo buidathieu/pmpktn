@@ -1,6 +1,6 @@
 # -*- encoding: utf-8 -*-
 from initialize import logo
-from .fonts import *
+import print_func.fonts
 
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A5
@@ -236,7 +236,7 @@ def drawLayout(c, data):
     customLine('Ký tên', signature_x, signature_y, label=True).draw(c)
 
 
-def make_pdf(filename, data):
+def make_prescription_pdf(filename, data):
     global x
     global y
     x = default_x

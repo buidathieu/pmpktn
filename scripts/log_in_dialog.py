@@ -63,6 +63,6 @@ class LogInDialog(wx.Dialog):
 
     def Destroy(self):
         logging.debug('LoginDialog destroyed, session closed')
-        self.sess.commit()
+        commit_(self.sess)
         self.sess.close()
         super().Destroy()

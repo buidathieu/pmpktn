@@ -29,7 +29,7 @@ class PatientBook(wx.Notebook):
 
 
 class BasePatientList(wx.ListCtrl):
-    
+
     def __init__(self, parent):
         super().__init__(parent, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self.AppendColumn('Mã BN', width=ma_bn_width)
@@ -68,16 +68,19 @@ class QueuingPatientList(BasePatientList):
     def __init__(self, parent):
         super().__init__(parent)
         self.vq = None
-        self.timer = self.RefreshQueueTimer()    
+        self.timer = self.RefreshQueueTimer()
 
     def _make_p_list(self):
-        self.vq_list = dbf.get_waiting_queue(sess=self.Parent.Parent.sess).all()
+        self.vq_list = dbf.get_visitqueue(
+            sess=self.Parent.Parent.sess).all()
         self.p_list = [vq.patient for vq in self.vq_list]
 
     def RefreshQueueTimer(self):
         self.Refresh()
-        return wx.CallLater(setting["time_between_rebuild_visitqueue"], self.RefreshQueueTimer)
-    
+        return wx.CallLater(
+            setting["time_between_rebuild_visitqueue"],
+            self.RefreshQueueTimer)
+
     def onSelect(self, e):
         self.vq = self.vq_list[e.Index]
         super().onSelect(e)

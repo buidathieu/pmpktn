@@ -14,7 +14,7 @@ Base = declarative_base()
 
 
 class Patient(Base):
-    __tablename__ = 'patients'
+    __tablename__ = 'patient'
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), index=True)
@@ -23,12 +23,12 @@ class Patient(Base):
     address = Column(Text, default="")
     past_history = Column(Text, default="")
     visits = relationship(
-        "Visit", back_populates="patient", order_by='Visit.id',
+        "Visit", order_by='desc(Visit.id)',
         lazy='dynamic', cascade="all, delete-orphan")
 
 
 class Visit(Base):
-    __tablename__ = 'visits'
+    __tablename__ = 'visit'
     __table_args__ = (CheckConstraint("days > 0"),
                       CheckConstraint("weight >= 0"),
                       CheckConstraint("bill >= 0"))
@@ -42,10 +42,11 @@ class Visit(Base):
     days = Column(Integer, default=2)
     followup = Column(Text, default='')
     bill = Column(Integer, default=0)
-    patient_id = Column(ForeignKey('patients.id'))
-    patient = relationship("Patient", back_populates='visits')
+    patient_id = Column(ForeignKey('patient.id'))
     linedrugs = relationship(
         "LineDrug", lazy='selectin', cascade="all, delete-orphan")
+    linetherapies = relationship(
+        "LineTherapy", lazy='selectin', cascade="all, delete-orphan")
 
 
 class DrugWarehouse(Base):
@@ -64,7 +65,7 @@ class DrugWarehouse(Base):
 
 
 class LineDrug(Base):
-    __tablename__ = 'linedrugs'
+    __tablename__ = 'linedrug'
     __table_args__ = (CheckConstraint("quantity >= 0"),
                       CheckConstraint("times >= 0"),)
 
@@ -74,12 +75,12 @@ class LineDrug(Base):
     times = Column(Integer, default=0)
     quantity = Column(Integer, default=0)
     usage = Column(String(30), default='uống')
-    visit_id = Column(ForeignKey("visits.id"))
+    visit_id = Column(ForeignKey("visit.id"))
     drug = relationship('DrugWarehouse', lazy='selectin')
 
 
 class SamplePrescription(Base):
-    __tablename__ = "sampleprescriptions"
+    __tablename__ = "sampleprescription"
     __table_args__ = (CheckConstraint("name != ''"),)
 
     id = Column(Integer, primary_key=True)
@@ -89,19 +90,19 @@ class SamplePrescription(Base):
 
 
 class SampleLineDrug(Base):
-    __tablename__ = "samplelinedrugs"
+    __tablename__ = "samplelinedrug"
     __table_args__ = (CheckConstraint("times >= 0"),)
 
     id = Column(Integer, primary_key=True)
     drug_id = Column(ForeignKey("drugwarehouse.id"))
     times = Column(Integer, default=0)
     dosage_per = Column(String(5), default=0)
-    sampleprescription_id = Column(ForeignKey("sampleprescriptions.id"))
+    sampleprescription_id = Column(ForeignKey("sampleprescription.id"))
     drug = relationship('DrugWarehouse', lazy='selectin')
 
 
 class Staff(Base):
-    __tablename__ = "staffs"
+    __tablename__ = "staff"
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True, nullable=False, index=True)
@@ -111,47 +112,55 @@ class Staff(Base):
 
 
 class WorkDay(Base):
-    __tablename__ = "workdays"
+    __tablename__ = "workday"
 
     id = Column(Integer, primary_key=True)
     time_login = Column(DateTime, nullable=False,
                         unique=True, default=dt.datetime.now)
-    staff_id = Column(ForeignKey("staffs.id"))
+    staff_id = Column(ForeignKey("staff.id"))
     staff = relationship('Staff', back_populates='workdays')
 
 
 class VisitQueue(Base):
     __tablename__ = 'visitqueue'
+
     id = Column(Integer, primary_key=True)
     time_added = Column(DateTime, nullable=False,
                         default=dt.datetime.now)
-    is_seen = Column(Boolean, default=False, nullable=False)
-    patient_id = Column(ForeignKey("patients.id"))
+    patient_id = Column(ForeignKey("patient.id"))
     patient = relationship('Patient', lazy='selectin')
 
 
 class Therapy(Base):
     __tablename__ = "therapy"
+
     id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique=True, nullable=False, index=True)
+    name = Column(String(200), unique=True, nullable=False, index=True)
     sale_price = Column(Integer, default=0)
-    therapylinecost = relationship("TheparyLineCost", lazy="selectin",
-                                   back_populates="therapy")
+    therapylinedrugs = relationship(
+        "TherapyLineDrug", lazy="selectin", cascade="all, delete-orphan")
 
     def quantity(self):
-        return min([lc.quantity / lc.cost_on_1_use for lc in self.therapylinecost])
+        return min(
+            [lc.drug.quantity / lc.cost_on_1_use for lc in self.therapylinedrugs])
 
 
-class TheparyLineCost(Base):
-    __tablename__ = "therapylinecost"
+class TherapyLineDrug(Base):
+    __tablename__ = "therapylinedrug"
     id = Column(Integer, primary_key=True)
-    name = Column(String(50), unique=True, nullable=False, index=True)
-    quantity = Column(Integer, default=0)
-    unit = Column(String(10), nullable=False)
+    drug_id = Column(ForeignKey("drugwarehouse.id"))
     cost_on_1_use = Column(Integer, default=1)
     therapy_id = Column(ForeignKey("therapy.id"))
-    therapy = relationship("Therapy", lazy="selectin",
-                           back_populates="therapylinecost")
+    drug = relationship('DrugWarehouse', lazy='selectin')
+
+
+class LineTherapy(Base):
+    __tablename__ = "linetherapy"
+    id = Column(Integer, primary_key=True)
+    therapy_id = Column(ForeignKey("therapy.id"))
+    visit_id = Column(ForeignKey("visit.id"))
+    therapy = relationship(
+        "Therapy", lazy="selectin")
 
 
 def make_db():
