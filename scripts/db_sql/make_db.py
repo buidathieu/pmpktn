@@ -43,6 +43,7 @@ class Visit(Base):
     followup = Column(Text, default='')
     bill = Column(Integer, default=0)
     patient_id = Column(ForeignKey('patient.id'))
+    staff_id = Column(ForeignKey('staff.id'))
     linedrugs = relationship(
         "LineDrug", lazy='selectin', cascade="all, delete-orphan")
     linetherapies = relationship(
@@ -109,6 +110,7 @@ class Staff(Base):
     password = Column(String(20))
     job = Column(Enum('Doctor', 'Nurse', name='jobs'), nullable=False)
     workdays = relationship('WorkDay', lazy='dynamic', back_populates='staff')
+    visits = relationship('Visit', lazy='dynamic')
 
 
 class WorkDay(Base):

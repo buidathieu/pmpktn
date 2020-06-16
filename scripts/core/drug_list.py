@@ -37,15 +37,15 @@ class DrugList(wx.ListCtrl):
     def onDrugSelect(self, e):
         i = e.Index
         pg = self.Parent
-        pg.drugpicker.drugWH = self.dwh_list[i]
-        pg.drugpicker.ChangeValue(self.dwh_list[i].name)
+        pg.drug_picker.drugWH = self.dwh_list[i]
+        pg.drug_picker.ChangeValue(self.dwh_list[i].name)
         pg.times.ChangeValue(self.GetItemText(i, 2))
         pg.dosage_per.ChangeValue(self.GetItemText(i, 3).partition(' ')[0])
         pg.quantity.ChangeValue(self.GetItemText(i, 4).partition(' ')[0])
         pg.usage.ChangeValue(self.GetItemText(i, 5))
 
     def onDrugDeselect(self, e):
-        self.Parent.drugpicker.Clear()
+        self.Parent.drug_picker.Clear()
 
     def add_or_update(self, d, times, dosage_per, quantity, usage):
         assert self.ItemCount == len(self.dwh_list)
@@ -69,8 +69,8 @@ class DrugList(wx.ListCtrl):
                 usage
             ])
             self.dwh_list.append(d)
-        pg.drugpicker.Clear()
-        pg.drugpicker.SetFocus()
+        pg.drug_picker.Clear()
+        pg.drug_picker.SetFocus()
 
     def remove_selected(self):
         assert self.ItemCount == len(self.dwh_list)

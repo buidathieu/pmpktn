@@ -93,6 +93,7 @@ def onSaveVisit(mv):
     kwargs = {
         'p': mv.patient,
         'v': mv.visit,
+        'staff_id': mv.staff_id,
         'vq': mv.book.GetPage(0).vq,
         'past_history': mv.past_history.Value,
         'note': mv.note.Value,

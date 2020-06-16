@@ -8,6 +8,7 @@ class LogInDialog(wx.Dialog):
 
     def __init__(self, parent):
         super().__init__(parent, title="Đăng nhập")
+        self.staff = None
         self.sess = Session()
         self.Centre()
         self.staff_list = dbf.query_staff_list(self.sess).all()
@@ -42,8 +43,8 @@ class LogInDialog(wx.Dialog):
                 logging.debug(
                     f'LoginDialog: save_staff_workday: selection={idx}, name={staff.name}, job={staff.job}')
                 dbf.save_staff_workday(staff, sess=self.sess)
-                job = staff.job
-                self.EndModal(job_dict[job])
+                self.staff = staff
+                self.EndModal(wx.ID_OK)
             else:
                 logging.debug("wrong password")
                 wx.MessageBox(

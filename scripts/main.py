@@ -11,11 +11,14 @@ import argparse
 def mainloop():
     app = wx.App()
     with LogInDialog(None) as dlg:
-        job = dlg.ShowModal()
-    if job == 0:  # doctor
-        MainView(None).Show()
-    elif job == 1:  # nurse
-        NurseView(None).Show()
+        ans = dlg.ShowModal()
+        staff_id = dlg.staff.id
+        job = dlg.staff.job
+    if ans == wx.ID_OK:
+        if job == "Doctor":
+            MainView(None, staff_id=staff_id).Show()
+        elif job == "Nurse":
+            NurseView(None).Show()
     else:
         quit()
 

@@ -119,13 +119,14 @@ def add_linetherapies_to_visit(v, linetherapies, sess):
 
 def update_visit(v, note, diag, weight, days,
                  followup, bill, linedrugs, linetherapies,
-                 sess):
+                 staff_id, sess):
     v.note = note
     v.diag = diag
     v.weight = weight
     v.days = days
     v.followup = followup
     v.bill = bill
+    v.staff_id = staff_id
     add_linedrugs_to_visit(v, linedrugs, sess)
     add_linetherapies_to_visit(v, linetherapies, sess)
     return v
@@ -133,38 +134,39 @@ def update_visit(v, note, diag, weight, days,
 
 def add_visit(p, note, diag, weight, days,
               followup, bill, linedrugs, linetherapies,
-              sess):
+              staff_id, sess):
     v = Visit(note=note,
               diag=diag,
               weight=weight,
               days=days,
               followup=followup,
               bill=bill,
-              patient_id=p.id)
+              patient_id=p.id,
+              staff_id=staff_id)
     add_linedrugs_to_visit(v, linedrugs, sess)
     add_linetherapies_to_visit(v, linetherapies, sess)
     sess.add(v)
     return v
 
 
-def save_old_visit(p, v, vq, past_history,
+def save_old_visit(p, v, staff_id, vq, past_history,
                    note, diag, weight, days,
                    followup, bill, linedrugs, linetherapies,
                    sess=None):
     patient = update_patient(p, past_history, sess)
     visit = update_visit(v, note, diag, weight, days,
-                         followup, bill, linedrugs, linetherapies, sess)
+                         followup, bill, linedrugs, linetherapies, staff_id, sess)
     commit_(sess)
     return patient, visit
 
 
-def save_new_visit(p, v, vq, past_history,
+def save_new_visit(p, v, staff_id, vq, past_history,
                    note, diag, weight, days,
                    followup, bill, linedrugs, linetherapies,
                    sess=None):
     patient = update_patient(p, past_history, sess)
     visit = add_visit(p, note, diag, weight, days,
-                      followup, bill, linedrugs, linetherapies, sess)
+                      followup, bill, linedrugs, linetherapies, staff_id, sess)
     do_seen_patient(vq, sess)
     commit_(sess)
     return patient, visit

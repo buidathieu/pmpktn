@@ -13,10 +13,11 @@ import logging
 
 class MainView(wx.Frame):
 
-    def __init__(self, parent, *args, **kw):
+    def __init__(self, parent, staff_id, *args, **kw):
 
         self._patient = None
         self._visit = None
+        self.staff_id = staff_id
         self.sess = Session()
         logging.debug("Mainview initialized, session opened")
 
@@ -41,8 +42,8 @@ class MainView(wx.Frame):
 
         whole_panel = wx.BoxSizer(wx.HORIZONTAL)
         whole_panel.Add(left_panel, 0, wx.EXPAND)
-        whole_panel.Add(right_panel, 0, wx.EXPAND |
-                        wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
+        whole_panel.Add(right_panel, 0,
+                        wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM, 10)
         self.SetSizer(whole_panel)
 
     def _setMenuBar(self):

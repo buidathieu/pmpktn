@@ -54,9 +54,6 @@ gender_dict = {0: 'nam',
                'nam': 0,
                'nữ': 1}
 
-job_dict = {"Doctor": 0,
-            "Nurse": 1}
-
 #  menu ids
 id_new_patient = NewId()
 id_edit_patient = NewId()

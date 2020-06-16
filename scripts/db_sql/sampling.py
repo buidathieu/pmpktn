@@ -168,8 +168,10 @@ def commit_population(k=10):
           random_sample_linedrug(),
           make_staff()]
     flatten_li = [obj for sublist in li for obj in sublist]
-    with session_scope() as sess:
-        sess.add_all(flatten_li)
+    sess = Session()
+    sess.add_all(flatten_li)
+    commit_(sess)
+    sess.close()
 
 
 # def commit_drugwarehouse():
