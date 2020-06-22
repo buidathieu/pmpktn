@@ -57,7 +57,10 @@ class DrugWarehouse(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(50), unique=True, index=True)
+    element = Column(String(50), index=True)
     quantity = Column(Integer, default=0)
+    expire = Column(Date)
+    manufacturer = Column(String(50))
     usage_unit = Column(String(10), default='viên')  # ml
     sale_unit = Column(String(10), default='viên')  # chai
     purchase_price = Column(Integer, default=0)  # gia mua vo

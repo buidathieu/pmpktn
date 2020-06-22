@@ -31,6 +31,10 @@ if __name__ == "__main__":
                     help="make a new db")
     ap.add_argument("-s", "--sample", action="store_true",
                     help="sample 10 patients")
+    ap.add_argument("-ex", "--exportdrug", action="store_true",
+                    help="export drugwarehouse")
+    ap.add_argument("-im", "--importdrug", action="store_true",
+                    help="import drugwarehouse")
     args = vars(ap.parse_args())
 
     if args['new']:
@@ -38,5 +42,11 @@ if __name__ == "__main__":
         make_db()
     if args["sample"]:
         commit_population()
+    if args["exportdrug"]:
+        from db_sql.drugwarehouse_exim import export_drug
+        export_drug()
+    if args["importdrug"]:
+        from db_sql.drugwarehouse_exim import import_drug
+        import_drug()
     if not any(args.values()):
         mainloop()

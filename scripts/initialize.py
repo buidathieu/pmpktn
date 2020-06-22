@@ -38,6 +38,9 @@ pencil_bm = os.path.join(BM_PATH, 'pencil.png')
 minus_bm = os.path.join(BM_PATH, 'minus.png')
 weight_bm = os.path.join(BM_PATH, 'weight.png')
 
+# excel path
+warehouse_path = os.path.join(DIR_PATH, "drugwarehouse", "warehouse.xlsx")
+
 
 with open(os.path.join(DIR_PATH, "setting.json"), "r", encoding="utf-8-sig") as f:
     setting = json.load(f)

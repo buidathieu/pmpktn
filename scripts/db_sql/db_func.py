@@ -174,19 +174,20 @@ def save_new_visit(p, v, staff_id, vq, past_history,
 
 # report
 def GetTodayReport():
-    with session_scope() as sess:
-        query = sess.query(Visit).filter(
-            func.DATE(Visit.exam_date) == dt.date.today())
-        count = query.count()
-        income = 0
-        cost = 0
-        sale = 0
-        for visit in query:
-            income += visit.bill
-            for linedrug in visit.linedrugs:
-                cost += (linedrug.drug.purchase_price * linedrug.quantity)
-                sale += (linedrug.drug.sale_price * linedrug.quantity)
-        profit = sale - cost
+    sess = Session()
+    query = sess.query(Visit).filter(
+        func.DATE(Visit.exam_date) == dt.date.today())
+    count = query.count()
+    income = 0
+    cost = 0
+    sale = 0
+    for visit in query:
+        income += visit.bill
+        for linedrug in visit.linedrugs:
+            cost += (linedrug.drug.purchase_price * linedrug.quantity)
+            sale += (linedrug.drug.sale_price * linedrug.quantity)
+    profit = sale - cost
+    commit_(sess)
     return count, income, cost, sale, profit
 
 
