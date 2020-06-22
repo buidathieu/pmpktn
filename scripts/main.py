@@ -35,6 +35,8 @@ if __name__ == "__main__":
                     help="export drugwarehouse")
     ap.add_argument("-im", "--importdrug", action="store_true",
                     help="import drugwarehouse")
+    ap.add_argument("-ims", "--importstaff", action="store_true",
+                    help="import staff")
     args = vars(ap.parse_args())
 
     if args['new']:
@@ -48,5 +50,8 @@ if __name__ == "__main__":
     if args["importdrug"]:
         from db_sql.drugwarehouse_exim import import_drug
         import_drug()
+    if args["importstaff"]:
+        from db_sql.importstaff import import_staff
+        import_staff()
     if not any(args.values()):
         mainloop()

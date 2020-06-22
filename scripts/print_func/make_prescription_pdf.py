@@ -24,7 +24,7 @@ title_horizontalScale = 110
 title_2_text = 'CHUYÊN KHOA NHI'
 title_2_x = 6 * cm
 title_2_y = A5[1] - 3 * cm
-title_2_fontName = 'SVN-Cookies'
+title_2_fontName = 'SVN-Sansation'
 title_2_fontSize = 26
 
 address_text = "355 Đặng Nguyên Cẩn, Phường 13, Quận 6, TPHCM"
@@ -110,7 +110,6 @@ class customLine():
         obj.textLines('\n'.join(lines))
         c.drawText(obj)
         c.restoreState()
-
         return (leading * len(lines)) - leading
 
 
@@ -189,6 +188,8 @@ def drawLayout(c, data):
     text_height = customLine(
         data['address'], x + label_width, y, info_fontName).draw_multi(c)
     y -= text_height
+    if data['address']=='':
+        y -= 0.3 * cm
 
     # draw diagnosis
     nextrow()

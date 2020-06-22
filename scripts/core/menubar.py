@@ -12,7 +12,9 @@ class MyMenuBar(wx.MenuBar):
     def __init__(self, mv):
         super().__init__()
         self.mv = mv
+        self.printer = MyPrinter()
         self._createMenu()
+        
 
     def _createMenu(self):
         homeMenu = wx.Menu()
@@ -49,13 +51,13 @@ class MyMenuBar(wx.MenuBar):
         NurseView(None).Show()
 
     def onPrint(self, e):
-        MyPrinter().print_prescription_pdf(self.mv)
+        self.printer.print_prescription_pdf(self.mv)
 
     def onPrintPreview(self, e):
-        MyPrinter().preview_prescription_pdf(self.mv)
+        self.printer.preview_prescription_pdf(self.mv)
 
     def onPrintBillPreview(self, e):
-        MyPrinter().preview_bill_pdf(self.mv)
+        self.printer.preview_bill_pdf(self.mv)
 
     def onSaveVisit(self, e):
         onSaveVisit(self.mv)

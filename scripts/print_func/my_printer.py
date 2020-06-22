@@ -13,7 +13,8 @@ class MyPrinter():
         if os.name == 'nt':
             import win32print
             printer_name = win32print.GetDefaultPrinter()
-            subprocess.run(['gs', '-sPapersize=A5',
+            print(printer_name)
+            subprocess.run(['gs', '-sPAPERSIZE=a5',
                             '-sDEVICE=mswinpr2',
                             f'-sOutputFile=%printer%{printer_name}',
                             '-dBATCH', '-dNOPAUSE',
