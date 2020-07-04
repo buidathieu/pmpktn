@@ -1,5 +1,6 @@
 from initialize import *
 from db_sql.db_func import query_therapy_list
+from .core_func import onSaveTherapy
 import os
 import wx
 
@@ -139,6 +140,10 @@ class TherapyPicker(wx.ComboCtrl):
                     self.Dismiss()
                     self.ChangeValue(a)
                     self.SetInsertionPointEnd()
+            elif e.GetKeyCode()==wx.WXK_RETURN and not self.IsPopupShown():
+                onSaveTherapy(self.Parent)
+                self.Clear()
+                self.ChangeValue("")
             e.Skip()
 
     def onTextChange(self, e):

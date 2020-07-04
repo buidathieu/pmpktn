@@ -143,7 +143,7 @@ def drawLayout(c, data):
         title_2_x,
         title_2_y,
         title_2_fontName,
-        title_2_fontSize).draw(c)
+        title_2_fontSize, 90).draw(c)
 
     # draw address
     customLine(

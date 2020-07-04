@@ -18,6 +18,7 @@ class DrugPopup(wx.ComboPopup):
             parent,
             style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.SIMPLE_BORDER)
         self.lc.AppendColumn('Thuốc', width=200)
+        self.lc.AppendColumn('Thành phần', width=150)
         self.lc.AppendColumn('Số lượng')
         self.lc.AppendColumn('Đơn giá')
         self.lc.AppendColumn('Cách dùng', width=100)
@@ -49,11 +50,12 @@ class DrugPopup(wx.ComboPopup):
 
     def Update(self, s=''):
         self.lc.DeleteAllItems()
-        self.d_l = list(filter(lambda x: s.casefold()
-                               in x.name.casefold(), self.init_d_l))
+        self.d_l = list(filter(
+            lambda x: s.casefold() in x.name.casefold() or s.casefold() in x.element.casefold(),
+            self.init_d_l))
         for item in self.d_l:
             self.lc.Append(
-                [item.name, item.quantity, item.sale_price, item.usage])
+                [item.name, item.element, item.quantity, item.sale_price, item.usage])
 
     def OnMotion(self, e):
         item, flags = self.lc.HitTest(e.GetPosition())
