@@ -22,6 +22,7 @@ class DrugPopup(wx.ComboPopup):
         self.lc.AppendColumn('Số lượng')
         self.lc.AppendColumn('Đơn giá')
         self.lc.AppendColumn('Cách dùng', width=100)
+        self.lc.AppendColumn('Nhà SX', width=80)
         self.lc.Bind(wx.EVT_MOTION, self.OnMotion)
         self.lc.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
         self.lc.Bind(wx.EVT_KEY_DOWN, self.onKeyPress)
@@ -55,7 +56,11 @@ class DrugPopup(wx.ComboPopup):
             self.init_d_l))
         for item in self.d_l:
             self.lc.Append(
-                [item.name, item.element, item.quantity, item.sale_price, item.usage])
+                [item.name, item.element, item.quantity, item.sale_price, item.usage, item.manufacturer])
+        for index, item in enumerate(self.d_l):
+            if item.quantity <10:
+                self.lc.SetItemTextColour(index, wx.Colour(252, 3, 57,255))
+                
 
     def OnMotion(self, e):
         item, flags = self.lc.HitTest(e.GetPosition())

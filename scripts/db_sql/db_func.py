@@ -63,7 +63,7 @@ def get_today_seen_patient_list(sess=None):
 
 # picker popup
 def query_linedrug_list(sess):
-    return sess.query(DrugWarehouse)
+    return sess.query(DrugWarehouse).filter(DrugWarehouse.quantity >0)
 
 
 def query_therapy_list(sess):
