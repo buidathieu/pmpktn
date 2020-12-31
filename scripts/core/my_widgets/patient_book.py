@@ -1,4 +1,4 @@
-import db_sql.db_func as dbf
+import database.db_func as dbf
 from initialize import *
 import other_func as otf
 
@@ -10,28 +10,34 @@ class PatientBook(wx.Notebook):
 
     def __init__(self, parent):
         super().__init__(parent)
-
-        self.AddPage(page=QueuingPatientList(self),
-                     text='Danh sách chờ khám', select=True)
+        self.mv = parent
+        # self.AddPage(page=QueuingPatientList(self),
+        #              text='Danh sách chờ khám', select=True)
+        self.AddPage(page=AllPatientList(self),
+                     text='Danh sách toàn bộ bệnh nhân', select=True)
         self.AddPage(page=TodayPatientList(self),
                      text='Danh sách đã khám hôm nay')
         self.Bind(wx.EVT_NOTEBOOK_PAGE_CHANGED, self.onChangePage)
 
-    def Refresh(self):
+    def refresh(self):
         self.ChangeSelection(0)
-        self.GetPage(0).Refresh()
+        self.GetPage(0).refresh()
 
     def onChangePage(self, e):
-        self.Parent.patient = None
-        self.GetPage(e.GetSelection()).Refresh()
-        logging.debug(f"Change to page {e.GetSelection()}")
+        self.mv.patient = None
+        self.GetPage(e.GetSelection()).refresh()
+        logging.debug("Change to page {}".format(e.GetSelection()))
         e.Skip()
+
+    def start(self):
+        self.GetPage(0).refresh()
 
 
 class BasePatientList(wx.ListCtrl):
 
     def __init__(self, parent):
         super().__init__(parent, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        self.mv = parent.Parent
         self.AppendColumn('Mã BN', width=ma_bn_width)
         self.AppendColumn('Bệnh nhân', width=bn_width)
         self.AppendColumn('Giới', width=gender_width)
@@ -46,18 +52,18 @@ class BasePatientList(wx.ListCtrl):
         self.DeleteAllItems()
         for p in self.p_list:
             b = otf.bd_to_age(p.birthdate)
-            self.Append([p.id, p.name,
-                         gender_dict[p.gender], b])
+            self.Append([p.id,
+                         p.name,
+                         gender_dict[p.gender],
+                         b])
 
     def onSelect(self, e):
-        mv = self.Parent.Parent
-        mv.patient = self.p_list[e.Index]
+        self.mv.patient = self.p_list[e.Index]
 
     def onDeselect(self, e):
-        mv = self.Parent.Parent
-        mv.patient = None
+        self.mv.patient = None
 
-    def Refresh(self):
+    def refresh(self):
         logging.debug(f'{self.__class__.__name__} make query and rebuilt')
         self._make_p_list()
         self._append()
@@ -68,18 +74,18 @@ class QueuingPatientList(BasePatientList):
     def __init__(self, parent):
         super().__init__(parent)
         self.vq = None
-        self.timer = self.RefreshQueueTimer()
+        self.timer = self.refreshQueueTimer()
 
     def _make_p_list(self):
         self.vq_list = dbf.get_visitqueue(
             sess=self.Parent.Parent.sess).all()
         self.p_list = [vq.patient for vq in self.vq_list]
 
-    def RefreshQueueTimer(self):
-        self.Refresh()
+    def refreshQueueTimer(self):
+        self.refresh()
         return wx.CallLater(
             setting["time_between_rebuild_visitqueue"],
-            self.RefreshQueueTimer)
+            self.refreshQueueTimer)
 
     def onSelect(self, e):
         self.vq = self.vq_list[e.Index]
@@ -97,4 +103,14 @@ class TodayPatientList(BasePatientList):
 
     def _make_p_list(self):
         self.p_list = dbf.get_today_seen_patient_list(
-            sess=self.Parent.Parent.sess).all()
+            sess=self.mv.sess).all()
+
+
+class AllPatientList(BasePatientList):
+
+    def __init__(self, parent):
+        super().__init__(parent)
+
+    def _make_p_list(self):
+        self.p_list = dbf.get_all_patient_list(
+            sess=self.mv.sess).all()

@@ -1,7 +1,3 @@
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-from wx import NewId
-
 import os
 import json
 # High DPI aware
@@ -11,46 +7,36 @@ try:
 except Exception:
     pass
 import logging
+from wx import NewId
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine
 
 
+# app structure
 SCRIPTS_PATH = os.path.dirname(os.path.abspath(__file__))
 DIR_PATH = os.path.dirname(SCRIPTS_PATH)
-
-# logo_path
-logo = os.path.join(DIR_PATH, "logo.png")
-
-# fonts_path
+USER_FILES_PATH = os.path.join(DIR_PATH, "user_files")
 FONTS_PATH = os.path.join(DIR_PATH, "fonts")
+BITMAPS_PATH = os.path.join(DIR_PATH, 'bitmaps')
 
-# BM_PATH_paths
-BM_PATH = os.path.join(DIR_PATH, 'bitmaps')
-new_p_bm = os.path.join(BM_PATH, 'new_patient.png')
-del_p_bm = os.path.join(BM_PATH, 'delete_patient.png')
-save_drug_bm = os.path.join(BM_PATH, 'save_drug.png')
-erase_drug_bm = os.path.join(BM_PATH, 'erase_drug.png')
-new_visit_bm = os.path.join(BM_PATH, 'new_visit.png')
-save_visit_bm = os.path.join(BM_PATH, 'save_visit.png')
-del_visit_bm = os.path.join(BM_PATH, 'del_visit.png')
-print_bm = os.path.join(BM_PATH, 'print.png')
-refresh_bm = os.path.join(BM_PATH, 'refresh.png')
-plus_bm = os.path.join(BM_PATH, 'plus.png')
-pencil_bm = os.path.join(BM_PATH, 'pencil.png')
-minus_bm = os.path.join(BM_PATH, 'minus.png')
-weight_bm = os.path.join(BM_PATH, 'weight.png')
+# logo
+logo = os.path.join(USER_FILES_PATH, "logo.png")
 
-# excel path
-warehouse_path = os.path.join(DIR_PATH, "drugwarehouse", "warehouse.xlsx")
+# bitmaps
+new_p_bm = os.path.join(BITMAPS_PATH, 'new_patient.png')
+del_p_bm = os.path.join(BITMAPS_PATH, 'delete_patient.png')
+save_drug_bm = os.path.join(BITMAPS_PATH, 'save_drug.png')
+erase_drug_bm = os.path.join(BITMAPS_PATH, 'erase_drug.png')
+new_visit_bm = os.path.join(BITMAPS_PATH, 'new_visit.png')
+save_visit_bm = os.path.join(BITMAPS_PATH, 'save_visit.png')
+del_visit_bm = os.path.join(BITMAPS_PATH, 'del_visit.png')
+print_bm = os.path.join(BITMAPS_PATH, 'print.png')
+refresh_bm = os.path.join(BITMAPS_PATH, 'refresh.png')
+plus_bm = os.path.join(BITMAPS_PATH, 'plus.png')
+pencil_bm = os.path.join(BITMAPS_PATH, 'pencil.png')
+minus_bm = os.path.join(BITMAPS_PATH, 'minus.png')
+weight_bm = os.path.join(BITMAPS_PATH, 'weight.png')
 
-
-with open(os.path.join(DIR_PATH, "setting.json"), "r", encoding="utf-8-sig") as f:
-    setting = json.load(f)
-
-followup_choices = setting["followup_list"]
-followup_choices.extend(list(setting["followup_dict"]))
-
-
-if setting["DEBUG"]:
-    logging.basicConfig(level=logging.DEBUG)
 
 gender_dict = {0: 'nam',
                1: 'nữ',
@@ -86,24 +72,25 @@ d_l1cu_w = 80
 d_socu_w = 60
 d_tc_w = 80
 
-gender_dict = {0: 'nam',
-               1: 'nữ',
-               'nam': 0,
-               'nữ': 1}
-
 tree_size = (400, 300)
 add_edit_prescription_dialog_size = (-1, 600)
 
-username = setting['username']
-password = setting['password']
-host = setting['host']
-port = setting['port']
-db_name = setting['db_name']
-gssencmode = setting['gssencmode']
 
-engine = create_engine(
-    f'postgresql://{username}:{password}@{host}:{port}/{db_name}?gssencmode={gssencmode}',
-    echo=setting["echo"])
+with open(os.path.join(DIR_PATH, "db_setting.json"), "r") as f:
+    db_setting = json.load(f)
+
+if db_setting['use_postgres']:
+    egn = 'postgresql://{}:{}@{}:{}/{}?gssencmode={}'.format(
+        db_setting['username'],
+        db_setting['password'],
+        db_setting['host'],
+        db_setting['port'],
+        db_setting['db_name'],
+        db_setting['gssencmode'])
+else:
+    SQLITE_PATH = os.path.join(DIR_PATH, db_setting['sqlite_filename'])
+    egn = 'sqlite:///' + SQLITE_PATH
+engine = create_engine(egn, echo=db_setting["echo"])
 Session = sessionmaker(bind=engine)
 
 
@@ -113,3 +100,19 @@ def commit_(sess):
     except Exception as e:
         sess.rollback()
         print('sess rollback: ', e)
+
+
+with open(os.path.join(DIR_PATH, "user_setting.json"), "r") as f:
+    user_setting = json.load(f)
+
+
+followup_choices = user_setting["followup_list"]
+followup_choices.extend(list(user_setting["followup_dict"]))
+
+with open(os.path.join(DIR_PATH, "setting.json"),
+          "r", encoding="utf-8-sig") as f:
+    setting = json.load(f)
+
+dst = os.path.join(DIR_PATH, "debugging.log")
+if setting["DEBUG"]:
+    logging.basicConfig(filename=dst, level=logging.DEBUG)

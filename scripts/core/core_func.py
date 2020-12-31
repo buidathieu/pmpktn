@@ -1,7 +1,6 @@
 from initialize import *
-import db_sql.db_func as dbf
+import database.db_func as dbf
 import other_func as otf
-from sample_prescription import SamplePrescriptionDialog
 
 
 from fractions import Fraction as fr
@@ -24,7 +23,7 @@ def onPatientSelect(mv, p):
 
 
 def onPatientDeselect(mv, p=None):
-    mv.visit_list.Clear()
+    mv.visit_list.DeleteAllItems()
     # info
     mv.label_1.Label = 'Thông tin bệnh nhân'
     mv.name.ChangeValue("")
@@ -138,7 +137,7 @@ def onSaveVisit(mv):
             dbf.save_old_visit(**kwargs, sess=mv.sess)
             wx.MessageBox("Đã cập nhật")
         mv.book.GetPage(1).Refresh()
-        mv.visit_list.Clear()
+        mv.visit_list.DeleteAllItems()
 
 
 def getWeight(mv):

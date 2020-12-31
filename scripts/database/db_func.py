@@ -61,6 +61,10 @@ def get_today_seen_patient_list(sess=None):
         filter(func.DATE(Visit.exam_date) == dt.date.today())
 
 
+def get_all_patient_list(sess=None):
+    return sess.query(Patient)
+
+
 # picker popup
 def query_linedrug_list(sess):
     return sess.query(DrugWarehouse).filter(DrugWarehouse.quantity >0)

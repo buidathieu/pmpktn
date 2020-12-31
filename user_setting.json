@@ -1,29 +1,14 @@
-﻿{
-    "cong_kham_benh": 100000,
+
+{
+    "cong_kham_benh": 0,
     "followup_dict": {
         "Lời dặn chung": "Khám lại khi trẻ có những dấu hiệu sau: co giật, ngủ li bì hay vật vã, bứt rứt, thở mệt, nôn ói nhiều, sốt cao liên tục, tiêu máu",
         "Dấu hiệu nặng TCM": "Dấu hiệu nặng TCM: Sốt cao ≥39 độ C hay sốt liên tục trên 2 ngày - Giật mình, chới với, hốt hoảng bất thường - Ngủ gà, li bì hay bứt rứt - Run giật tay chân bất thường - Yếu tay chân, ngồi không vững, đi đứng loạng choạng - Thở bất thường: không đều, thở nhanh - Nuốt sặc, thay đổi giọng nói",
         "Dấu hiệu nặng SXH": "Dấu hiệu nặng SXH: Lừ đừ, bứt rứt - Lạnh tay chân khi trẻ đã hết sốt (thường vào ngày thứ 4, thứ 5 của bệnh) - Đau bụng - Ói nhiều - Chảy máu bất thường: Chảy máu răng, máu mũi, đi cầu phân đen, ói ra máu",
-		"Tái khám sau 2 ngày":"Tái khám sau 2 ngày, Khám lại khi trẻ có những dấu hiệu sau: co giật, ngủ li bì hay vật vã, bứt rứt, thở mệt, nôn ói nhiều, sốt cao liên tục, tiêu máu",
+        "Tái khám sau 2 ngày":"Tái khám sau 2 ngày, Khám lại khi trẻ có những dấu hiệu sau: co giật, ngủ li bì hay vật vã, bứt rứt, thở mệt, nôn ói nhiều, sốt cao liên tục, tiêu máu",
         "Tái khám sau 3 ngày":"Tái khám sau 3 ngày, Khám lại khi trẻ có những dấu hiệu sau: co giật, ngủ li bì hay vật vã, bứt rứt, thở mệt, nôn ói nhiều, sốt cao liên tục, tiêu máu",
         "Tái khám sau 1 tuần":"Tái khám sau 1 tuần, Khám lại khi trẻ có những dấu hiệu sau: co giật, ngủ li bì hay vật vã, bứt rứt, thở mệt, nôn ói nhiều, sốt cao liên tục, tiêu máu",
-        "Tái khám sau 1 tháng":"Tái khám sau 1 tháng, Khám lại khi trẻ có những dấu hiệu sau: co giật, ngủ li bì hay vật vã, bứt rứt, thở mệt, nôn ói nhiều, sốt cao liên tục, tiêu máu",
+        "Tái khám sau 1 tháng":"Tái khám sau 1 tháng, Khám lại khi trẻ có những dấu hiệu sau: co giật, ngủ li bì hay vật vã, bứt rứt, thở mệt, nôn ói nhiều, sốt cao liên tục, tiêu máu"
     },
-    "followup_list": [
-        "Tái khám sau 2 ngày",
-        "Tái khám sau 3 ngày",
-        "Tái khám sau 1 tuần",
-        "Tái khám sau 1 tháng",
-		"Khám lại khi trẻ có những dấu hiệu sau: co giật, ngủ li bì hay vật vã, bứt rứt, thở mệt, nôn ói nhiều, sốt cao liên tục, tiêu máu"
-    ],
-    "echo": false,
-    "time_between_search": 800,
-	"time_between_rebuild_visitqueue": 300000,
-    "username" : "postgres",
-    "password" : "admin",
-    "host" : "localhost",
-    "port" : 5432,
-    "db_name" : "kite-clinic",
-    "gssencmode" : "disable",
-    "DEBUG" : true
+    "followup_list": []
 }

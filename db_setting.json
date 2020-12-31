@@ -1,0 +1,11 @@
+{
+    "use_postgres": false,
+    "echo": false,
+    "username" : "postgres",
+    "password" : "admin",
+    "host" : "localhost",
+    "port" : 5432,
+    "db_name" : "kite-clinic",
+    "gssencmode" : "disable",
+    "sqlite_filename" : "database.db"
+}
