@@ -12,8 +12,7 @@ from sqlalchemy import create_engine
 
 
 # app structure
-SCRIPTS_PATH = os.path.dirname(os.path.abspath(__file__))
-DIR_PATH = os.path.dirname(SCRIPTS_PATH)
+DIR_PATH = os.path.dirname(os.path.abspath(__file__))
 USER_FILES_PATH = os.path.join(DIR_PATH, "user_files")
 FONTS_PATH = os.path.join(DIR_PATH, "fonts")
 BITMAPS_PATH = os.path.join(DIR_PATH, 'bitmaps')
