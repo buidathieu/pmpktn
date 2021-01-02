@@ -237,7 +237,6 @@ class MainView(wx.Frame):
         pg.days.ChangeValue(str(v.days))
         pg.drug_picker.Clear()
         pg.d_list.Populate(v.linedrugs)
-        pg.followup.ChangeValue(v.followup)
         self.total_cost.ChangeValue(v.bill)
         self.save_visit_btn.SetLabel("Cập nhật lượt khám cũ")
         self.Layout()
@@ -253,7 +252,6 @@ class MainView(wx.Frame):
             str(user_setting['so_ngay_toa_ve_mac_dinh']))
         pg.drug_picker.Clear()
         pg.d_list.Clear()
-        pg.followup.Selection = 0
         self.total_cost.ChangeValue(user_setting['cong_kham_benh'])
         self.save_visit_btn.SetLabel("Lưu lượt khám mới")
         self.Layout()
@@ -315,7 +313,6 @@ class MainView(wx.Frame):
             'diagnosis': self.diagnosis.Value,
             'weight': float(pg.weight.Value),
             'days': int(pg.days.Value),
-            'followup': pg.followup.Value,
             'bill': otf.bill_str_to_int(
                 self.total_cost.Value),
             'linedrugs': pg.d_list.build_linedrugs(),
@@ -338,7 +335,6 @@ class MainView(wx.Frame):
             'diagnosis': self.diagnosis.Value,
             'weight': float(pg.weight.Value),
             'days': int(pg.days.Value),
-            'followup': pg.followup.Value,
             'bill': otf.bill_str_to_int(
                 self.total_cost.Value),
             'linedrugs': pg.d_list.build_linedrugs(),

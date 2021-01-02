@@ -46,13 +46,12 @@ def edit_patient(patient, name, gender, birthdate,
 # save button
 
 def add_visit(p, note, diag, weight, days,
-              followup, bill, linedrugs, linetherapies,
+              bill, linedrugs, linetherapies,
               staff_id, sess):
     v = Visit(note=note,
               diag=diag,
               weight=weight,
               days=days,
-              followup=followup,
               bill=bill,
               patient_id=p.id,
               staff_id=staff_id)
@@ -64,14 +63,13 @@ def add_visit(p, note, diag, weight, days,
 
 def save_old_visit(p, v, past_history,
                    note, diagnosis, weight, days,
-                   followup, bill, linedrugs,
+                   bill, linedrugs,
                    sess=None):
     p.past_history = past_history
     v.note = note
     v.diagnosis = diagnosis
     v.weight = weight
     v.days = days
-    v.followup = followup
     v.bill = bill
     # restock
     for i in v.linedrugs:
@@ -88,7 +86,7 @@ def save_old_visit(p, v, past_history,
 
 def save_new_visit(p, past_history,
                    note, diagnosis, weight, days,
-                   followup, bill, linedrugs,
+                   bill, linedrugs,
                    sess=None):
     p.past_history = past_history
     new_visit = Visit(
@@ -96,7 +94,6 @@ def save_new_visit(p, past_history,
         diagnosis=diagnosis,
         weight=weight,
         days=days,
-        followup=followup,
         bill=bill,
         patient_id=p.id,
     )

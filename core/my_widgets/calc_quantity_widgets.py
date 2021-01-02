@@ -35,7 +35,7 @@ class BaseCalcQuantityWidget(wx.TextCtrl):
             else:
                 dosage = int(dosage)
             # cal qty
-            if drug.sale_unit == 'chai':
+            if drug.sale_unit in ['chai', 'lọ', 'týp']:
                 qty = '1'
             else:
                 qty = math.ceil(dosage * time * day)
@@ -47,6 +47,7 @@ class BaseCalcQuantityWidget(wx.TextCtrl):
                     time,
                     dosage,
                     drug.usage_unit))
+            pg.quantity.SetInsertionPointEnd()
         except AssertionError:
             pass
 

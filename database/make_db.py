@@ -40,7 +40,6 @@ class Visit(Base):
     diagnosis = Column(String(50), nullable=False)
     weight = Column(Float(precision=1), default=0)
     days = Column(Integer, default=2)
-    followup = Column(Text, default='')
     bill = Column(Integer, default=0)
     patient_id = Column(ForeignKey('patient.id'))
     linedrugs = relationship(

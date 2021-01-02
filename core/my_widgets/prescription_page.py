@@ -32,10 +32,6 @@ class PrescriptionPage(wx.Panel):
             label='{Đơn vị}')
         self.usage = wx.TextCtrl(self)
         self.d_list = DrugList(self)
-        self.followup = wx.ComboBox(
-            self,
-            style=wx.CB_DROPDOWN,
-            choices=followup_choices)
         self.save_drug_btn = wx.BitmapButton(
             self,
             bitmap=wx.Bitmap(plus_bm))
@@ -57,7 +53,6 @@ class PrescriptionPage(wx.Panel):
         weight_days_row = wx.BoxSizer(wx.HORIZONTAL)
         drug_input_row = wx.BoxSizer(wx.HORIZONTAL)
         usage_row = wx.BoxSizer(wx.HORIZONTAL)
-        followup_row = wx.BoxSizer(wx.HORIZONTAL)
         btn_row = wx.BoxSizer(wx.HORIZONTAL)
         sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -90,16 +85,12 @@ class PrescriptionPage(wx.Panel):
         usage_row.Add(wx.StaticText(
             self, label='Cách dùng:'), 0, wx.CENTRE | wx.RIGHT, 5)
         usage_row.Add(self.usage, 1)
-        followup_row.Add(wx.StaticText(self, label='Dặn dò:'),
-                         0, wx.CENTRE | wx.RIGHT, 5)
-        followup_row.Add(self.followup, 1)
         btn_row.Add(self.reuse_btn, 0, wx.RIGHT, 5)
 
         sizer.Add(weight_days_row, 0, wx.EXPAND)
         sizer.Add(drug_input_row, 0, wx.EXPAND)
         sizer.Add(usage_row, 0, wx.EXPAND)
         sizer.Add(self.d_list, 1, wx.EXPAND | wx.TOP, 3)
-        sizer.Add(followup_row, 0, wx.EXPAND | wx.TOP, 3)
         sizer.Add(btn_row, 0, wx.EXPAND | wx.TOP, 3)
         self.SetSizer(sizer)
 

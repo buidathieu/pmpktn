@@ -69,17 +69,9 @@ add_edit_prescription_dialog_size = (-1, 600)
 with open(os.path.join(DIR_PATH, "db_setting.json"), "r") as f:
     db_setting = json.load(f)
 
-if db_setting['use_postgres']:
-    egn = 'postgresql://{}:{}@{}:{}/{}?gssencmode={}'.format(
-        db_setting['username'],
-        db_setting['password'],
-        db_setting['host'],
-        db_setting['port'],
-        db_setting['db_name'],
-        db_setting['gssencmode'])
-else:
-    SQLITE_PATH = os.path.join(DIR_PATH, db_setting['sqlite_filename'])
-    egn = 'sqlite:///' + SQLITE_PATH
+
+SQLITE_PATH = os.path.join(DIR_PATH, db_setting['sqlite_filename'])
+egn = 'sqlite:///' + SQLITE_PATH
 engine = create_engine(egn, echo=db_setting["echo"])
 Session = sessionmaker(bind=engine)
 
@@ -98,9 +90,6 @@ def commit_(sess):
 with open(os.path.join(DIR_PATH, "user_setting.json"), "r") as f:
     user_setting = json.load(f)
 
-
-followup_choices = user_setting["followup_list"]
-followup_choices.extend(list(user_setting["followup_dict"]))
 
 with open(os.path.join(DIR_PATH, "setting.json"),
           "r", encoding="utf-8-sig") as f:

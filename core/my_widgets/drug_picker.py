@@ -56,7 +56,7 @@ class DrugPopup(wx.ComboPopup):
         for index, item in enumerate(self.d_l):
             self.lc.Append(
                 [item.name, item.element, item.quantity, item.sale_price, item.usage])
-            if item.quantity < 10:
+            if item.quantity <= user_setting["so_luong_thuoc_toi_thieu_de_bao_dong_do"]:
                 self.lc.SetItemTextColour(index, wx.Colour(252, 3, 57, 255))
 
     def OnMotion(self, e):

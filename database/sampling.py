@@ -89,7 +89,6 @@ def random_visit_list(k=10, w_note=False):
                         diagnosis=rtext(),
                         weight=round(uniform(5, 20), 1),
                         days=randint(1, 5),
-                        followup=rtext(),
                         bill=int(random() * 1000) * 1000,
                         patient_id=(i + 1),
                         )

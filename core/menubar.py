@@ -1,4 +1,6 @@
 from initialize import *
+
+import webbrowser
 import wx
 
 
@@ -12,6 +14,7 @@ class MyMenuBar(wx.MenuBar):
     def _createMenu(self):
         homeMenu = wx.Menu()
         menuRefresh = homeMenu.Append(wx.ID_REFRESH, "Refresh\tF5")
+        menuAbout = homeMenu.Append(wx.ID_ABOUT)
         menuExit = homeMenu.Append(wx.ID_EXIT, "Exit\tALT+F4")
 
         patientmenu = wx.Menu()
@@ -23,6 +26,7 @@ class MyMenuBar(wx.MenuBar):
         self.Append(patientmenu, "Bệnh nhân")
 
         self.Bind(wx.EVT_MENU, lambda e: self.mv.refresh(), menuRefresh)
+        self.Bind(wx.EVT_MENU, lambda e: webbrowser.open(r"https://github.com/vuongkienthanh/pmpktn"), menuAbout)
         self.Bind(wx.EVT_MENU, lambda e: self.mv.Close(), menuExit)
         self.Bind(wx.EVT_MENU, lambda e: self.mv.onCreateNewPatient(), menuNewPatient)
         self.Bind(wx.EVT_MENU, lambda e: self.mv.onEditPatientInfo(), menuEditPatient)

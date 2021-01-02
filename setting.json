@@ -1,5 +1,3 @@
 ﻿{
-    "DEBUG" : true,
-    "time_between_search": 800,
-    "time_between_rebuild_visitqueue": 300000
+    "time_between_search": 800
 }
