@@ -25,7 +25,6 @@ class PatientBook(wx.Notebook):
     def onChangePage(self, e):
         self.mv.patient = None
         self.GetPage(e.GetSelection()).refresh()
-        logging.debug("Change to page {}".format(e.GetSelection()))
         e.Skip()
 
     def start(self):
@@ -63,12 +62,10 @@ class BasePatientList(wx.ListCtrl):
         self.mv.patient = None
 
     def refresh(self):
-        logging.debug(f'{self.__class__.__name__} make query and rebuilt')
         self._make_p_list()
         self._append()
 
     def append_new_patient(self, new_patient):
-        logging.debug(f'{self.__class__.__name__} append new patient')
         b = otf.bd_to_age(new_patient.birthdate)
         self.Append([
             new_patient.id,

@@ -75,7 +75,6 @@ class AddPatientDialog(BasePatientDialog):
 
     def __init__(self, parent):
         super().__init__(parent, title="Thêm bệnh nhân mới")
-        logging.debug('AddPatientDialog initialize')
 
     def add_patient(self):
         kwargs = {'name': self.name.Value.upper(),
@@ -83,7 +82,6 @@ class AddPatientDialog(BasePatientDialog):
                   'birthdate': otf.wxdate2pydate(self.birthdate.Value),
                   'address': self.address.Value
                   }
-        logging.debug(f"{self.__class__.__name__}: add_patient {kwargs['name']}")
         new_patient = dbf.add_patient(**kwargs, sess=self.mv.sess)
         return new_patient
 
@@ -94,8 +92,6 @@ class EditPatientDialog(BasePatientDialog):
         super().__init__(parent, title="Chỉnh sửa thông tin bệnh nhân")
         self.patient = patient
         self.Populate()
-        logging.debug(
-            f'EditPatientDialog initialize, using parent session, populate data, name={patient.name}')
 
     def Populate(self):
         self.name.ChangeValue(self.patient.name)
@@ -111,7 +107,6 @@ class EditPatientDialog(BasePatientDialog):
             'gender': ['nam', 'nữ'][self.gender.Selection],
             'birthdate': otf.wxdate2pydate(self.birthdate.Value),
             'address': self.address.Value}
-        logging.debug(f"EditPatientDialog: edit_patient {kwargs['name']}")
         edited_patient = dbf.edit_patient(
             **kwargs, sess=self.mv.sess)
         return edited_patient
