@@ -1,17 +1,18 @@
 from initialize import *
 from .my_widgets.patient_book import PatientBook
 from .my_widgets.visit_list import VisitList
-import other_func as otf
 from .my_widgets.my_button import MyButton
 from .my_widgets.total_cost import TotalCost
+from .my_widgets.order_book import OrderBook
+from .my_widgets.search_bar import PatientSearchBar
+import other_func as otf
+import database.db_func as dbf
+from .patient_dialog import AddPatientDialog, EditPatientDialog
 
-# from .menubar import MyMenuBar
-# from .accel import my_accel
-# from .binding import button_bindings
+from .menubar import MyMenuBar
+from .accel import my_accel
 
-from .core_func import onPatientSelect, onPatientDeselect, onVisitSelect, onVisitDeselect
 import wx
-import logging
 
 
 class MainView(wx.Frame):
@@ -21,7 +22,7 @@ class MainView(wx.Frame):
         self._patient = None
         self._visit = None
         self.sess = Session()
-        logging.debug("Mainview initialized, session opened")
+        self.sess.commit_ = commit_(self.sess)
 
         super().__init__(
             parent,
@@ -30,10 +31,10 @@ class MainView(wx.Frame):
         self.SetBackgroundColour(wx.Colour(206, 219, 186))
 
         self._createInterface()
-        # self._setMenuBar()
-        # self._setAccelTable()
-        # button_bindings(self)
-        self.Bind(wx.EVT_CLOSE, self.onClose)
+        self._setMenuBar()
+        self._setAccelTable()
+        self.patient_book.start()
+        self._bind()
 
     def _createInterface(self):
         self._createWidgets()
@@ -55,7 +56,8 @@ class MainView(wx.Frame):
         self.SetSizer(whole_sizer)
 
     def _create_left_widgets(self):
-        self.book = PatientBook(self)
+        self.patient_book = PatientBook(self)
+        self.search_bar = PatientSearchBar(self)
         self.visit_list = VisitList(self)
 
     def _create_right_widgets(self):
@@ -70,18 +72,29 @@ class MainView(wx.Frame):
         self.label_dt = wx.StaticText(self)
         self.note = wx.TextCtrl(self, size=note_size, style=wx.TE_MULTILINE)
         self.diagnosis = wx.TextCtrl(self)
+        self.order_book = OrderBook(self)
+        self.new_patient_btn = MyButton(
+            self,
+            label="Bệnh nhân mới",
+            bitmap=new_p_bm)
         self.save_visit_btn = MyButton(
             self,
-            label="Lưu lượt khám (F3)",
+            label="Lưu lượt khám mới",
             bitmap=save_visit_bm)
         self.total_cost = TotalCost(self)
-
         self.past_history.Bind(wx.EVT_CHAR, lambda e: otf.onTab(e, self.note))
         self.note.Bind(wx.EVT_CHAR, lambda e: otf.onTab(e, self.diagnosis))
 
+        self.name.Disable()
+        self.gender.Disable()
+        self.birthdate.Disable()
+        self.age.Disable()
+        self.address.Disable()
+
     def _create_left_sizer(self):
         sizer = wx.BoxSizer(wx.VERTICAL)
-        sizer.Add(self.book, 10, wx.LEFT | wx.TOP, 10)
+        sizer.Add(self.patient_book, 10, wx.LEFT | wx.TOP, 10)
+        sizer.Add(self.search_bar, 0, wx.EXPAND | wx.LEFT | wx.TOP, 10)
         sizer.Add(wx.StaticText(self, label='Lượt khám cũ:'), 0, wx.LEFT, 20)
         sizer.Add(self.visit_list, 4, wx.EXPAND | wx.LEFT | wx.BOTTOM, 20)
         return sizer
@@ -94,6 +107,7 @@ class MainView(wx.Frame):
         label_2_row = wx.BoxSizer(wx.HORIZONTAL)
         datetime_row = wx.BoxSizer(wx.HORIZONTAL)
         diag_row = wx.BoxSizer(wx.HORIZONTAL)
+        order_book_row = wx.BoxSizer(wx.HORIZONTAL)
         btn_row = wx.BoxSizer(wx.HORIZONTAL)
 
         label_1_row.Add(self.label_1, 0)
@@ -116,7 +130,9 @@ class MainView(wx.Frame):
         diag_row.Add(wx.StaticText(self, label='Chẩn đoán:'),
                      0, wx.ALIGN_CENTER | wx.TOP, 3)
         diag_row.Add(self.diagnosis, 1)
-        btn_row.Add(self.save_visit_btn, 0, wx.CENTRE)
+        order_book_row.Add(self.order_book)
+        btn_row.Add(self.new_patient_btn, 0)
+        btn_row.Add(self.save_visit_btn, 0)
         btn_row.AddStretchSpacer()
         btn_row.Add(wx.StaticText(self, label='Tổng tiền:'), 0, wx.CENTRE)
         btn_row.Add(self.total_cost, 0, wx.CENTRE)
@@ -130,15 +146,16 @@ class MainView(wx.Frame):
         sizer.Add(datetime_row, 0, wx.EXPAND)
         sizer.Add(self.note, 0, wx.EXPAND)
         sizer.Add(diag_row, 0, wx.EXPAND | wx.TOP, 3)
+        sizer.Add(order_book_row, 0, wx.EXPAND | wx.TOP, 3)
         sizer.Add(btn_row, 0, wx.EXPAND | wx.TOP, 3)
         return sizer
 
-    # def _setMenuBar(self):
-    #     self.menubar = MyMenuBar(self)
-    #     self.SetMenuBar(self.menubar)
+    def _setMenuBar(self):
+        self.menubar = MyMenuBar(self)
+        self.SetMenuBar(self.menubar)
 
-    # def _setAccelTable(self):
-    #     self.SetAcceleratorTable(my_accel)
+    def _setAccelTable(self):
+        self.SetAcceleratorTable(my_accel)
 
     @property
     def patient(self):
@@ -147,12 +164,10 @@ class MainView(wx.Frame):
     @patient.setter
     def patient(self, p):
         self._patient = p
-        logging.debug('Set mainview patient = {}'.format(p))
         if p:
-            onPatientSelect(self, p)
+            self.onPatientSelect()
         else:
-            self.visit = None
-            onPatientDeselect(self)
+            self.onPatientDeselect()
 
     @property
     def visit(self):
@@ -161,14 +176,13 @@ class MainView(wx.Frame):
     @visit.setter
     def visit(self, v):
         self._visit = v
-        logging.debug('Set mainview visit = {}'.format(v))
         if v:
-            onVisitSelect(self, v)
+            self.onVisitSelect()
         else:
-            onVisitDeselect(self)
+            self.onVisitDeselect()
 
     def refresh(self):
-        self.book.refresh()
+        self.patient_book.refresh()
         self.patient = None
 
     def onClose(self, e):
@@ -178,7 +192,160 @@ class MainView(wx.Frame):
             self.Destroy()
 
     def Destroy(self):
-        logging.debug('Mainview destroyed, session closed')
         self.sess.commit()
         self.sess.close()
         super().Destroy()
+
+    def onPatientSelect(self):
+        p = self.patient
+        self.visit_list.buildVisitList()
+        self.label_1.Label = f'Thông tin bệnh nhân (Mã BN: {p.id})'
+        self.name.ChangeValue(p.name)
+        self.gender.ChangeValue(p.gender)
+        self.birthdate.ChangeValue(p.birthdate.strftime("%d/%m/%Y"))
+        self.age.ChangeValue(otf.bd_to_age(p.birthdate).ljust(16))
+        self.address.ChangeValue(p.address)
+        self.past_history.ChangeValue(p.past_history)
+
+    def onPatientDeselect(self):
+        self.visit = None
+        self.visit_list.DeleteAllItems()
+        self.label_1.Label = 'Thông tin bệnh nhân'
+        self.name.ChangeValue("")
+        self.gender.ChangeValue("")
+        self.birthdate.ChangeValue("")
+        self.age.ChangeValue("")
+        self.address.ChangeValue("")
+        self.past_history.ChangeValue("")
+
+    def onVisitSelect(self):
+
+        def _dt_to_label(p_dt):
+            return ' ' * 20 + 'Giờ khám: {}:{} ngày {} tháng {} năm {}'.\
+                format(str(p_dt.hour).rjust(2, '0'),
+                       str(p_dt.minute).rjust(2, '0'),
+                       p_dt.day,
+                       p_dt.month,
+                       p_dt.year)
+        v = self.visit
+        self.label_2.Label = f'Thông tin lượt khám (Mã lượt khám: {v.id})'
+        self.label_dt.Label = _dt_to_label(v.exam_date)
+        self.note.ChangeValue(v.note)
+        self.diagnosis.ChangeValue(v.diagnosis)
+        pg = self.order_book.GetPage(0)
+        pg.weight.ChangeValue(str(v.weight))
+        pg.days.ChangeValue(str(v.days))
+        pg.drug_picker.Clear()
+        pg.d_list.Populate(v.linedrugs)
+        pg.followup.ChangeValue(v.followup)
+        self.total_cost.ChangeValue(v.bill)
+        self.save_visit_btn.SetLabel("Cập nhật lượt khám cũ")
+        self.Layout()
+
+    def onVisitDeselect(self):
+        self.label_2.Label = 'Thông tin lượt khám'
+        self.label_dt.Label = ""
+        self.note.ChangeValue("")
+        self.diagnosis.ChangeValue("")
+        pg = self.order_book.GetPage(0)
+        pg.weight.ChangeValue('0')
+        pg.days.ChangeValue(
+            str(user_setting['so_ngay_toa_ve_mac_dinh']))
+        pg.drug_picker.Clear()
+        pg.d_list.Clear()
+        pg.followup.Selection = 0
+        self.total_cost.ChangeValue(user_setting['cong_kham_benh'])
+        self.save_visit_btn.SetLabel("Lưu lượt khám mới")
+        self.Layout()
+
+    def calc_price(self):
+        price = user_setting["cong_kham_benh"]
+        price += self.order_book.GetPage(0).d_list.get_total_price()
+        self.total_cost.ChangeValue(price)
+
+    def _bind(self):
+        self.Bind(wx.EVT_CLOSE, self.onClose)
+        self.new_patient_btn.Bind(wx.EVT_BUTTON, lambda e: self.onCreateNewPatient())
+        self.save_visit_btn.Bind(wx.EVT_BUTTON, lambda e: self.onSaveVisit())
+
+    def onCreateNewPatient(self):
+        dialog = AddPatientDialog(self)
+        if dialog.ShowModal() == wx.ID_OK:
+            new_patient = dialog.add_patient()
+            self.patient_book.GetPage(0).append_new_patient(new_patient)
+
+    def onEditPatientInfo(self):
+        page = self.patient_book.GetSelection()
+        page = self.patient_book.GetPage(page)
+        idx = page.GetFirstSelected()
+        if idx == -1:
+            wx.MessageBox("Vui lòng chọn một bệnh nhân", "Chỉnh sửa thông tin bệnh nhân")
+        else:
+            patient = page.p_list[idx]
+            dialog = EditPatientDialog(self, patient)
+            if dialog.ShowModal() == wx.ID_OK:
+                edited_patient = dialog.edit_patient()
+                page.renew_patient_info(edited_patient, idx)
+
+    def onSaveVisit(self):
+        pg = self.order_book.GetPage(0)
+
+        def check_kwargs():
+            if self.patient is not None and \
+                    self.diagnosis.Value != "" and \
+                    float(pg.weight.Value) >= 0 and \
+                    int(pg.days.Value) >= 0:
+                return True
+
+        if check_kwargs():
+            if self.visit:
+                self._save_old_visit()
+            else:
+                self._save_new_visit()
+        else:
+            wx.MessageBox("Bạn chưa chọn bệnh nhân hoặc chưa gõ chẩn đoán, cân nặng, số ngày cho toa", "Lỗi")
+
+    def _save_old_visit(self):
+        pg = self.order_book.GetPage(0)
+        kwargs = {
+            'p': self.patient,
+            'v': self.visit,
+            'past_history': self.past_history.Value,
+            'note': self.note.Value,
+            'diagnosis': self.diagnosis.Value,
+            'weight': float(pg.weight.Value),
+            'days': int(pg.days.Value),
+            'followup': pg.followup.Value,
+            'bill': otf.bill_str_to_int(
+                self.total_cost.Value),
+            'linedrugs': pg.d_list.build_linedrugs(),
+        }
+        ans = wx.MessageBox(
+            f"Cập nhật lượt khám cũ lúc {self.visit.exam_date.strftime('%d/%m/%Y %H:%M')}?",
+            "Cập nhật",
+            style=wx.YES_NO)
+        if ans == wx.YES:
+            dbf.save_old_visit(**kwargs, sess=self.sess)
+            wx.MessageBox("Đã cập nhật")
+            self.visit_list.buildVisitList()
+
+    def _save_new_visit(self):
+        pg = self.order_book.GetPage(0)
+        kwargs = {
+            'p': self.patient,
+            'past_history': self.past_history.Value,
+            'note': self.note.Value,
+            'diagnosis': self.diagnosis.Value,
+            'weight': float(pg.weight.Value),
+            'days': int(pg.days.Value),
+            'followup': pg.followup.Value,
+            'bill': otf.bill_str_to_int(
+                self.total_cost.Value),
+            'linedrugs': pg.d_list.build_linedrugs(),
+        }
+        ans = wx.MessageBox(
+            "Lưu lượt khám mới?", "Lưu",
+            style=wx.YES_NO)
+        if ans == wx.YES:
+            dbf.save_new_visit(**kwargs, sess=self.sess)
+            self.visit_list.buildVisitList()

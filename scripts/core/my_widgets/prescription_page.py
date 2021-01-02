@@ -1,37 +1,50 @@
 from initialize import *
-from .drug_picker import drug_picker
+from .drug_picker import DrugPicker
 from .drug_list import DrugList
 import other_func as otf
-from .core_func import getWeight, calc_quantity,\
-    onSaveDrug, onEraseDrug, onReuse, onSamplePrescriptionbtn
+from .get_weight_btn import GetWeightBtn
+from .calc_quantity_widgets import Days, Times, DosagePer, Quantity
 
 import wx
-
 
 class PrescriptionPage(wx.Panel):
 
     def __init__(self, parent):
         super().__init__(parent)
+        self.mv = parent.mv
         self._createWidgets()
         self._setSizer()
+        self._bind()
 
     def _createWidgets(self):
         self.weight = self._createWeight()
-        self.getweightbtn = self._createGetWeightBtn()
-        self.days = self._createDays()
-        self.drug_picker = drug_picker(self)
-        self.times = self._createTimes()
-        self.dosage_per = self._createDosagePer()
-        self.quantity = self._createQuantity()
-        self.usage_unit = wx.StaticText(self, label='{Đơn vị}')
-        self.sale_unit = wx.StaticText(self, label='{Đơn vị}')
+        self.getweightbtn = GetWeightBtn(self)
+        self.days = Days(self)
+        self.drug_picker = DrugPicker(self)
+        self.times = Times(self)
+        self.dosage_per = DosagePer(self)
+        self.quantity = Quantity(self)
+        self.usage_unit = wx.StaticText(
+            self,
+            label='{Đơn vị}')
+        self.sale_unit = wx.StaticText(
+            self,
+            label='{Đơn vị}')
         self.usage = wx.TextCtrl(self)
         self.d_list = DrugList(self)
-        self.followup = self._createFollowup()
-        self.save_drug_btn = self._createSaveDrugbtn()
-        self.erase_drug_btn = self._createEraseDrugbtn()
-        self.reuse_btn = self._createReusebtn()
-        self.sample_prescription_btn = self._createSamplePrescriptionbtn()
+        self.followup = wx.ComboBox(
+            self,
+            style=wx.CB_DROPDOWN,
+            choices=followup_choices)
+        self.save_drug_btn = wx.BitmapButton(
+            self,
+            bitmap=wx.Bitmap(plus_bm))
+        self.del_drug_btn = wx.BitmapButton(
+            self,
+            bitmap=wx.Bitmap(minus_bm))
+        self.reuse_btn = wx.Button(
+            self,
+            label='Lượt khám mới với toa cũ')
 
     def _createWeight(self):
         w = wx.TextCtrl(self, size=dose_size, value='0')
@@ -39,75 +52,6 @@ class PrescriptionPage(wx.Panel):
                lambda e: otf.only_nums(e, decimal=True))
         w.SetHint('Kg')
         return w
-
-    def _createGetWeightBtn(self):
-        w = wx.BitmapButton(self, bitmap=wx.Bitmap(weight_bm))
-        w.Bind(
-            wx.EVT_BUTTON,
-            lambda e: self.weight.ChangeValue(getWeight(mv=self.Parent.Parent))
-        )
-        return w
-
-    def _createDays(self):
-        w = wx.TextCtrl(self, size=days_size, value='2')
-        w.Bind(wx.EVT_CHAR, otf.only_nums)
-        w.Bind(wx.EVT_TEXT, lambda e: calc_quantity(self))
-        return w
-
-    def _createTimes(self):
-        w = wx.TextCtrl(self, size=dose_size)
-        w.SetHint('lần')
-        w.Bind(wx.EVT_CHAR, otf.only_nums)
-        w.Bind(wx.EVT_TEXT, lambda e: calc_quantity(self))
-        return w
-
-    def _createDosagePer(self):
-        w = wx.TextCtrl(self, size=dose_size)
-        w.SetHint('liều')
-        w.Bind(wx.EVT_CHAR,
-               lambda e: otf.only_nums(e, decimal=True, slash=True))
-        w.Bind(wx.EVT_TEXT, lambda e: calc_quantity(self))
-        return w
-
-    def _createQuantity(self):
-
-        def on_txt_qty(e):
-            x = e.KeyCode
-            if x in (wx.WXK_RETURN, wx.WXK_NUMPAD_ENTER):
-                onSaveDrug(self)
-            elif x == wx.WXK_TAB:
-                return
-            else:
-                otf.only_nums(e)
-
-        w = wx.TextCtrl(self, size=dose_size, style=wx.TE_PROCESS_ENTER)
-        w.SetHint('Enter')
-        w.Bind(wx.EVT_CHAR, on_txt_qty)
-        return w
-
-    def _createFollowup(self):
-        w = wx.ComboBox(self, style=wx.CB_DROPDOWN, choices=followup_choices)
-        return w
-
-    def _createSaveDrugbtn(self):
-        btn = wx.BitmapButton(self, bitmap=wx.Bitmap(plus_bm))
-        btn.Bind(wx.EVT_BUTTON, lambda e: onSaveDrug(self))
-        return btn
-
-    def _createEraseDrugbtn(self):
-        btn = wx.BitmapButton(self, bitmap=wx.Bitmap(minus_bm))
-        btn.Bind(wx.EVT_BUTTON, lambda e: onEraseDrug(self))
-        return btn
-
-    def _createReusebtn(self):
-        btn = wx.Button(self, label='Lượt khám mới với toa cũ')
-        btn.Bind(wx.EVT_BUTTON, lambda e: onReuse(self))
-        return btn
-
-    def _createSamplePrescriptionbtn(self):
-        btn = wx.Button(self, label="Toa mẫu")
-        btn.Bind(wx.EVT_BUTTON, lambda e: onSamplePrescriptionbtn(self))
-        return btn
 
     def _setSizer(self):
         weight_days_row = wx.BoxSizer(wx.HORIZONTAL)
@@ -140,7 +84,7 @@ class PrescriptionPage(wx.Panel):
         drug_input_row.Add(self.sale_unit, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         drug_input_row.Add(self.save_drug_btn, 0,
                            wx.ALIGN_CENTER | wx.RIGHT, 5)
-        drug_input_row.Add(self.erase_drug_btn, 0,
+        drug_input_row.Add(self.del_drug_btn, 0,
                            wx.ALIGN_CENTER | wx.RIGHT, 5)
 
         usage_row.Add(wx.StaticText(
@@ -150,7 +94,6 @@ class PrescriptionPage(wx.Panel):
                          0, wx.CENTRE | wx.RIGHT, 5)
         followup_row.Add(self.followup, 1)
         btn_row.Add(self.reuse_btn, 0, wx.RIGHT, 5)
-        btn_row.Add(self.sample_prescription_btn, 0)
 
         sizer.Add(weight_days_row, 0, wx.EXPAND)
         sizer.Add(drug_input_row, 0, wx.EXPAND)
@@ -159,3 +102,44 @@ class PrescriptionPage(wx.Panel):
         sizer.Add(followup_row, 0, wx.EXPAND | wx.TOP, 3)
         sizer.Add(btn_row, 0, wx.EXPAND | wx.TOP, 3)
         self.SetSizer(sizer)
+
+    def _bind(self):
+        self.save_drug_btn.Bind(wx.EVT_BUTTON, lambda e: self.onSaveDrug())
+        self.del_drug_btn.Bind(wx.EVT_BUTTON, lambda e: self.onDelDrug())
+        self.reuse_btn.Bind(wx.EVT_BUTTON, lambda e: self.onReuse())
+
+    def onSaveDrug(self):
+        kwargs = {
+            "d": self.drug_picker.drugWH,
+            "times": self.times.Value,
+            "dosage_per": self.dosage_per.Value,
+            "quantity": self.quantity.Value,
+            "usage": self.usage.Value
+        }
+        assert kwargs["d"] is not None
+        assert int(kwargs["times"])
+        assert kwargs['dosage_per'] != ""
+        assert int(kwargs['quantity'])
+        self.d_list.add_or_update(**kwargs)
+        self.mv.calc_price()
+
+    def onDelDrug(self):
+        selected_id = self.d_list.GetFirstSelected()
+        self.d_list.remove(selected_id)
+        self.mv.calc_price()
+        self.drug_picker.Clear()
+
+    def onReuse(self):
+        v_idx = self.mv.visit_list.GetFirstSelected()
+        if v_idx != -1:
+            # keep old values
+            linedrugs = self.mv.visit.linedrugs.copy()
+            w = self.weight.Value
+            d = self.days.Value
+            # unselect
+            self.mv.visit_list.Select(v_idx, 0)
+            # populate field with old values
+            self.d_list.Populate(linedrugs=linedrugs)
+            self.weight.ChangeValue(w)
+            self.days.ChangeValue(d)
+            self.mv.calc_price()

@@ -2,33 +2,37 @@
 from .make_db import *
 from initialize import *
 import datetime as dt
-from random import randint, choices, uniform, sample
+from random import randint, choices, uniform, sample, random
 import math
 from fractions import Fraction as fr
 
+# id
+# name
+# element
+# quantity
+# usage_unit
+# sale_unit
+# purchase_price
+# sale_price
+# usage
 
-sample_drugs = [['AMOXICILLIN 500mg', 5000, 'gói', 'gói', 10000, 'uống', 5000],
-                ['CEFUROXIM 250mg', 3000, 'gói', 'gói', 30000, 'uống', 25000],
-                ['PARACETAMOL 80mg', 10000, 'gói', 'gói', 5000, 'uống', 3000],
-                ['PARACETAMOL 150mg', 10000, 'gói', 'gói', 7000, 'uống', 4000],
-                ['PARACETAMOL 250mg', 10000, 'gói', 'gói', 10000, 'uống', 5000],
-                ['PARACETAMOL 500mg', 10000, 'viên', 'viên', 15000, 'uống', 10000],
-                ['VITAMIN C 100mg', 10000, 'viên', 'viên', 2000, 'uống', 1000],
-                ['SIMETHICON 15ml', 500, 'ml', 'chai', 30000, 'uống', 25000],
-                ['DESLORATADINE', 5000, 'ml', 'chai', 40000, 'uống', 35000],
-                ['BACIVIT H', 10000, 'gói', 'gói', 2000, 'uống', 1000],
-                ['HOASTEX 90ml', 5000, 'ml', 'chai', 20000, 'uống', 15000],
-                ['ACEMUC 200mg', 100, 'gói', 'gói', 5000, 'uống', 3000],
-                ['ACEMUC 100mg', 100, 'gói', 'gói', 5000, 'uống', 3000],
-                ['PASSEDYL E', 100, 'ml', 'chai', 5000, 'uống', 3000],
-                ['PECTOL 90mg', 100, 'ml', 'chai', 5000, 'uống', 3000],
+
+sample_drugs = [[1, 'AMOXICILLIN 500mg', 'amoxicillin', 1000, 'gói', 'gói', 5000, 10000, 'uống'],
+                [2, 'CEFUROXIM 250mg', 'cefuroxim', 3000, 'gói', 'gói', 30000, 25000, 'uống'],
+                [3, 'PARACETAMOL 80mg', 'paracetamol', 10000, 'gói', 'gói', 5000, 3000, 'uống'],
+                [4, 'PARACETAMOL 500mg', 'para', 10000, 'viên', 'viên', 15000, 10000, 'uống'],
+                [5, 'DESLORATADINE', 'desloratadin', 5000, 'ml', 'chai', 40000, 35000, 'uống'],
+                [6, 'BACIVIT H', "men", 10000, 'gói', 'gói', 2000, 1000, 'uống'],
+                [7, 'HOASTEX 90ml', "hoas", 5000, 'ml', 'chai', 20000, 15000, 'uống'],
+                [8, 'ACEMUC 200mg', 'acemu', 100, 'gói', 'gói', 5000, 3000, 'uống'],
+                [9, 'TOBREX', 'Tobramycin', 2, 'giọt', 'lọ', 1000, 2000, 'nhỏ mắt']
                 ]
 
 
 def rdate(exam=False):
     if exam:
         y = dt.datetime.now().year
-        m = randint(dt.datetime.now().month - 3, dt.datetime.now().month)
+        m = dt.datetime.now().month
         h = randint(18, 21)
         m2 = randint(0, 59)
         s = randint(0, 59)
@@ -70,7 +74,7 @@ def rtext():
 def random_patient_list(k=10):
     li = []
     for i, name in zip(range(k), rname()):
-        li.append(Patient(name=name, gender=randint(0, 1),
+        li.append(Patient(name=name, gender=choices(['nam', 'nữ'])[0],
                           birthdate=rdate(),
                           address=rtext(), past_history=rtext()))
     return li
@@ -82,11 +86,11 @@ def random_visit_list(k=10, w_note=False):
         li.append(Visit(exam_date=choices([rdate(exam=True),
                                            dt.datetime.now()])[0],
                         note=rtext(),
-                        diag=rtext(),
+                        diagnosis=rtext(),
                         weight=round(uniform(5, 20), 1),
                         days=randint(1, 5),
                         followup=rtext(),
-                        bill=100000,
+                        bill=int(random() * 1000) * 1000,
                         patient_id=(i + 1),
                         )
                   )
@@ -97,87 +101,49 @@ def sample_warehouse():
     li = []
     for i in sample_drugs:
         li.append(DrugWarehouse(
-            name=i[0], quantity=i[1],
-            usage_unit=i[2], sale_unit=i[3],
-            sale_price=i[4], usage=i[5], purchase_price=i[6]))
+            id=i[0],
+            name=i[1],
+            element=i[2],
+            quantity=i[3],
+            usage_unit=i[4],
+            sale_unit=i[5],
+            purchase_price=i[6],
+            sale_price=i[7],
+            usage=i[8]))
     return li
 
 
 def random_linedrug(k=10):
     li = []
     for i in range(k):
-        for j in sample(list(range(15)), k=choices([1, 2, 3])[0]):
+        for j in sample(sample_drugs, k=choices([1, 2, 3])[0]):
             a = choices(['1/3', '0.5', '2'])[0]
             b = choices([1, 2, 3])[0]
             try:
                 quantity = float(a) * b
             except ValueError:
                 quantity = fr(a) * b
-            if sample_drugs[j][3] == "chai":
+            if j[5] == "chai":
                 quantity = 1
             li.append(
                 LineDrug(
-                    drug_id=j + 1,
+                    drug_id=j[0],
                     dosage_per=a,
                     times=b,
                     quantity=math.ceil(quantity),
-                    usage=f"Ngày {sample_drugs[j][5]} {b} lần, lần {a} {sample_drugs[j][2]}",
+                    usage=f"Ngày {j[8]} {b} lần, lần {a} {j[4]}",
                     visit_id=i + 1))
     return li
 
 
-def random_sample_prescription(k=10):
-    li = []
-    for i in range(k):
-        li.append(SamplePrescription(name=rtext()))
-    return li
-
-
-def random_sample_linedrug(k=10):
-    li = []
-    for i in range(k):
-        for j in sample(list(range(15)), k=choices([1, 2, 3])[0]):
-            a = choices(['1/3', '0.5', '2'])[0]
-            b = choices([1, 2, 3])[0]
-            li.append(SampleLineDrug(drug_id=j + 1,
-                                     sampleprescription_id=i + 1,
-                                     dosage_per=a,
-                                     times=b,
-                                     ))
-    return li
-
-
-def make_staff():
-    res = []
-    doctor_li = ["NGUYỄN DUY KHẢI", "VƯƠNG KIẾN THANH", "TRẦN VŨ",
-                 "HUỲNH HỮU DANH", "QUÁCH NGỌC VINH", "BÙI THỊ LỆ HUYỀN"]
-    for i in doctor_li:
-        res.append(Staff(name=i, password=1, job='Doctor'))
-    nurse_li = ["Nurse A", "Nurse B"]
-    for i in nurse_li:
-        res.append(Staff(name=i, password=1, job='Nurse'))
-    return res
-
-
-def commit_population(k=10):
+def populate_db(k=10):
     li = [random_patient_list(k),
           random_visit_list(k),
           sample_warehouse(),
           random_linedrug(k),
-          random_sample_prescription(),
-          random_sample_linedrug(),
-          make_staff()]
+          ]
     flatten_li = [obj for sublist in li for obj in sublist]
     sess = Session()
     sess.add_all(flatten_li)
-    commit_(sess)
+    sess.commit()
     sess.close()
-
-
-# def commit_drugwarehouse():
-#     li = [sample_warehouse(),
-#           random_sample_prescription(),
-#           random_sample_linedrug()]
-#     flatten_li = [obj for sublist in li for obj in sublist]
-#     with session_scope() as sess:
-#         sess.add_all(flatten_li)

@@ -23,11 +23,12 @@ class VisitList(wx.ListCtrl):
     def onDeselect(self, e):
         self.mv.visit = None
 
-    def buildVisitList(self, p):
+    def buildVisitList(self):
+        p = self.mv.patient
         self.visit_list = p.visits.order_by(Visit.id.asc())
         logging.debug('visit list rebuilt')
         self.DeleteAllItems()
         for v in self.visit_list:
             self.Append([v.id,
                          v.exam_date.strftime('%d/%m/%Y %H:%M'),
-                         v.diag])
+                         v.diagnosis])

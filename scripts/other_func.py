@@ -77,11 +77,13 @@ def bill_int_to_str(bill_int):
     return res[:-1]
 
 
-def only_nums(e, decimal=False, slash=False):
+def only_nums(e, decimal=False, slash=False, tab=True):
     x = e.KeyCode
     nums = list(range(48, 58)) + list(range(324, 334)) +\
         [wx.WXK_BACK, wx.WXK_DELETE,
-         wx.WXK_TAB, wx.WXK_LEFT, wx.WXK_RIGHT]
+         wx.WXK_LEFT, wx.WXK_RIGHT]
+    if tab:
+        nums += [wx.WXK_TAB]
     if decimal:
         nums += [46, wx.WXK_DECIMAL]
     if slash:

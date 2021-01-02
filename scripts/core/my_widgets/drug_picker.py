@@ -1,5 +1,5 @@
 from initialize import *
-from db_sql.db_func import query_linedrug_list
+from database.db_func import query_linedrug_list
 import os
 import wx
 
@@ -9,8 +9,8 @@ class DrugPopup(wx.ComboPopup):
     def __init__(self, parent):
         super().__init__()
         self.lc = None
-        mv = parent.Parent.Parent.Parent
-        self.init_d_l = query_linedrug_list(mv.sess).all()
+        self.mv = parent.mv
+        self.init_d_l = query_linedrug_list(self.mv.sess).all()
         self.d_l = []
 
     def Create(self, parent):
@@ -22,7 +22,6 @@ class DrugPopup(wx.ComboPopup):
         self.lc.AppendColumn('Số lượng')
         self.lc.AppendColumn('Đơn giá')
         self.lc.AppendColumn('Cách dùng', width=100)
-        self.lc.AppendColumn('Nhà SX', width=80)
         self.lc.Bind(wx.EVT_MOTION, self.OnMotion)
         self.lc.Bind(wx.EVT_LEFT_DOWN, self.OnLeftDown)
         self.lc.Bind(wx.EVT_KEY_DOWN, self.onKeyPress)
@@ -54,13 +53,11 @@ class DrugPopup(wx.ComboPopup):
         self.d_l = list(filter(
             lambda x: s.casefold() in x.name.casefold() or s.casefold() in x.element.casefold(),
             self.init_d_l))
-        for item in self.d_l:
-            self.lc.Append(
-                [item.name, item.element, item.quantity, item.sale_price, item.usage, item.manufacturer])
         for index, item in enumerate(self.d_l):
-            if item.quantity <10:
-                self.lc.SetItemTextColour(index, wx.Colour(252, 3, 57,255))
-                
+            self.lc.Append(
+                [item.name, item.element, item.quantity, item.sale_price, item.usage])
+            if item.quantity < 10:
+                self.lc.SetItemTextColour(index, wx.Colour(252, 3, 57, 255))
 
     def OnMotion(self, e):
         item, flags = self.lc.HitTest(e.GetPosition())
@@ -124,10 +121,11 @@ class DrugPopup(wx.ComboPopup):
             self.KeyReturn()
 
 
-class drug_picker(wx.ComboCtrl):
+class DrugPicker(wx.ComboCtrl):
 
     def __init__(self, parent):
         super().__init__(parent, size=drugctrl_size, style=wx.TE_PROCESS_ENTER)
+        self.mv = parent.mv
         self.drug_popup = DrugPopup(self)
         self.SetPopupControl(self.drug_popup)
         self.Bind(wx.EVT_KEY_DOWN, self.onKeyPress)

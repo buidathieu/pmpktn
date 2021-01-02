@@ -1,13 +1,13 @@
 from initialize import *
 
 import wx
-import logging
 
 
 class DrugList(wx.ListCtrl):
 
     def __init__(self, parent):
         super().__init__(parent, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        self.mv = parent.mv
         self.dwh_list = []
         self.AppendColumn('STT', width=d_stt_w)
         self.AppendColumn('Thuốc', width=d_name_w)
@@ -48,18 +48,15 @@ class DrugList(wx.ListCtrl):
         self.Parent.drug_picker.Clear()
 
     def add_or_update(self, d, times, dosage_per, quantity, usage):
-        assert self.ItemCount == len(self.dwh_list)
-        pg = self.Parent
+        pg = self.mv.order_book.GetPage(0)
         try:
             # find if already added drug
             row = [i.id for i in self.dwh_list].index(d.id)
-            loggin.debug('drug found -> UPDATE ')
             self.SetItem(row, 2, times)
             self.SetItem(row, 3, f"{dosage_per} {d.usage_unit}")
             self.SetItem(row, 4, f"{quantity} {d.sale_unit}")
             self.SetItem(row, 5, usage)
         except ValueError:
-            logging.debug('drug not found -> ADD')
             self.Append([
                 self.ItemCount + 1,
                 d.name,
@@ -72,20 +69,13 @@ class DrugList(wx.ListCtrl):
         pg.drug_picker.Clear()
         pg.drug_picker.SetFocus()
 
-    def remove_selected(self):
-        assert self.ItemCount == len(self.dwh_list)
-        idx = self.GetFirstSelected()
-        logging.debug(f"Delete drug {self.dwh_list[idx].name} ")
-        if idx >= 0:
-            self.dwh_list.pop(idx)
-            self.DeleteItem(idx)
-            for row in range(1, self.ItemCount + 1):
-                self.SetItem(row - 1, 0, str(row))
-        else:
-            logging.debug('drug not found when delete')
+    def remove(self, idx):
+        self.dwh_list.pop(idx)
+        self.DeleteItem(idx)
+        for row in range(1, self.ItemCount + 1):
+            self.SetItem(row - 1, 0, str(row))
 
     def get_total_price(self):
-        assert self.ItemCount == len(self.dwh_list)
         total = 0
         if self.ItemCount > 0:
             for i in range(self.ItemCount):
@@ -106,12 +96,4 @@ class DrugList(wx.ListCtrl):
             linedrugs.append(ld)
         return linedrugs
 
-    def build_linedrugs_for_pdf(self):
-        linedrugs = []
-        for i in range(self.ItemCount):
-            ld = []
-            ld.append(self.GetItemText(i, 1))
-            ld.append(self.GetItemText(i, 5))
-            ld.append(self.GetItemText(i, 4))
-            linedrugs.append(ld)
-        return linedrugs
+

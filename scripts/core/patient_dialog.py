@@ -1,5 +1,5 @@
 from initialize import *
-import db_sql.db_func as dbf
+import database.db_func as dbf
 import other_func as otf
 import wx
 import wx.adv
@@ -8,19 +8,18 @@ import wx.adv
 class BasePatientDialog(wx.Dialog):
     def __init__(self, parent, title):
         super().__init__(parent, title=title)
+        self.mv = parent
         self.name = wx.TextCtrl(self, size=name_size)
         self.gender = self._createGender()
         self.birthdate = self._createBirthdate()
         self.age = self._createAge()
         self.address = wx.TextCtrl(self)
-        self.past_history = wx.TextCtrl(
-            self, style=wx.TE_MULTILINE, size=note_size)
 
         self.Bind(wx.EVT_KEY_DOWN, self.onESC)
         self._setSizer()
 
     def _createGender(self):
-        w = wx.Choice(self, choices=[gender_dict[0], gender_dict[1]])
+        w = wx.Choice(self, choices=['nam', 'nữ'])
         w.Selection = 0
         return w
 
@@ -56,8 +55,6 @@ class BasePatientDialog(wx.Dialog):
                              (self.age),
                              (wx.StaticText(self, label="Địa chỉ"),),
                              (self.address, 0, wx.EXPAND),
-                             (wx.StaticText(self, label="Bệnh nền, dị ứng"),),
-                             (self.past_history, 0, wx.EXPAND),
                              ])
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)
         btn_sizer.AddStretchSpacer()
@@ -78,17 +75,16 @@ class AddPatientDialog(BasePatientDialog):
 
     def __init__(self, parent):
         super().__init__(parent, title="Thêm bệnh nhân mới")
-        logging.debug('AddPatientDialog initialize, using parent session')
+        logging.debug('AddPatientDialog initialize')
 
     def add_patient(self):
         kwargs = {'name': self.name.Value.upper(),
-                  'gender': bool(self.gender.Selection),
+                  'gender': ['nam', 'nữ'][self.gender.Selection],
                   'birthdate': otf.wxdate2pydate(self.birthdate.Value),
-                  'address': self.address.Value,
-                  'past_history': self.past_history.Value
+                  'address': self.address.Value
                   }
-        logging.debug(f'AddPatientDialog: add_patient {kwargs}')
-        new_patient = dbf.add_patient(**kwargs, sess=self.Parent.sess)
+        logging.debug(f"{self.__class__.__name__}: add_patient {kwargs['name']}")
+        new_patient = dbf.add_patient(**kwargs, sess=self.mv.sess)
         return new_patient
 
 
@@ -103,22 +99,19 @@ class EditPatientDialog(BasePatientDialog):
 
     def Populate(self):
         self.name.ChangeValue(self.patient.name)
-        self.gender.Selection = int(self.patient.gender)
+        self.gender.Selection = ['nam', 'nữ'].index(self.patient.gender)
         self.birthdate.SetValue(otf.pydate2wxdate(self.patient.birthdate))
         self.age.ChangeValue(otf.bd_to_age(self.birthdate.Value).ljust(16))
         self.address.ChangeValue(self.patient.address)
-        self.past_history.ChangeValue(self.patient.past_history)
 
     def edit_patient(self):
         kwargs = {
-            'p': self.patient,
+            'patient': self.patient,
             'name': self.name.Value.upper(),
-            'gender': bool(self.gender.Selection),
+            'gender': ['nam', 'nữ'][self.gender.Selection],
             'birthdate': otf.wxdate2pydate(self.birthdate.Value),
-            'address': self.address.Value,
-            'past_history': self.past_history.Value
-        }
-        logging.debug(f'EditPatientDialog: edit_patient {kwargs}')
+            'address': self.address.Value}
+        logging.debug(f"EditPatientDialog: edit_patient {kwargs['name']}")
         edited_patient = dbf.edit_patient(
-            **kwargs, sess=self.Parent.sess)
+            **kwargs, sess=self.mv.sess)
         return edited_patient

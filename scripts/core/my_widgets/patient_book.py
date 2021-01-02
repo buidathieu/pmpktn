@@ -3,7 +3,6 @@ from initialize import *
 import other_func as otf
 
 import wx
-import logging
 
 
 class PatientBook(wx.Notebook):
@@ -37,7 +36,7 @@ class BasePatientList(wx.ListCtrl):
 
     def __init__(self, parent):
         super().__init__(parent, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        self.mv = parent.Parent
+        self.mv = parent.mv
         self.AppendColumn('Mã BN', width=ma_bn_width)
         self.AppendColumn('Bệnh nhân', width=bn_width)
         self.AppendColumn('Giới', width=gender_width)
@@ -54,7 +53,7 @@ class BasePatientList(wx.ListCtrl):
             b = otf.bd_to_age(p.birthdate)
             self.Append([p.id,
                          p.name,
-                         gender_dict[p.gender],
+                         p.gender,
                          b])
 
     def onSelect(self, e):
@@ -68,33 +67,23 @@ class BasePatientList(wx.ListCtrl):
         self._make_p_list()
         self._append()
 
+    def append_new_patient(self, new_patient):
+        logging.debug(f'{self.__class__.__name__} append new patient')
+        b = otf.bd_to_age(new_patient.birthdate)
+        self.Append([
+            new_patient.id,
+            new_patient.name,
+            new_patient.gender,
+            b])
+        self.p_list.append(new_patient)
 
-class QueuingPatientList(BasePatientList):
-
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.vq = None
-        self.timer = self.refreshQueueTimer()
-
-    def _make_p_list(self):
-        self.vq_list = dbf.get_visitqueue(
-            sess=self.Parent.Parent.sess).all()
-        self.p_list = [vq.patient for vq in self.vq_list]
-
-    def refreshQueueTimer(self):
-        self.refresh()
-        return wx.CallLater(
-            setting["time_between_rebuild_visitqueue"],
-            self.refreshQueueTimer)
-
-    def onSelect(self, e):
-        self.vq = self.vq_list[e.Index]
-        super().onSelect(e)
-
-    def onDeselect(self, e):
-        self.vq = None
-        super().onDeselect(e)
-
+    def renew_patient_info(self, patient, idx):
+        self.SetItem(idx, 0, str(patient.id))
+        self.SetItem(idx, 1, patient.name)
+        self.SetItem(idx, 2, patient.gender)
+        self.SetItem(idx, 3, otf.bd_to_age(patient.birthdate))
+        self.Select(idx, on=0)
+        self.Select(idx)
 
 class TodayPatientList(BasePatientList):
 

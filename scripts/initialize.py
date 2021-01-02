@@ -6,7 +6,6 @@ try:
     ctypes.windll.shcore.SetProcessDpiAwareness(True)
 except Exception:
     pass
-import logging
 from wx import NewId
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
@@ -18,9 +17,6 @@ DIR_PATH = os.path.dirname(SCRIPTS_PATH)
 USER_FILES_PATH = os.path.join(DIR_PATH, "user_files")
 FONTS_PATH = os.path.join(DIR_PATH, "fonts")
 BITMAPS_PATH = os.path.join(DIR_PATH, 'bitmaps')
-
-# logo
-logo = os.path.join(USER_FILES_PATH, "logo.png")
 
 # bitmaps
 new_p_bm = os.path.join(BITMAPS_PATH, 'new_patient.png')
@@ -36,12 +32,6 @@ plus_bm = os.path.join(BITMAPS_PATH, 'plus.png')
 pencil_bm = os.path.join(BITMAPS_PATH, 'pencil.png')
 minus_bm = os.path.join(BITMAPS_PATH, 'minus.png')
 weight_bm = os.path.join(BITMAPS_PATH, 'weight.png')
-
-
-gender_dict = {0: 'nam',
-               1: 'nữ',
-               'nam': 0,
-               'nữ': 1}
 
 #  menu ids
 id_new_patient = NewId()
@@ -76,6 +66,7 @@ tree_size = (400, 300)
 add_edit_prescription_dialog_size = (-1, 600)
 
 
+# DB_SETTING ------------------------------------------------------------
 with open(os.path.join(DIR_PATH, "db_setting.json"), "r") as f:
     db_setting = json.load(f)
 
@@ -95,13 +86,16 @@ Session = sessionmaker(bind=engine)
 
 
 def commit_(sess):
-    try:
-        sess.commit()
-    except Exception as e:
-        sess.rollback()
-        print('sess rollback: ', e)
+    def inner():
+        try:
+            sess.commit()
+        except Exception as e:
+            sess.rollback()
+            print('sess rollback: ', e)
+    return inner
 
 
+# USER_SETTING ------------------------------------------------------------
 with open(os.path.join(DIR_PATH, "user_setting.json"), "r") as f:
     user_setting = json.load(f)
 
@@ -112,7 +106,3 @@ followup_choices.extend(list(user_setting["followup_dict"]))
 with open(os.path.join(DIR_PATH, "setting.json"),
           "r", encoding="utf-8-sig") as f:
     setting = json.load(f)
-
-dst = os.path.join(DIR_PATH, "debugging.log")
-if setting["DEBUG"]:
-    logging.basicConfig(filename=dst, level=logging.DEBUG)
