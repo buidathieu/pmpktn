@@ -1,5 +1,5 @@
 # Phần mềm phòng mạch tư
-Tác giả: Bs Vương Kiến Thanh
+Tác giả: Bs Vương Kiến Thanh  
 email: thanhstardust@outlook.com
 
 ## Chức năng:
@@ -28,9 +28,22 @@ Bạn có thể dùng app sqlitestudio để chỉnh sửa các giá trị trong
 ## Screenshots
 ![](/screenshots/ss1.png)
 
+- Dùng sqlitestudio để quản lý dữ liệu
+![](/screenshots/ss2.png)
+
 ## Hướng dẫn cài đặt:
 Tải về tại https://github.com/vuongkienthanh/pmpktn/releases/
-- MacOS: Nếu bạn bị lỗi developer cannot be verified, thì bạn dùng menu chuột phải -> open. Những lần sau sẽ không cần bước này nữa.
+- MacOS: Chép vào ổ khác ngoài thư mục Download. Nếu bạn bị lỗi developer cannot be verified, thì bạn dùng menu chuột phải -> open. Những lần sau sẽ không cần bước này nữa.
+- Windows: Will be here asap.
+
+## Nâng cấp:
+Một số chức năng đơn giản có thể thêm vào app, hoặc có thể customize theo quy trình tổ chức:
+- Kết nối với database kiểu hệ thống mạng như Posgresql, Oracle,..
+- In ấn với font tự chọn, design tự thiết kế.
+- Tương tác với clipboard.
+
+![](/screenshots/ss3.jpg)
+
 
 ## Liên hệ:
 - facebook.com/vuongkienthanh
