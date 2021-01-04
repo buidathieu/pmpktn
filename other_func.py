@@ -4,21 +4,6 @@ from initialize import setting
 
 
 def bd_to_age(bd):
-<<<<<<< HEAD:scripts/other_func.py
-    if isinstance(bd, dt.date):
-        now = dt.date.today()
-        delta = (now - bd).days
-    else:
-        now = wx.DateTime.Today()
-        delta = (now - bd).GetDays()
-
-    if delta <= 60:
-        age = f'{delta} ngày tuổi'
-    elif delta <= (30 * 24):
-        age = f'{int(delta / 30)} tháng tuổi'
-    else:
-        age = f'{int(delta / 365)} tuổi'
-=======
     if isinstance(bd, (dt.datetime, dt.date)):
         now = dt.date.today()
         delta = (now - bd).days
@@ -34,7 +19,6 @@ def bd_to_age(bd):
             age = f'{int(delta / 365)} tuổi'
     except ValueError:
         age = "ERROR"
->>>>>>> bsloi:other_func.py
     return age
 
 
