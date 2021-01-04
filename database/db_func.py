@@ -71,16 +71,22 @@ def save_old_visit(p, v, past_history,
     v.weight = weight
     v.days = days
     v.bill = bill
-    # restock
-    for i in v.linedrugs:
-        drug = sess.query(DrugWarehouse).get(i.drug_id)
-        drug.quantity += i.quantity
-        sess.delete(i)
-    # takeout
-    for i in linedrugs:
-        v.linedrugs.append(LineDrug(**i))
-        drug = sess.query(DrugWarehouse).get(i['drug_id'])
-        drug.quantity -= i['quantity']
+    drug = sess.query(DrugWarehouse).get(i.drug_id)
+    if drug.quantity != -1:
+        # restock
+        for i in v.linedrugs:
+            drug = sess.query(DrugWarehouse).get(i.drug_id)
+            drug.quantity += i.quantity
+            sess.delete(i)
+        # takeout
+        for i in linedrugs:
+            v.linedrugs.append(LineDrug(**i))
+            drug = sess.query(DrugWarehouse).get(i['drug_id'])
+            if drug.quantity - i['quantity'] < 0:
+                sess.rollback()
+                return -1
+            else:
+                drug.quantity -= i['quantity']
     sess.commit_()
 
 
@@ -100,7 +106,11 @@ def save_new_visit(p, past_history,
     for i in linedrugs:
         new_visit.linedrugs.append(LineDrug(**i))
         drug = sess.query(DrugWarehouse).get(i['drug_id'])
-        drug.quantity -= i['quantity']
+        if drug.quantity - i['quantity'] < 0:
+            sess.rollback()
+            return -1
+        else:
+            drug.quantity -= i['quantity']
     sess.add(new_visit)
     sess.commit_()
 

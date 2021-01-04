@@ -26,10 +26,10 @@ class PrescriptionPage(wx.Panel):
         self.quantity = Quantity(self)
         self.usage_unit = wx.StaticText(
             self,
-            label='{Đơn vị}')
+            label='{Đơn vị} ')
         self.sale_unit = wx.StaticText(
             self,
-            label='{Đơn vị}')
+            label='{Đơn vị} ')
         self.usage = wx.TextCtrl(self)
         self.d_list = DrugList(self)
         self.save_drug_btn = wx.BitmapButton(
@@ -56,11 +56,11 @@ class PrescriptionPage(wx.Panel):
         btn_row = wx.BoxSizer(wx.HORIZONTAL)
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        weight_days_row.Add(wx.StaticText(self, label='Cân nặng:'),
+        weight_days_row.Add(wx.StaticText(self, label='Cân nặng '),
                             0, wx.ALIGN_CENTER)
         weight_days_row.Add(self.weight, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         weight_days_row.Add(self.getweightbtn, 0, wx.RIGHT, 5)
-        weight_days_row.Add(wx.StaticText(self, label='Số ngày:'),
+        weight_days_row.Add(wx.StaticText(self, label='Số ngày '),
                             0, wx.ALIGN_CENTER)
         weight_days_row.Add(self.days, 0, wx.ALIGN_CENTER)
         drug_input_row.Add(wx.StaticText(self, label='Thuốc:'),

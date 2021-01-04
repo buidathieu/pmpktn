@@ -140,4 +140,6 @@ dmypy.json
 *.sublime-workspace
 *.ipynb
 *.pdf
-/drugwarehouse
+*.db
+dist/
+build/

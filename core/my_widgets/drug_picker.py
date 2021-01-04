@@ -148,10 +148,10 @@ class DrugPicker(wx.ComboCtrl):
         else:
             self.ChangeValue('')
             pg.dosage_per.ChangeValue('')
-            pg.usage_unit.Label = '{Đơn vị}'
+            pg.usage_unit.Label = '{Đơn vị} '
             pg.times.ChangeValue("")
             pg.quantity.ChangeValue("")
-            pg.sale_unit.Label = '{Đơn vị}'
+            pg.sale_unit.Label = '{Đơn vị} '
             pg.usage.ChangeValue("")
 
     def onKeyPress(self, e):

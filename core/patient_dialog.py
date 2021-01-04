@@ -45,15 +45,15 @@ class BasePatientDialog(wx.Dialog):
 
     def _setSizer(self):
         entry_sizer = wx.FlexGridSizer(rows=6, cols=2, vgap=5, hgap=2)
-        entry_sizer.AddMany([(wx.StaticText(self, label="Tên bệnh nhân"),),
+        entry_sizer.AddMany([(wx.StaticText(self, label="Tên bệnh nhân: "),),
                              (self.name, 0, wx.EXPAND),
-                             (wx.StaticText(self, label="Giới"),),
+                             (wx.StaticText(self, label="Giới: "),),
                              (self.gender),
-                             (wx.StaticText(self, label="Ngày sinh"),),
+                             (wx.StaticText(self, label="Ngày sinh: "),),
                              (self.birthdate),
-                             (wx.StaticText(self, label="Tuổi"),),
+                             (wx.StaticText(self, label="Tuổi: "),),
                              (self.age),
-                             (wx.StaticText(self, label="Địa chỉ"),),
+                             (wx.StaticText(self, label="Địa chỉ: "),),
                              (self.address, 0, wx.EXPAND),
                              ])
         btn_sizer = wx.BoxSizer(wx.HORIZONTAL)

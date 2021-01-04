@@ -48,7 +48,7 @@ class Visit(Base):
 
 class DrugWarehouse(Base):
     __tablename__ = 'drugwarehouse'
-    __table_args__ = (CheckConstraint("quantity >= 0"),
+    __table_args__ = (CheckConstraint("quantity >= -1"),
                       CheckConstraint("sale_price >= 0"))
 
     id = Column(Integer, primary_key=True)

@@ -26,7 +26,7 @@ class MainView(wx.Frame):
 
         super().__init__(
             parent,
-            title='APP PHÒNG MẠCH TƯ, created by thanhstardust@outlook.com',
+            title='PHẦN MỀM PHÒNG MẠCH TƯ, created by thanhstardust@outlook.com',
             pos=(0, 20), size=window_size, *args, **kw)
         self.SetBackgroundColour(wx.Colour(206, 219, 186))
 
@@ -112,20 +112,20 @@ class MainView(wx.Frame):
 
         label_1_row.Add(self.label_1, 0)
         label_1_row.Add(wx.StaticLine(self), 1, wx.ALIGN_CENTER)
-        name_row.Add(wx.StaticText(self, label='Họ tên:'), 0, wx.ALIGN_CENTER)
+        name_row.Add(wx.StaticText(self, label='Họ tên: '), 0, wx.ALIGN_CENTER)
         name_row.Add(self.name, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         name_row.Add(self.gender, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
-        name_row.Add(wx.StaticText(self, label='Ngày sinh:'), 0, wx.ALIGN_CENTER)
+        name_row.Add(wx.StaticText(self, label='Ngày sinh: '), 0, wx.ALIGN_CENTER)
         name_row.Add(self.birthdate, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
-        name_row.Add(wx.StaticText(self, label='Tuổi:'), 0, wx.ALIGN_CENTER)
+        name_row.Add(wx.StaticText(self, label='Tuổi: '), 0, wx.ALIGN_CENTER)
         name_row.Add(self.age, 1, wx.ALIGN_CENTER)
-        addr_row.Add(wx.StaticText(self, label='Địa chỉ:'), 0, wx.ALIGN_CENTER)
+        addr_row.Add(wx.StaticText(self, label='Địa chỉ: '), 0, wx.ALIGN_CENTER)
         addr_row.Add(self.address, 1, wx.EXPAND)
         label_2_row.Add(self.label_2)
         label_2_row.Add(wx.StaticLine(self), 1, wx.ALIGN_CENTER)
         datetime_row.Add(wx.StaticText(
             self,
-            label='Bệnh sử, triệu chứng, ghi chú,... (theo từng lượt khám):'))
+            label='Bệnh sử, triệu chứng, ghi chú,... (theo từng lượt khám): '))
         datetime_row.Add(self.label_dt, 1, wx.RIGHT, 10)
         diag_row.Add(wx.StaticText(self, label='Chẩn đoán:'),
                      0, wx.ALIGN_CENTER | wx.TOP, 3)
@@ -134,13 +134,13 @@ class MainView(wx.Frame):
         btn_row.Add(self.new_patient_btn, 0)
         btn_row.Add(self.save_visit_btn, 0)
         btn_row.AddStretchSpacer()
-        btn_row.Add(wx.StaticText(self, label='Tổng tiền:'), 0, wx.CENTRE)
+        btn_row.Add(wx.StaticText(self, label='Tổng tiền: '), 0, wx.CENTRE)
         btn_row.Add(self.total_cost, 0, wx.CENTRE)
 
         sizer.Add(label_1_row, 0, wx.EXPAND)
         sizer.Add(name_row, 0, wx.EXPAND)
         sizer.Add(addr_row, 0, wx.EXPAND | wx.TOP, 3)
-        sizer.Add(wx.StaticText(self, label='Bệnh nền, dị ứng:'), 0, wx.TOP, 3)
+        sizer.Add(wx.StaticText(self, label='Bệnh nền, dị ứng: '), 0, wx.TOP, 3)
         sizer.Add(self.past_history, 0, wx.EXPAND)
         sizer.Add(label_2_row, 0, wx.EXPAND)
         sizer.Add(datetime_row, 0, wx.EXPAND)
@@ -199,7 +199,7 @@ class MainView(wx.Frame):
     def onPatientSelect(self):
         p = self.patient
         self.visit_list.buildVisitList()
-        self.label_1.Label = f'Thông tin bệnh nhân (Mã BN: {p.id})'
+        self.label_1.Label = f'Thông tin bệnh nhân (Mã BN: {p.id}) '
         self.name.ChangeValue(p.name)
         self.gender.ChangeValue(p.gender)
         self.birthdate.ChangeValue(p.birthdate.strftime("%d/%m/%Y"))
@@ -210,7 +210,7 @@ class MainView(wx.Frame):
     def onPatientDeselect(self):
         self.visit = None
         self.visit_list.DeleteAllItems()
-        self.label_1.Label = 'Thông tin bệnh nhân'
+        self.label_1.Label = 'Thông tin bệnh nhân '
         self.name.ChangeValue("")
         self.gender.ChangeValue("")
         self.birthdate.ChangeValue("")
@@ -221,14 +221,14 @@ class MainView(wx.Frame):
     def onVisitSelect(self):
 
         def _dt_to_label(p_dt):
-            return ' ' * 20 + 'Giờ khám: {}:{} ngày {} tháng {} năm {}'.\
+            return ' ' * 20 + 'Giờ khám: {}:{} ngày {} tháng {} năm {} '.\
                 format(str(p_dt.hour).rjust(2, '0'),
                        str(p_dt.minute).rjust(2, '0'),
                        p_dt.day,
                        p_dt.month,
                        p_dt.year)
         v = self.visit
-        self.label_2.Label = f'Thông tin lượt khám (Mã lượt khám: {v.id})'
+        self.label_2.Label = f'Thông tin lượt khám (Mã lượt khám: {v.id}) '
         self.label_dt.Label = _dt_to_label(v.exam_date)
         self.note.ChangeValue(v.note)
         self.diagnosis.ChangeValue(v.diagnosis)
@@ -242,7 +242,7 @@ class MainView(wx.Frame):
         self.Layout()
 
     def onVisitDeselect(self):
-        self.label_2.Label = 'Thông tin lượt khám'
+        self.label_2.Label = 'Thông tin lượt khám '
         self.label_dt.Label = ""
         self.note.ChangeValue("")
         self.diagnosis.ChangeValue("")
@@ -322,8 +322,11 @@ class MainView(wx.Frame):
             "Cập nhật",
             style=wx.YES_NO)
         if ans == wx.YES:
-            dbf.save_old_visit(**kwargs, sess=self.sess)
-            wx.MessageBox("Đã cập nhật")
+            succeed = dbf.save_old_visit(**kwargs, sess=self.sess)
+            if succeed == -1:
+                wx.MessageBox("Kho thuốc không đủ")
+            else:
+                wx.MessageBox("Đã cập nhật")
             self.visit_list.buildVisitList()
 
     def _save_new_visit(self):
@@ -343,5 +346,9 @@ class MainView(wx.Frame):
             "Lưu lượt khám mới?", "Lưu",
             style=wx.YES_NO)
         if ans == wx.YES:
-            dbf.save_new_visit(**kwargs, sess=self.sess)
+            succeed = dbf.save_new_visit(**kwargs, sess=self.sess)
+            if succeed == -1:
+                wx.MessageBox("Kho thuốc không đủ")
+            else:
+                wx.MessageBox("Đã lưu")
             self.visit_list.buildVisitList()
