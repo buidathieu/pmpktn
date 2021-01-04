@@ -1,6 +1,9 @@
 ﻿{
+<<<<<<< HEAD
     "cong_kham_benh": 50000,
     "database_name": "database",
     "echo": false,
+=======
+>>>>>>> bsloi
     "time_between_search": 800
 }

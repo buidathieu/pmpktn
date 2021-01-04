@@ -1,10 +1,7 @@
 from initialize import *
-from db_sql.db_func import query_linedrug_list_by_name
-
-import wx
-import wx.adv
-
+from database.db_func import query_linedrug_list
 import os
+import wx
 
 
 class DrugPopup(wx.ComboPopup):
@@ -12,13 +9,16 @@ class DrugPopup(wx.ComboPopup):
     def __init__(self, parent):
         super().__init__()
         self.lc = None
-        self.init_d_l = query_linedrug_list_by_name('').all()
+        self.mv = parent.mv
+        self.init_d_l = query_linedrug_list(self.mv.sess).all()
         self.d_l = []
 
     def Create(self, parent):
-        self.lc = wx.ListCtrl(parent,
-                              style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.SIMPLE_BORDER)
+        self.lc = wx.ListCtrl(
+            parent,
+            style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.SIMPLE_BORDER)
         self.lc.AppendColumn('Thuốc', width=200)
+        self.lc.AppendColumn('Thành phần', width=150)
         self.lc.AppendColumn('Số lượng')
         self.lc.AppendColumn('Đơn giá')
         self.lc.AppendColumn('Cách dùng', width=100)
@@ -50,10 +50,14 @@ class DrugPopup(wx.ComboPopup):
 
     def Update(self, s=''):
         self.lc.DeleteAllItems()
-        self.d_l = list(filter(lambda x: s.upper() in x.name, self.init_d_l))
-        for item in self.d_l:
+        self.d_l = list(filter(
+            lambda x: s.casefold() in x.name.casefold() or s.casefold() in x.element.casefold(),
+            self.init_d_l))
+        for index, item in enumerate(self.d_l):
             self.lc.Append(
-                [item.name, item.quantity, item.sale_price, item.usage])
+                [item.name, item.element, item.quantity, item.sale_price, item.usage])
+            if item.quantity <= user_setting["so_luong_thuoc_toi_thieu_de_bao_dong_do"]:
+                self.lc.SetItemTextColour(index, wx.Colour(252, 3, 57, 255))
 
     def OnMotion(self, e):
         item, flags = self.lc.HitTest(e.GetPosition())
@@ -121,6 +125,7 @@ class DrugPicker(wx.ComboCtrl):
 
     def __init__(self, parent):
         super().__init__(parent, size=drugctrl_size, style=wx.TE_PROCESS_ENTER)
+        self.mv = parent.mv
         self.drug_popup = DrugPopup(self)
         self.SetPopupControl(self.drug_popup)
         self.Bind(wx.EVT_KEY_DOWN, self.onKeyPress)
@@ -136,18 +141,18 @@ class DrugPicker(wx.ComboCtrl):
     @drugWH.setter
     def drugWH(self, dwh):
         self._drugWH = dwh
-        RP = self.Parent
+        pg = self.Parent
         if dwh:
-            RP.usage_unit.Label = dwh.usage_unit
-            RP.sale_unit.Label = dwh.sale_unit
+            pg.usage_unit.Label = dwh.usage_unit
+            pg.sale_unit.Label = dwh.sale_unit
         else:
             self.ChangeValue('')
-            RP.dosage_per.ChangeValue('')
-            RP.usage_unit.Label = '{Đơn vị}'
-            RP.times.ChangeValue("")
-            RP.quantity.ChangeValue("")
-            RP.sale_unit.Label = '{Đơn vị}'
-            RP.usage.ChangeValue("")
+            pg.dosage_per.ChangeValue('')
+            pg.usage_unit.Label = '{Đơn vị} '
+            pg.times.ChangeValue("")
+            pg.quantity.ChangeValue("")
+            pg.sale_unit.Label = '{Đơn vị} '
+            pg.usage.ChangeValue("")
 
     def onKeyPress(self, e):
         if os.name == "posix":
@@ -157,7 +162,10 @@ class DrugPicker(wx.ComboCtrl):
             else:
                 e.Skip()
         else:
-            if e.GetKeyCode() not in [wx.WXK_RETURN, wx.WXK_UP, wx.WXK_DOWN, wx.WXK_ESCAPE]:
+            if e.GetKeyCode() not in [wx.WXK_RETURN,
+                                      wx.WXK_UP,
+                                      wx.WXK_DOWN,
+                                      wx.WXK_ESCAPE]:
                 if self.IsPopupShown():
                     a = self.Value
                     self.Dismiss()
@@ -179,97 +187,3 @@ class DrugPicker(wx.ComboCtrl):
 
     def Clear(self):
         self.drugWH = None
-
-
-class DrugList(wx.ListCtrl):
-
-    def __init__(self, parent):
-        super().__init__(parent, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        self.total_drug_price = 0
-        self.dwh_list = []
-        self.AppendColumn('STT', width=d_stt_w)
-        self.AppendColumn('Thuốc', width=d_name_w)
-        self.AppendColumn('Số cữ', width=d_socu_w)
-        self.AppendColumn('Liều 1 cữ', width=d_l1cu_w)
-        self.AppendColumn('Tổng cộng', width=d_tc_w)
-        self.AppendColumn('Cách dùng', width=d_tc_w * 4)
-        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.onDrugSelect)
-        self.Bind(wx.EVT_LIST_ITEM_DESELECTED, self.onDrugDeselect)
-
-    def Update(self, linedrugs):
-        self.dwh_list = [i.drug for i in linedrugs]
-        self.DeleteAllItems()
-        for i, ld in enumerate(linedrugs, start=1):
-            self.Append(
-                [i,
-                 ld.drug.name,
-                 f"{ld.times}",
-                 f"{ld.dosage_per} {ld.drug.usage_unit}",
-                 f"{ld.quantity} {ld.drug.sale_unit}",
-                 ld.usage])
-        self.calc_total_drug_price()
-
-    def Clear(self):
-        self.DeleteAllItems()
-        self.dwh_list = []
-        self.total_drug_price = 0
-
-    def onDrugSelect(self, e):
-        i = e.Index
-        RP = self.Parent
-        RP.drugpicker.drugWH = self.dwh_list[i]
-        RP.drugpicker.ChangeValue(self.dwh_list[i].name)
-        RP.times.ChangeValue(self.GetItemText(i, 2))
-        RP.dosage_per.ChangeValue(self.GetItemText(i, 3).partition(' ')[0])
-        RP.quantity.ChangeValue(self.GetItemText(i, 4).partition(' ')[0])
-        RP.usage.ChangeValue(self.GetItemText(i, 5))
-
-    def onDrugDeselect(self, e):
-        self.Parent.drugpicker.Clear()
-
-    def Add_or_Update(self, d, times, dosage_per, quantity, usage):
-        try:
-            row = [i.id for i in self.dwh_list].index(d.id)
-            self.SetItem(row, 2, times)
-            self.SetItem(row, 3, f"{dosage_per} {d.usage_unit}")
-            self.SetItem(row, 4, f"{quantity} {d.sale_unit}")
-            self.SetItem(row, 5, usage)
-        except ValueError:
-            self.Append([
-                self.ItemCount + 1,
-                d.name, times,
-                f"{dosage_per} {d.usage_unit}",
-                f"{quantity} {d.sale_unit}",
-                usage])
-            self.dwh_list.append(d)
-        self.calc_total_drug_price()
-
-    def Remove(self, d):
-        assert self.ItemCount == len(self.dwh_list)
-        idx = self.GetFirstSelected()
-        self.dwh_list.pop(idx)
-        self.DeleteItem(idx)
-        for row in range(1, self.ItemCount):
-            self.SetItem(row - 1, 0, str(row))
-        self.calc_total_drug_price()
-
-    def calc_total_drug_price(self):
-        assert self.ItemCount == len(self.dwh_list)
-        self.total_drug_price = 0
-        if self.ItemCount > 0:
-            for i in range(self.ItemCount):
-                qty = int(self.GetItemText(i, 4).partition(' ')[0])
-                p = self.dwh_list[i].sale_price
-                self.total_drug_price += (qty * p)
-
-    def build_linedrugs(self):
-        linedrugs = []
-        for i in range(self.ItemCount):
-            ld = {}
-            ld['drug_id'] = self.dwh_list[i].id
-            ld['dosage_per'] = self.GetItemText(i, 3).partition(' ')[0]
-            ld['times'] = int(self.GetItemText(i, 2))
-            ld['quantity'] = int(self.GetItemText(i, 4).partition(' ')[0])
-            ld['usage'] = self.GetItemText(i, 5)
-            linedrugs.append(ld)
-        return linedrugs

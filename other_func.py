@@ -4,6 +4,7 @@ from initialize import setting
 
 
 def bd_to_age(bd):
+<<<<<<< HEAD:scripts/other_func.py
     if isinstance(bd, dt.date):
         now = dt.date.today()
         delta = (now - bd).days
@@ -17,29 +18,41 @@ def bd_to_age(bd):
         age = f'{int(delta / 30)} tháng tuổi'
     else:
         age = f'{int(delta / 365)} tuổi'
+=======
+    if isinstance(bd, (dt.datetime, dt.date)):
+        now = dt.date.today()
+        delta = (now - bd).days
+    elif isinstance(bd, wx.DateTime):
+        now = wx.DateTime.Today()
+        delta = (now - bd).GetDays()
+    try:
+        if delta <= 60:
+            age = f'{delta} ngày tuổi'
+        elif delta <= (30 * 24):
+            age = f'{int(delta / 30)} tháng tuổi'
+        else:
+            age = f'{int(delta / 365)} tuổi'
+    except ValueError:
+        age = "ERROR"
+>>>>>>> bsloi:other_func.py
     return age
 
 
-def age_to_bd(age):
+def age_to_bd(age, py=False):
     age = age.upper()
     now = wx.DateTime.Today()
-    year, month, day = now.GetYear(), now.GetMonth() + 1, now.GetDay()
+    span = wx.DateSpan()
     if "TH" in age:
-        num = int(age.partition("TH")[0].strip(" "))
-        month -= num
-        while month <= 0:
-            month += 12
-            year -= 1
+        span.SetMonths(int(age.partition("TH")[0].strip(" ")))
     elif "T" in age:
-        num = int(age.partition("T")[0].strip(" "))
-        year -= num
+        span.SetYears(int(age.partition("T")[0].strip(" ")))
     elif "NG" in age:
-        num = int(age.partition("NG")[0].strip(" "))
-        day -= num
-        while day <= 0:
-            month -= 1
-            day += wx.GetNumberOfDays(month)
-    return wx.DateTime(year=year, month=month - 1, day=day)
+        span.SetDays(int(age.partition("NG")[0].strip(" ")))
+    res = now.Subtract(span)
+    if py:
+        return wxdate2pydate(res)
+    else:
+        return res
 
 
 def pydate2wxdate(date):
@@ -80,11 +93,13 @@ def bill_int_to_str(bill_int):
     return res[:-1]
 
 
-def only_nums(e, decimal=False, slash=False):
+def only_nums(e, decimal=False, slash=False, tab=True):
     x = e.KeyCode
     nums = list(range(48, 58)) + list(range(324, 334)) +\
         [wx.WXK_BACK, wx.WXK_DELETE,
-         wx.WXK_TAB, wx.WXK_LEFT, wx.WXK_RIGHT]
+         wx.WXK_LEFT, wx.WXK_RIGHT]
+    if tab:
+        nums += [wx.WXK_TAB]
     if decimal:
         nums += [46, wx.WXK_DECIMAL]
     if slash:
@@ -92,3 +107,9 @@ def only_nums(e, decimal=False, slash=False):
     if x in nums:
         e.Skip()
 
+
+def onTab(e, dst):
+    if e.KeyCode == wx.WXK_TAB:
+        dst.SetFocus()
+    else:
+        e.Skip()

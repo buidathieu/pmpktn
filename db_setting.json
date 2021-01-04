@@ -1,0 +1,4 @@
+{
+    "echo": false,
+    "sqlite_filename" : "database.db"
+}

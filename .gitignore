@@ -126,9 +126,24 @@ venv.bak/
 dmypy.json
 
 # Pyre type checker
+<<<<<<< HEAD
 .pyre
 
 # app
 *.sublime-project
 *.sublime-workspace
+<<<<<<< HEAD
 *.ipynb
+=======
+=======
+.pyre/
+
+# project
+*.sublime-project
+*.sublime-workspace
+*.ipynb
+*.pdf
+*.db
+dist/
+build/
+>>>>>>> bsloi
