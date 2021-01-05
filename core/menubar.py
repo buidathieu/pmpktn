@@ -39,10 +39,10 @@ class MyMenuBar(wx.MenuBar):
         dbMenu = wx.Menu()
         menuSQLiteGUI = settingMenu.Append(wx.ID_ANY, "SQLiteGUI")
         opendbMenu = dbMenu.Append(wx.ID_ANY, "Mở folder database")
-        createdbMenu = dbMenu.Append(wx.ID_ANY, "Tạo database")
+        dbMenu.AppendSeparator()
         populatedbMenu = dbMenu.Append(wx.ID_ANY, "Thêm mẫu vào database")
-        deletedbMenu = dbMenu.Append(wx.ID_ANY, "Xoá database (có backup)")
-        settingMenu.Append(wx.ID_ANY, "Database...", dbMenu)
+        deletedbMenu = dbMenu.Append(wx.ID_ANY, "Backup, xoá và tạo mới database")
+        settingMenu.AppendSubMenu(dbMenu, "Database...")
         menuUser_setting = settingMenu.Append(wx.ID_ANY, "user_setting")
 
         self.Append(homeMenu, "Home")
@@ -58,7 +58,6 @@ class MyMenuBar(wx.MenuBar):
         self.Bind(wx.EVT_MENU, self.openSQLiteGUI, menuSQLiteGUI)
         self.Bind(wx.EVT_MENU, lambda e: open_url(os.path.join(os.path.dirname(SQLITE_PATH), "user_setting.json")), menuUser_setting)
         self.Bind(wx.EVT_MENU, lambda e: open_url(os.path.dirname(SQLITE_PATH)), opendbMenu)
-        self.Bind(wx.EVT_MENU, lambda e: self.onCreateDB(), createdbMenu)
         self.Bind(wx.EVT_MENU, lambda e: self.onPopulateDB(), populatedbMenu)
         self.Bind(wx.EVT_MENU, lambda e: self.onDeleteDB(), deletedbMenu)
 
@@ -74,17 +73,11 @@ class MyMenuBar(wx.MenuBar):
                 wx.TheClipboard.SetData(txt)
                 wx.TheClipboard.Close()
 
-    def onCreateDB(self):
-        if os.path.exists(SQLITE_PATH):
-            wx.MessageBox('Database existed, couldnt create a new one.')
-        else:
-            make_db()
-            wx.MessageBox('New database created.')
-
     def onPopulateDB(self):
         if os.path.exists(SQLITE_PATH):
             populate_db()
             wx.MessageBox('Database populated.')
+            self.mv.refresh()
         else:
             wx.MessageBox("Couldnt find database.")
 
@@ -95,6 +88,7 @@ class MyMenuBar(wx.MenuBar):
             os.remove(SQLITE_PATH)
             make_db()
             self.mv.sess = Session()
-            wx.MessageBox('Database backed up, deleted and newly created.')
+            wx.MessageBox('Database backed up, deleted and newly created.\n\n Backed up db\'s file extension is .bak')
+            self.mv.refresh()
         else:
             wx.MessageBox("Couldnt find database.")

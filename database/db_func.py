@@ -66,7 +66,7 @@ def save_old_visit(p, v, past_history,
         else:
             v.linedrugs.append(LineDrug(**i))
             drug = sess.query(DrugWarehouse).get(i['drug_id'])
-            if drug.quantity - i['quantity'] < 0:
+            if drug.quantity < i['quantity']:
                 sess.rollback()
                 return -1
             else:
@@ -92,7 +92,7 @@ def save_new_visit(p, past_history,
         drug = sess.query(DrugWarehouse).get(i['drug_id'])
         if drug.quantity == -1:
             continue
-        elif drug.quantity - i['quantity'] < 0:
+        elif drug.quantity < i['quantity']:
             sess.rollback()
             return -1
         else:

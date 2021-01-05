@@ -9,3 +9,7 @@ class OrderBook(wx.Notebook):
         self.mv = parent
         self.AddPage(page=PrescriptionPage(self),
                      text='Toa thuốc', select=True)
+
+    def refresh(self):
+        for i in range(self.PageCount):
+            self.GetPage(i).refresh()

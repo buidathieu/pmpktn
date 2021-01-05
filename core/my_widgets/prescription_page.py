@@ -56,14 +56,14 @@ class PrescriptionPage(wx.Panel):
         btn_row = wx.BoxSizer(wx.HORIZONTAL)
         sizer = wx.BoxSizer(wx.VERTICAL)
 
-        weight_days_row.Add(wx.StaticText(self, label='Cân nặng '),
+        weight_days_row.Add(wx.StaticText(self, label='Cân nặng: '),
                             0, wx.ALIGN_CENTER)
         weight_days_row.Add(self.weight, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         weight_days_row.Add(self.getweightbtn, 0, wx.RIGHT, 5)
-        weight_days_row.Add(wx.StaticText(self, label='Số ngày '),
+        weight_days_row.Add(wx.StaticText(self, label='Số ngày: '),
                             0, wx.ALIGN_CENTER)
         weight_days_row.Add(self.days, 0, wx.ALIGN_CENTER)
-        drug_input_row.Add(wx.StaticText(self, label='Thuốc:'),
+        drug_input_row.Add(wx.StaticText(self, label='Thuốc: '),
                            0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         drug_input_row.Add(self.drug_picker, 1, wx.ALIGN_CENTER | wx.RIGHT, 5)
         drug_input_row.Add(self.times, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
@@ -73,7 +73,7 @@ class PrescriptionPage(wx.Panel):
             self.dosage_per, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         drug_input_row.Add(self.usage_unit, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         drug_input_row.Add(wx.StaticText(
-            self, label=u"\u21D2   Tổng cộng:"), 0, wx.ALIGN_CENTER)
+            self, label=u"\u21D2   Tổng cộng: "), 0, wx.ALIGN_CENTER)
         drug_input_row.Add(
             self.quantity, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
         drug_input_row.Add(self.sale_unit, 0, wx.ALIGN_CENTER | wx.RIGHT, 5)
@@ -83,7 +83,7 @@ class PrescriptionPage(wx.Panel):
                            wx.ALIGN_CENTER | wx.RIGHT, 5)
 
         usage_row.Add(wx.StaticText(
-            self, label='Cách dùng:'), 0, wx.CENTRE | wx.RIGHT, 5)
+            self, label='Cách dùng: '), 0, wx.CENTRE | wx.RIGHT, 5)
         usage_row.Add(self.usage, 1)
         btn_row.Add(self.reuse_btn, 0, wx.RIGHT, 5)
 
@@ -98,6 +98,10 @@ class PrescriptionPage(wx.Panel):
         self.save_drug_btn.Bind(wx.EVT_BUTTON, lambda e: self.onSaveDrug())
         self.del_drug_btn.Bind(wx.EVT_BUTTON, lambda e: self.onDelDrug())
         self.reuse_btn.Bind(wx.EVT_BUTTON, lambda e: self.onReuse())
+
+    def refresh(self):
+        self.drug_picker.Clear()
+        self.drug_picker.refreshPopup()
 
     def onSaveDrug(self):
         kwargs = {

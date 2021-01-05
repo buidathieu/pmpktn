@@ -143,8 +143,8 @@ class DrugPicker(wx.ComboCtrl):
         self._drugWH = dwh
         pg = self.Parent
         if dwh:
-            pg.usage_unit.Label = dwh.usage_unit
-            pg.sale_unit.Label = dwh.sale_unit
+            pg.usage_unit.Label = dwh.usage_unit + " "
+            pg.sale_unit.Label = dwh.sale_unit + " "
         else:
             self.ChangeValue('')
             pg.dosage_per.ChangeValue('')
@@ -187,3 +187,6 @@ class DrugPicker(wx.ComboCtrl):
 
     def Clear(self):
         self.drugWH = None
+
+    def refreshPopup(self):
+        self.drug_popup.init_d_l = query_linedrug_list(self.mv.sess).all()

@@ -183,6 +183,7 @@ class MainView(wx.Frame):
     def refresh(self):
         self.patient_book.refresh()
         self.patient = None
+        self.order_book.refresh()
 
     def onClose(self, e):
         dlg = wx.MessageDialog(
@@ -283,6 +284,7 @@ class MainView(wx.Frame):
             if dialog.ShowModal() == wx.ID_OK:
                 edited_patient = dialog.edit_patient()
                 page.renew_patient_info(edited_patient, idx)
+                wx.MessageBox("Đã cập nhật")
 
     def onSaveVisit(self):
         pg = self.order_book.GetPage(0)
