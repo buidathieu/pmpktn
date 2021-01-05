@@ -7,7 +7,15 @@ import subprocess
 import shutil
 import datetime as dt
 import wx
+import platform
 
+
+if platform.system() == 'Darwin':
+    def open_url(url):
+        subprocess.Popen(['open', url])
+elif platform.system() == 'Windows':
+    def open_url(url):
+        os.startfile(url)
 
 class MyMenuBar(wx.MenuBar):
 
@@ -48,8 +56,8 @@ class MyMenuBar(wx.MenuBar):
         self.Bind(wx.EVT_MENU, lambda e: self.mv.onEditPatientInfo(), menuEditPatient)
         self.Bind(wx.EVT_MENU, lambda e: self.mv.onSaveVisit(), menuSaveVisit)
         self.Bind(wx.EVT_MENU, self.openSQLiteGUI, menuSQLiteGUI)
-        self.Bind(wx.EVT_MENU, lambda e: subprocess.Popen(["open", os.path.join(os.path.dirname(SQLITE_PATH), "user_setting.json")]), menuUser_setting)
-        self.Bind(wx.EVT_MENU, lambda e: subprocess.Popen(["open", os.path.dirname(SQLITE_PATH)]), opendbMenu)
+        self.Bind(wx.EVT_MENU, lambda e: open_url(os.path.join(os.path.dirname(SQLITE_PATH), "user_setting.json")), menuUser_setting)
+        self.Bind(wx.EVT_MENU, lambda e: open_url(os.path.dirname(SQLITE_PATH)), opendbMenu)
         self.Bind(wx.EVT_MENU, lambda e: self.onCreateDB(), createdbMenu)
         self.Bind(wx.EVT_MENU, lambda e: self.onPopulateDB(), populatedbMenu)
         self.Bind(wx.EVT_MENU, lambda e: self.onDeleteDB(), deletedbMenu)
