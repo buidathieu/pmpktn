@@ -38,4 +38,6 @@ if __name__ == "__main__":
             os.remove(SQLITE_PATH)
         print('Database deleted')
     else:
+        if not os.path.exists(SQLITE_PATH):
+            make_db()
         mainloop()

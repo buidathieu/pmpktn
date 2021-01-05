@@ -55,30 +55,38 @@ class MyMenuBar(wx.MenuBar):
         self.Bind(wx.EVT_MENU, lambda e: self.onDeleteDB(), deletedbMenu)
 
     def openSQLiteGUI(self, e):
-        wx.MessageBox(
-            "Đây là đường dẫn đến file database sqlite của phần mềm.\n"
-            + SQLITE_PATH + "\n"
-            + "Bạn có thể dùng những phần mềm như SQLiteStudio để truy cập vào nó.")
+        ans = wx.MessageBox(
+            "Đây là đường dẫn đến file database sqlite của phần mềm.\n\n"
+            + SQLITE_PATH + "\n\n"
+            + "Bạn có thể dùng những phần mềm như SQLiteStudio để truy cập vào nó.\n\n"
+            + "Nhấn OK để copy đường dẫn")
+        if ans == wx.OK:
+            txt = wx.TextDataObject(SQLITE_PATH)
+            if wx.TheClipboard.Open():
+                wx.TheClipboard.SetData(txt)
+                wx.TheClipboard.Close()
 
     def onCreateDB(self):
         if os.path.exists(SQLITE_PATH):
-            wx.MessageBox('Database existed, couldnt create a new one')
+            wx.MessageBox('Database existed, couldnt create a new one.')
         else:
             make_db()
-            wx.MessageBox('New database created')
+            wx.MessageBox('New database created.')
 
     def onPopulateDB(self):
         if os.path.exists(SQLITE_PATH):
             populate_db()
-            wx.MessageBox('Database populated')
+            wx.MessageBox('Database populated.')
         else:
-            wx.MessageBox("Couldnt find database")
+            wx.MessageBox("Couldnt find database.")
 
     def onDeleteDB(self):
         if os.path.exists(SQLITE_PATH):
             shutil.copy(SQLITE_PATH, SQLITE_PATH + dt.datetime.now().strftime("%Y%m%d_%H%M%S") + '.bak')
+            self.mv.sess.close()
             os.remove(SQLITE_PATH)
             make_db()
-            wx.MessageBox('Database backed up, deleted and newly created, restart the app to see result.')
+            self.mv.sess = Session()
+            wx.MessageBox('Database backed up, deleted and newly created.')
         else:
-            wx.MessageBox("Couldnt find database")
+            wx.MessageBox("Couldnt find database.")

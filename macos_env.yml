@@ -1,0 +1,50 @@
+name: pmpktn
+channels:
+  - conda-forge
+  - milagro
+  - defaults
+dependencies:
+  - altgraph=0.17=pyhd8ed1ab_0
+  - backports=1.0=py_2
+  - backports.lzma=0.0.14=py38hba84461_3
+  - brotlipy=0.7.0=py38h94c058a_1001
+  - ca-certificates=2020.12.5=h033912b_0
+  - certifi=2020.12.5=py38h50d1736_0
+  - cffi=1.14.4=py38h979bc6b_1
+  - chardet=4.0.0=py38h50d1736_0
+  - cryptography=3.3.1=py38h6b4ec92_0
+  - expat=2.2.9=hb1e8313_2
+  - gettext=0.19.8.1=h7937167_1005
+  - idna=2.10=pyh9f0ad1d_0
+  - jpeg=9d=hbcb3906_0
+  - libcxx=11.0.0=h4c3b8ed_1
+  - libffi=3.3=h046ec9c_2
+  - libiconv=1.16=haf1e3a3_0
+  - libpng=1.6.37=h7cec526_2
+  - macholib=1.14=pyh9f0ad1d_1
+  - modulegraph=0.18=pyh9f0ad1d_1
+  - ncurses=6.2=h2e338ed_4
+  - openssl=1.1.1i=h35c211d_0
+  - pathlib2=2.3.5=py38h50d1736_2
+  - pip=20.3.3=pyhd8ed1ab_0
+  - pthread-stubs=0.4=hc929b4f_1001
+  - pycparser=2.20=pyh9f0ad1d_2
+  - pyopenssl=20.0.1=pyhd8ed1ab_0
+  - pypubsub=4.0.3=py_0
+  - pysocks=1.7.1=py38h5347e94_2
+  - python=3.8.6=h624753d_4_cpython
+  - python.app=1.3=py38h5406a74_3
+  - python_abi=3.8=1_cp38
+  - readline=8.0=h0678c8f_2
+  - requests=2.25.1=pyhd3deb0d_0
+  - setuptools=49.6.0=py38h5347e94_2
+  - six=1.15.0=pyh9f0ad1d_0
+  - sqlalchemy=1.3.22=py38h5406a74_0
+  - sqlite=3.34.0=h17101e1_0
+  - tk=8.6.10=h0419947_1
+  - urllib3=1.26.2=pyhd8ed1ab_0
+  - wheel=0.36.2=pyhd3deb0d_0
+  - wxpython=4.0.7.post2=py38h10bb4de_3
+  - xz=5.2.5=haf1e3a3_1
+  - zlib=1.2.11=h7795811_1010
+prefix: /Volumes/DATA/anaconda3/envs/pmpktn
