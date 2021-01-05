@@ -1,15 +1,20 @@
 import os
 import json
+import platform
 # High DPI aware
 import ctypes
 try:
     ctypes.windll.shcore.SetProcessDpiAwareness(True)
 except Exception:
     pass
-from wx import NewId
+from wx import NewId, Colour
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
+if platform.system() == 'Windows':
+    background_color = Colour(185, 214, 144)
+else:
+    background_color = Colour(206, 219, 186)
 
 # app structure
 DIR_PATH = os.path.dirname(os.path.abspath(__file__))

@@ -17,11 +17,7 @@ def get_all_patient_list(sess=None):
 
 # picker popup
 def query_linedrug_list(sess):
-    return sess.query(DrugWarehouse).filter(DrugWarehouse.quantity > 0)
-
-
-def query_therapy_list(sess):
-    return sess.query(Therapy)
+    return sess.query(DrugWarehouse)
 
 
 # patient dialog
@@ -43,24 +39,7 @@ def edit_patient(patient, name, gender, birthdate,
     return patient
 
 
-# save button
-
-def add_visit(p, note, diag, weight, days,
-              bill, linedrugs, linetherapies,
-              staff_id, sess):
-    v = Visit(note=note,
-              diag=diag,
-              weight=weight,
-              days=days,
-              bill=bill,
-              patient_id=p.id,
-              staff_id=staff_id)
-    add_linedrugs_to_visit(v, linedrugs, sess)
-    add_linetherapies_to_visit(v, linetherapies, sess)
-    sess.add(v)
-    return v
-
-
+# save
 def save_old_visit(p, v, past_history,
                    note, diagnosis, weight, days,
                    bill, linedrugs,
@@ -71,15 +50,20 @@ def save_old_visit(p, v, past_history,
     v.weight = weight
     v.days = days
     v.bill = bill
-    drug = sess.query(DrugWarehouse).get(i.drug_id)
-    if drug.quantity != -1:
-        # restock
-        for i in v.linedrugs:
-            drug = sess.query(DrugWarehouse).get(i.drug_id)
+    # restock
+    for i in v.linedrugs:
+        drug = sess.query(DrugWarehouse).get(i.drug_id)
+        if drug.quantity == -1:
+            continue
+        else:
             drug.quantity += i.quantity
-            sess.delete(i)
-        # takeout
-        for i in linedrugs:
+        sess.delete(i)
+    # takeout
+    for i in linedrugs:
+        drug = sess.query(DrugWarehouse).get(i['drug_id'])
+        if drug.quantity == -1:
+            continue
+        else:
             v.linedrugs.append(LineDrug(**i))
             drug = sess.query(DrugWarehouse).get(i['drug_id'])
             if drug.quantity - i['quantity'] < 0:
@@ -106,29 +90,12 @@ def save_new_visit(p, past_history,
     for i in linedrugs:
         new_visit.linedrugs.append(LineDrug(**i))
         drug = sess.query(DrugWarehouse).get(i['drug_id'])
-        if drug.quantity - i['quantity'] < 0:
+        if drug.quantity == -1:
+            continue
+        elif drug.quantity - i['quantity'] < 0:
             sess.rollback()
             return -1
         else:
             drug.quantity -= i['quantity']
     sess.add(new_visit)
     sess.commit_()
-
-
-# report
-def GetTodayReport():
-    sess = Session()
-    query = sess.query(Visit).filter(
-        func.DATE(Visit.exam_date) == dt.date.today())
-    count = query.count()
-    income = 0
-    cost = 0
-    sale = 0
-    for visit in query:
-        income += visit.bill
-        for linedrug in visit.linedrugs:
-            cost += (linedrug.drug.purchase_price * linedrug.quantity)
-            sale += (linedrug.drug.sale_price * linedrug.quantity)
-    profit = sale - cost
-    sess.commit_()
-    return count, income, cost, sale, profit

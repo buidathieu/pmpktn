@@ -28,8 +28,7 @@ class MainView(wx.Frame):
             parent,
             title='PHẦN MỀM PHÒNG MẠCH TƯ, created by thanhstardust@outlook.com',
             pos=(0, 20), size=window_size, *args, **kw)
-        self.SetBackgroundColour(wx.Colour(206, 219, 186))
-
+        self.SetBackgroundColour(background_color)
         self._createInterface()
         self._setMenuBar()
         self._setAccelTable()
