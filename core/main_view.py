@@ -21,8 +21,7 @@ class MainView(wx.Frame):
 
         self._patient = None
         self._visit = None
-        self.sess = Session()
-        self.sess.commit_ = commit_(self.sess)
+        self.sess = make_session()
 
         super().__init__(
             parent,

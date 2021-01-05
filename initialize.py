@@ -11,10 +11,7 @@ from wx import NewId, Colour
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
-if platform.system() == 'Windows':
-    background_color = Colour(185, 214, 144)
-else:
-    background_color = Colour(206, 219, 186)
+background_color = Colour(206, 219, 186)
 
 # app structure
 DIR_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -89,6 +86,12 @@ def commit_(sess):
             sess.rollback()
             print('sess rollback: ', e)
     return inner
+
+
+def make_session():
+    sess = Session()
+    sess.commit_ = commit_(sess)
+    return sess
 
 
 # USER_SETTING ------------------------------------------------------------

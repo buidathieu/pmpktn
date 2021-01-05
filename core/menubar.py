@@ -87,7 +87,7 @@ class MyMenuBar(wx.MenuBar):
             self.mv.sess.close()
             os.remove(SQLITE_PATH)
             make_db()
-            self.mv.sess = Session()
+            self.mv.sess = make_session()
             wx.MessageBox('Database backed up, deleted and newly created.\n\n Backed up db\'s file extension is .bak')
             self.mv.refresh()
         else:

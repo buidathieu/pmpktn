@@ -48,3 +48,7 @@ if not os.path.isfile(db_src):
     print("db src not found, create new")
     subprocess.run(['python', 'main.py', '-c'])
 shutil.copy(db_src, db_dst)
+
+
+# delete build folder
+shutil.rmtree(os.path.join(cwd, "build"))
