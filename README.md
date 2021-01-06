@@ -33,8 +33,12 @@ Bạn có thể dùng app sqlitestudio để chỉnh sửa các giá trị trong
 
 ## Hướng dẫn cài đặt:
 Tải về tại https://github.com/vuongkienthanh/pmpktn/releases/
-- MacOS: Chép vào ổ khác ngoài thư mục Download. Nếu bạn bị lỗi developer cannot be verified, thì bạn dùng menu chuột phải -> open. Những lần sau sẽ không cần bước này nữa.
-- Windows: Will be here asap.
+- Từ sourcecode: cài python, `pip install -f pip_requirements.txt`, và chạy file main.py, và có một số option khác.
+- Tải về và dùng:
+    - [Liên hệ](#a)
+    - Có bản cho MacOS và Windows.
+    - MacOS: Chép vào ổ khác ngoài thư mục Download để sử dụng. Nếu bạn bị lỗi developer cannot be verified, thì bạn dùng menu chuột phải -> open. Những lần sau sẽ không cần bước này nữa.
+    - Windows: Tải về và mở file `.exe`. 
 
 ## Nâng cấp:
 Một số chức năng đơn giản có thể thêm vào app, hoặc có thể customize theo quy trình tổ chức:
@@ -45,6 +49,7 @@ Một số chức năng đơn giản có thể thêm vào app, hoặc có thể 
 ![](/screenshots/ss3.jpg)
 
 
-## Liên hệ:
+## Liên hệ:<a name="a"></a>
+- 0908-034-298
 - facebook.com/vuongkienthanh
 - thanhstardust@outlook.com
