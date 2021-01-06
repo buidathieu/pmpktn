@@ -1,5 +1,4 @@
 from initialize import *
-import other_func as otf
 
 import wx
 
@@ -18,19 +17,17 @@ class PatientSearchBar(wx.TextCtrl):
         self.Bind(wx.EVT_TEXT, self.on_text)
 
     def filter_patient(self, p_list):
-        return filter(lambda p: self.Value.upper() in p.name, p_list)
+        return list(filter(lambda p: self.Value.upper() in p.name, p_list))
 
     def on_text(self, e):
         if self.Value != "":
             self.timer.StartOnce(setting["time_between_search"])
         else:
-            self.mv.patient_book.GetPage(0)._append()
+            patient_book = self.mv.patient_book.GetPage(0)
+            patient_book.filtered_p_list = patient_book.p_list
+            patient_book._append()
 
     def on_search(self, e):
         patient_book = self.mv.patient_book.GetPage(0)
-        filtered_p_list = self.filter_patient(patient_book.p_list)
-        patient_book.DeleteAllItems()
-        for p in filtered_p_list:
-            b = otf.bd_to_age(p.birthdate)
-            patient_book.Append([
-                p.id, p.name, p.gender, b])
+        patient_book.filtered_p_list = self.filter_patient(patient_book.p_list)
+        patient_book._append()

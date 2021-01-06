@@ -45,10 +45,11 @@ class BasePatientList(wx.ListCtrl):
 
     def _make_p_list(self):
         self.p_list = None
+        self.filtered_p_list = None
 
     def _append(self):
         self.DeleteAllItems()
-        for p in self.p_list:
+        for p in self.filtered_p_list:
             b = otf.bd_to_age(p.birthdate)
             self.Append([p.id,
                          p.name,
@@ -56,7 +57,7 @@ class BasePatientList(wx.ListCtrl):
                          b])
 
     def onSelect(self, e):
-        self.mv.patient = self.p_list[e.Index]
+        self.mv.patient = self.filtered_p_list[e.Index]
 
     def onDeselect(self, e):
         self.mv.patient = None
@@ -90,6 +91,7 @@ class TodayPatientList(BasePatientList):
     def _make_p_list(self):
         self.p_list = dbf.get_today_seen_patient_list(
             sess=self.mv.sess).all()
+        self.filtered_p_list = self.p_list
 
 
 class AllPatientList(BasePatientList):
@@ -100,3 +102,4 @@ class AllPatientList(BasePatientList):
     def _make_p_list(self):
         self.p_list = dbf.get_all_patient_list(
             sess=self.mv.sess).all()
+        self.filtered_p_list = self.p_list
