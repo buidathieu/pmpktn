@@ -33,7 +33,7 @@ Bạn có thể dùng app sqlitestudio để chỉnh sửa các giá trị trong
 
 ## Hướng dẫn cài đặt:
 Tải về tại https://github.com/vuongkienthanh/pmpktn/releases/
-- Từ sourcecode: cài python, `pip install -f pip_requirements.txt`, và chạy file main.py, và có một số option khác.
+- Từ sourcecode: cài python, `pip install -r pip_requirements.txt`, và chạy file main.py, và có một số option khác.
 - Tải về và dùng:
     - [Liên hệ](#a)
     - Có bản cho MacOS và Windows.

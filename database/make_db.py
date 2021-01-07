@@ -36,7 +36,7 @@ class Visit(Base):
     id = Column(Integer, primary_key=True)
     exam_date = Column(DateTime, default=dt.datetime.now,
                        onupdate=dt.datetime.now)
-    note = Column(Text)
+    note = Column(Text, default='')
     diagnosis = Column(String(50), nullable=False)
     weight = Column(Float(precision=1), default=0)
     days = Column(Integer, default=2)
