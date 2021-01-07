@@ -1,4 +1,4 @@
-from initialize import SQLITE_PATH
+from initialize import SQLITE_PATH, DIR_PATH
 import os
 import zipfile
 import shutil
@@ -24,7 +24,9 @@ os.chdir(cwd)
 # copy other
 
 files = ['user_setting.json', 'setting.json', 'db_setting.json']
-folders = ['bitmaps']
+folders = [
+    ('core', 'bitmaps')
+]
 
 copy_dst = os.path.join(cwd, "dist", "Phần mềm phòng mạch tư.app", "Contents", "Resources", "lib", "python38.zip")
 
@@ -34,7 +36,8 @@ for f in files:
 
 for fol in folders:
     print(f"{fol} copied")
-    shutil.copytree(fol, os.path.join(copy_dst, fol))
+    os.path.join(DIR_PATH, *fol)
+    shutil.copytree(fol, os.path.join(copy_dst, 'core', 'bitmaps'))
 
 
 # copy database

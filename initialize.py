@@ -1,6 +1,5 @@
 import os
 import json
-import platform
 # High DPI aware
 import ctypes
 try:
@@ -15,9 +14,7 @@ background_color = Colour(206, 219, 186)
 
 # app structure
 DIR_PATH = os.path.dirname(os.path.abspath(__file__))
-USER_FILES_PATH = os.path.join(DIR_PATH, "user_files")
-FONTS_PATH = os.path.join(DIR_PATH, "fonts")
-BITMAPS_PATH = os.path.join(DIR_PATH, 'bitmaps')
+BITMAPS_PATH = os.path.join(DIR_PATH, 'core', 'bitmaps')
 
 # bitmaps
 new_p_bm = os.path.join(BITMAPS_PATH, 'new_patient.png')
