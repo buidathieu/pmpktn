@@ -1,6 +1,6 @@
 from core.main_view import MainView
-from database.make_db import make_db
-from database.sampling import populate_db
+from core.db.make_db import make_db
+from core.db.sampling import populate_db
 from initialize import SQLITE_PATH
 
 import wx

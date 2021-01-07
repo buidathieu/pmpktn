@@ -69,7 +69,7 @@ with open(os.path.join(DIR_PATH, "db_setting.json"), "r") as f:
     db_setting = json.load(f)
 
 
-SQLITE_PATH = os.path.join(DIR_PATH, db_setting['sqlite_filename'])
+SQLITE_PATH = os.path.join(DIR_PATH, "database", db_setting['sqlite_filename'])
 egn = 'sqlite:///' + SQLITE_PATH
 engine = create_engine(egn, echo=db_setting["echo"])
 Session = sessionmaker(bind=engine)

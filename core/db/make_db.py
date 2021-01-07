@@ -41,6 +41,7 @@ class Visit(Base):
     weight = Column(Float(precision=1), default=0)
     days = Column(Integer, default=2)
     bill = Column(Integer, default=0)
+    followup = Column(Text, default='')
     patient_id = Column(ForeignKey('patient.id'))
     linedrugs = relationship(
         "LineDrug", lazy='selectin', cascade="all, delete-orphan")

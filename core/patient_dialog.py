@@ -1,5 +1,5 @@
 from initialize import *
-import database.db_func as dbf
+import core.db.db_func as dbf
 import other_func as otf
 import wx
 import wx.adv

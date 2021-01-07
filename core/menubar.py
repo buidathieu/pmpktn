@@ -1,6 +1,6 @@
 from initialize import *
-from database.make_db import make_db
-from database.sampling import populate_db
+from core.db.make_db import make_db
+from core.db.sampling import populate_db
 import os
 import webbrowser
 import subprocess
@@ -56,7 +56,7 @@ class MyMenuBar(wx.MenuBar):
         self.Bind(wx.EVT_MENU, lambda e: self.mv.onEditPatientInfo(), menuEditPatient)
         self.Bind(wx.EVT_MENU, lambda e: self.mv.onSaveVisit(), menuSaveVisit)
         self.Bind(wx.EVT_MENU, self.openSQLiteGUI, menuSQLiteGUI)
-        self.Bind(wx.EVT_MENU, lambda e: open_url(os.path.join(os.path.dirname(SQLITE_PATH), "user_setting.json")), menuUser_setting)
+        self.Bind(wx.EVT_MENU, lambda e: open_url(os.path.join(DIR_PATH, "user_setting.json")), menuUser_setting)
         self.Bind(wx.EVT_MENU, lambda e: open_url(os.path.dirname(SQLITE_PATH)), opendbMenu)
         self.Bind(wx.EVT_MENU, lambda e: self.onPopulateDB(), populatedbMenu)
         self.Bind(wx.EVT_MENU, lambda e: self.onDeleteDB(), deletedbMenu)

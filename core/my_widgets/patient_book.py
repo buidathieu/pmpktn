@@ -1,4 +1,4 @@
-import database.db_func as dbf
+import core.db.db_func as dbf
 from initialize import *
 import other_func as otf
 

@@ -1,4 +1,4 @@
-from database.make_db import Visit
+from core.db.make_db import Visit
 from initialize import *
 
 import wx

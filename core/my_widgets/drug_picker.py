@@ -1,5 +1,5 @@
 from initialize import *
-from database.db_func import query_linedrug_list
+from core.db.db_func import query_linedrug_list
 import os
 import wx
 

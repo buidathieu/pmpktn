@@ -6,7 +6,7 @@ from .my_widgets.total_cost import TotalCost
 from .my_widgets.order_book import OrderBook
 from .my_widgets.search_bar import PatientSearchBar
 import other_func as otf
-import database.db_func as dbf
+import core.db.db_func as dbf
 from .patient_dialog import AddPatientDialog, EditPatientDialog
 
 from .menubar import MyMenuBar
@@ -315,6 +315,7 @@ class MainView(wx.Frame):
             'days': int(pg.days.Value),
             'bill': otf.bill_str_to_int(
                 self.total_cost.Value),
+            'followup': pg.followup.Value,
             'linedrugs': pg.d_list.build_linedrugs(),
         }
         ans = wx.MessageBox(
@@ -340,6 +341,7 @@ class MainView(wx.Frame):
             'days': int(pg.days.Value),
             'bill': otf.bill_str_to_int(
                 self.total_cost.Value),
+            'followup': pg.followup.Value,
             'linedrugs': pg.d_list.build_linedrugs(),
         }
         ans = wx.MessageBox(
