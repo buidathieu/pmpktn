@@ -15,6 +15,10 @@ background_color = Colour(206, 219, 186)
 # app structure
 DIR_PATH = os.path.dirname(os.path.abspath(__file__))
 BITMAPS_PATH = os.path.join(DIR_PATH, 'core', 'bitmaps')
+DB_PATH = os.path.join(DIR_PATH, "database")
+SETTINGS_PATH = os.path.join(DIR_PATH, "settings")
+if not os.path.exists(DB_PATH):
+    os.mkdir(DB_PATH)
 
 # bitmaps
 new_p_bm = os.path.join(BITMAPS_PATH, 'new_patient.png')
@@ -65,11 +69,11 @@ add_edit_prescription_dialog_size = (-1, 600)
 
 
 # DB_SETTING ------------------------------------------------------------
-with open(os.path.join(DIR_PATH, "db_setting.json"), "r") as f:
+with open(os.path.join(SETTINGS_PATH, "db_setting.json"), "r") as f:
     db_setting = json.load(f)
 
 
-SQLITE_PATH = os.path.join(DIR_PATH, "database", db_setting['sqlite_filename'])
+SQLITE_PATH = os.path.join(DB_PATH, db_setting['sqlite_filename'])
 egn = 'sqlite:///' + SQLITE_PATH
 engine = create_engine(egn, echo=db_setting["echo"])
 Session = sessionmaker(bind=engine)
@@ -92,10 +96,10 @@ def make_session():
 
 
 # USER_SETTING ------------------------------------------------------------
-with open(os.path.join(DIR_PATH, "user_setting.json"), "r") as f:
+with open(os.path.join(SETTINGS_PATH, "user_setting.json"), "r") as f:
     user_setting = json.load(f)
 
 
-with open(os.path.join(DIR_PATH, "setting.json"),
+with open(os.path.join(SETTINGS_PATH, "setting.json"),
           "r", encoding="utf-8-sig") as f:
     setting = json.load(f)

@@ -56,8 +56,8 @@ class MyMenuBar(wx.MenuBar):
         self.Bind(wx.EVT_MENU, lambda e: self.mv.onEditPatientInfo(), menuEditPatient)
         self.Bind(wx.EVT_MENU, lambda e: self.mv.onSaveVisit(), menuSaveVisit)
         self.Bind(wx.EVT_MENU, self.openSQLiteGUI, menuSQLiteGUI)
-        self.Bind(wx.EVT_MENU, lambda e: open_url(os.path.join(DIR_PATH, "user_setting.json")), menuUser_setting)
-        self.Bind(wx.EVT_MENU, lambda e: open_url(os.path.dirname(SQLITE_PATH)), opendbMenu)
+        self.Bind(wx.EVT_MENU, lambda e: open_url(os.path.join(SETTINGS_PATH, "user_setting.json")), menuUser_setting)
+        self.Bind(wx.EVT_MENU, lambda e: open_url(DB_PATH), opendbMenu)
         self.Bind(wx.EVT_MENU, lambda e: self.onPopulateDB(), populatedbMenu)
         self.Bind(wx.EVT_MENU, lambda e: self.onDeleteDB(), deletedbMenu)
 
