@@ -42,7 +42,7 @@ def edit_patient(patient, name, gender, birthdate,
 # save
 def save_old_visit(p, v, past_history,
                    note, diagnosis, weight, days,
-                   bill, followup, linedrugs,
+                   bill, linedrugs,
                    sess=None):
     p.past_history = past_history
     v.note = note
@@ -50,7 +50,6 @@ def save_old_visit(p, v, past_history,
     v.weight = weight
     v.days = days
     v.bill = bill
-    v.followup = followup
     # restock
     for i in v.linedrugs:
         drug = sess.query(DrugWarehouse).get(i.drug_id)
@@ -77,7 +76,7 @@ def save_old_visit(p, v, past_history,
 
 def save_new_visit(p, past_history,
                    note, diagnosis, weight, days,
-                   bill, followup, linedrugs,
+                   bill, linedrugs,
                    sess=None):
     p.past_history = past_history
     new_visit = Visit(
@@ -86,7 +85,6 @@ def save_new_visit(p, past_history,
         weight=weight,
         days=days,
         bill=bill,
-        followup=followup,
         patient_id=p.id,
     )
     for i in linedrugs:

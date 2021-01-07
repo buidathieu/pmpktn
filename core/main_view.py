@@ -315,7 +315,6 @@ class MainView(wx.Frame):
             'days': int(pg.days.Value),
             'bill': otf.bill_str_to_int(
                 self.total_cost.Value),
-            'followup': pg.followup.Value,
             'linedrugs': pg.d_list.build_linedrugs(),
         }
         ans = wx.MessageBox(
@@ -341,7 +340,6 @@ class MainView(wx.Frame):
             'days': int(pg.days.Value),
             'bill': otf.bill_str_to_int(
                 self.total_cost.Value),
-            'followup': pg.followup.Value,
             'linedrugs': pg.d_list.build_linedrugs(),
         }
         ans = wx.MessageBox(
