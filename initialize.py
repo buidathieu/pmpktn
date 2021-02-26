@@ -96,7 +96,7 @@ def make_session():
 
 
 # USER_SETTING ------------------------------------------------------------
-with open(os.path.join(SETTINGS_PATH, "user_setting.json"), "r") as f:
+with open(os.path.join(SETTINGS_PATH, "user_setting.json"), "r", encoding="utf-8-sig") as f:
     user_setting = json.load(f)
 
 
